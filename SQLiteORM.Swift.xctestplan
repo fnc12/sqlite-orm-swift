@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "FE823D12-7F4D-461F-9AA6-8481AC9DE4D9",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:SQLiteORM.Swift.xcodeproj",
+        "identifier" : "E962CFB326E5396000E9CCDC",
+        "name" : "UnitTests"
+      }
+    }
+  ],
+  "version" : 1
+}
