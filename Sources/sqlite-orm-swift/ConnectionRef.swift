@@ -6,11 +6,11 @@ class ConnectionRef: NSObject {
     init(connection: ConnectionHolder) throws {
         self.connection = connection
         super.init()
-        try self.connection.retain()
+        try self.connection.increment()
     }
     
     deinit {
-        self.connection.releaseUnsafe()
+        self.connection.decrementUnsafe()
     }
     
     var db: OpaquePointer? {

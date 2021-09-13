@@ -12,7 +12,7 @@ class ConnectionHolder: NSObject {
         super.init()
     }
     
-    func retain() throws {
+    func increment() throws {
         self.retainCount += 1
         if 1 == self.retainCount {
             let resultCode = apiProvider.sqlite3Open(self.filename.cString(using: .utf8), &self.dbMaybe)
@@ -31,14 +31,14 @@ class ConnectionHolder: NSObject {
         }
     }
     
-    func releaseUnsafe() {
+    func decrementUnsafe() {
         self.retainCount -= 1
         if 0 == self.retainCount {
             _ = apiProvider.sqlite3Close(self.dbMaybe)
         }
     }
     
-    func release() throws {
+    func decrement() throws {
         self.retainCount -= 1
         if 0 == self.retainCount {
             guard let db = self.dbMaybe else {

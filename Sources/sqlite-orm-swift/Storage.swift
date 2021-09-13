@@ -17,7 +17,7 @@ public class Storage: NSObject {
         self.apiProvider = apiProvider
         super.init()
         if self.inMemory {
-            try self.connection.retain()
+            try self.connection.increment()
         }
     }
     
@@ -27,7 +27,7 @@ public class Storage: NSObject {
     
     deinit {
         if self.inMemory {
-            self.connection.releaseUnsafe()
+            self.connection.decrementUnsafe()
         }
     }
     
