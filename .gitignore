@@ -2,3 +2,5 @@ SQLiteORM.Swift.xcodeproj/project.xcworkspace/xcuserdata/
 SQLiteORM.Swift.xcodeproj/xcshareddata/
 *.xcuserstate
 */xcuserdata/*
+.swiftpm/xcode/xcshareddata/
+.swiftpm/xcode/xcuserdata/
