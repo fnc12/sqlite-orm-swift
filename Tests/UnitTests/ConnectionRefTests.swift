@@ -3,7 +3,7 @@ import XCTest
 
 class ConnectionRefTests: XCTestCase {
     var connectionHolder: ConnectionHolderMock!
-    var db: OpaquePointer = .init(bitPattern: 1)!
+    let db = OpaquePointer(bitPattern: 1)!
     var apiProvider: SQLiteApiProviderMock!
     
     let filename = "db.sqlite"
