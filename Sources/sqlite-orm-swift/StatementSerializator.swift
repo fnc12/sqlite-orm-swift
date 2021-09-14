@@ -68,12 +68,12 @@ func serialize(column: AnyColumn) -> String {
 }
 
 func serialize(type: Any.Type) -> String {
-    switch type {
-    case is Int.Type, is UInt.Type, is Bool.Type:
+    switch type {   //  TODO: find how to get non-nullable T from T?
+    case is Int.Type, is UInt.Type, is Bool.Type, is Int?.Type, is UInt?.Type, is Bool?.Type:
         return "INTEGER"
-    case is String.Type:
+    case is String.Type, is String?.Type:
         return "TEXT"
-    case is Float.Type, is Double.Type:
+    case is Float.Type, is Double.Type, is Float?.Type, is Double?.Type:
         return "REAL"
     default:
         fatalError()
