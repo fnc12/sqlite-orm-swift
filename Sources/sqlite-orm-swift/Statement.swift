@@ -1,7 +1,7 @@
 import Foundation
 
 internal class Statement: NSObject {
-    private let stmt: OpaquePointer
+    let stmt: OpaquePointer
     private let apiProvider: SQLiteApiProvider
     
     init(stmt: OpaquePointer, apiProvider: SQLiteApiProvider) {

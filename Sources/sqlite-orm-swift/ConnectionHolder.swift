@@ -1,6 +1,16 @@
 import Foundation
 
-class ConnectionHolder: NSObject {
+protocol ConnectionHolder: AnyObject {
+    var dbMaybe: OpaquePointer? { get }
+    var apiProvider: SQLiteApiProvider { get }
+    var filename: String { get }
+    
+    func increment() throws
+    func decrementUnsafe()
+    func decrement() throws
+}
+
+class ConnectionHolderImpl: NSObject {
     let filename: String
     private(set) var retainCount = 0
     private(set) var dbMaybe: OpaquePointer?
@@ -11,17 +21,20 @@ class ConnectionHolder: NSObject {
         self.apiProvider = apiProvider
         super.init()
     }
+}
+
+extension ConnectionHolderImpl: ConnectionHolder {
     
     func increment() throws {
         self.retainCount += 1
         if 1 == self.retainCount {
-            let resultCode = apiProvider.sqlite3Open(self.filename.cString(using: .utf8), &self.dbMaybe)
+            let resultCode = self.apiProvider.sqlite3Open(self.filename.cString(using: .utf8), &self.dbMaybe)
             guard let db = self.dbMaybe else{
                 throw Error.databaseIsNull
             }
-            guard resultCode == apiProvider.SQLITE_OK else {
+            guard resultCode == self.apiProvider.SQLITE_OK else {
                 let errorString: String
-                if let cString = apiProvider.sqlite3Errmsg(db) {
+                if let cString = self.apiProvider.sqlite3Errmsg(db) {
                     errorString = String(cString: UnsafePointer(cString), encoding: .utf8) ?? ""
                 }else{
                     errorString = ""
@@ -34,7 +47,7 @@ class ConnectionHolder: NSObject {
     func decrementUnsafe() {
         self.retainCount -= 1
         if 0 == self.retainCount {
-            _ = apiProvider.sqlite3Close(self.dbMaybe)
+            _ = self.apiProvider.sqlite3Close(self.dbMaybe)
         }
     }
     
@@ -44,10 +57,10 @@ class ConnectionHolder: NSObject {
             guard let db = self.dbMaybe else {
                 throw Error.databaseIsNull
             }
-            let resultCode = apiProvider.sqlite3Close(db)
-            guard resultCode == apiProvider.SQLITE_OK else {
+            let resultCode = self.apiProvider.sqlite3Close(db)
+            guard resultCode == self.apiProvider.SQLITE_OK else {
                 let errorString: String
-                if let cString = apiProvider.sqlite3Errmsg(db) {
+                if let cString = self.apiProvider.sqlite3Errmsg(db) {
                     errorString = String(cString: UnsafePointer(cString), encoding: .utf8) ?? ""
                 }else{
                     errorString = ""

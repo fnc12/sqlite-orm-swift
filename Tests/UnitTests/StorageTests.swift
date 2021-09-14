@@ -1,5 +1,5 @@
 import XCTest
-import sqlite_orm_swift
+@testable import sqlite_orm_swift
 
 func compareUnordered<T>(_ lhs: Array<T>, _ rhs: Array<T>) -> Bool where T: Equatable {
     guard lhs.count == rhs.count else {
@@ -28,17 +28,71 @@ class StorageTests: XCTestCase {
     }
     
     var storage: Storage!
+    var apiProvider: SQLiteApiProviderMock!
     
     override func setUpWithError() throws {
-        storage = try Storage(filename: "",
-                              tables: Table<User>(name: "users",
-                                                  columns:
-                                                    Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                    Column(name: "name", keyPath: \User.name, constraints: notNull())))
+        self.storage = try Storage(filename: "",
+                                   tables: Table<User>(name: "users",
+                                                       columns:
+                                                        Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                        Column(name: "name", keyPath: \User.name, constraints: notNull())))
+        self.apiProvider = .init()
     }
 
     override func tearDownWithError() throws {
+        self.apiProvider = nil
+        self.storage = nil
+    }
+    
+    func testFilename() throws {
+        self.apiProvider.isProxy = true
+        struct TestCase {
+            let filename: String
+        }
+        let testCases = [
+            TestCase(filename: "ototo"),
+            TestCase(filename: ""),
+            TestCase(filename: ":memory:"),
+            TestCase(filename: "db.sqlite"),
+            TestCase(filename: "company.db"),
+        ]
+        for testCase in testCases {
+            let storage = try Storage(filename: testCase.filename, apiProvider: self.apiProvider, tables: [])
+            XCTAssertEqual(storage.filename, testCase.filename)
+        }
+    }
+    
+    func testCtorFile() throws {
+        self.apiProvider.isProxy = true
+        let storage = try Storage(filename: "db.sqlite",
+                                  apiProvider: apiProvider,
+                                  tables: [])
+        _ = storage
+        XCTAssertEqual(self.apiProvider.calls.count, 0)
+    }
+    
+    func testCtorDtorInMemory() throws {
+        self.apiProvider.isProxy = true
+        var storage: Storage? = try Storage(filename: "",
+                                            apiProvider: self.apiProvider,
+                                            tables: [])
+        _ = storage
+        XCTAssertEqual(self.apiProvider.calls.count, 1)
+        switch self.apiProvider.calls[0].callType {
+        case .sqlite3Open(_, _):
+            XCTAssert(true)
+        default:
+            XCTAssert(false)
+        }
+        
         storage = nil
+        XCTAssertEqual(self.apiProvider.calls.count, 2)
+        switch self.apiProvider.calls[1].callType {
+        case .sqlite3Close(_):
+            XCTAssert(true)
+        default:
+            XCTAssert(false)
+        }
     }
 
     func testGetAllThrowTypeIsNotMapped() throws {

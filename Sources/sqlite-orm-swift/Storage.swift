@@ -7,13 +7,13 @@ public protocol Initializable {
 public class Storage: NSObject {
     private let tables: [AnyTable]
     private let inMemory: Bool
-    private let connection: ConnectionHolder
+    let connection: ConnectionHolder
     private let apiProvider: SQLiteApiProvider
     
     init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
         self.inMemory = filename.isEmpty || filename == ":memory:"
         self.tables = tables
-        self.connection = ConnectionHolder(filename: filename, apiProvider: apiProvider)
+        self.connection = ConnectionHolderImpl(filename: filename, apiProvider: apiProvider)
         self.apiProvider = apiProvider
         super.init()
         if self.inMemory {
