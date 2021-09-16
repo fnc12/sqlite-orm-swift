@@ -9,7 +9,7 @@ class StatementTests: XCTestCase {
     
     override func setUpWithError() throws {
         self.apiProvider = .init()
-        self.statement = Statement(stmt: self.pointer, apiProvider: self.apiProvider)
+        self.statement = StatementImpl(stmt: self.pointer, apiProvider: self.apiProvider)
     }
 
     override func tearDownWithError() throws {
@@ -166,7 +166,7 @@ class StatementTests: XCTestCase {
     }
     
     func testDeinit() {
-        var newStatement: Statement? = .init(stmt: self.pointer, apiProvider: self.apiProvider)
+        var newStatement: Statement? = StatementImpl(stmt: self.pointer, apiProvider: self.apiProvider)
         _ = newStatement    //  to erase warning
         XCTAssertEqual(self.apiProvider.calls, [])
         

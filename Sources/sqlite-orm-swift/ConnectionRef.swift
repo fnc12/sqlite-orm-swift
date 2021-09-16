@@ -45,7 +45,7 @@ class ConnectionRef: NSObject {
         guard let stmt = stmtMaybe else {
             throw Error.statementIsNull
         }
-        return Statement(stmt: stmt, apiProvider: self.connection.apiProvider)
+        return StatementImpl(stmt: stmt, apiProvider: self.connection.apiProvider)
     }
     
     func exec(sql: String) throws {

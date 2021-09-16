@@ -55,20 +55,31 @@ public class Column<T, V>: AnyColumn {
     
     override func bind<O>(statement: Statement, object: O, index: Int) throws -> Int32 {
         var resultCode = Int32(0)
-        if O.self == T.self {
-            let tObject = object as! T
-            switch V.self {
-            case is Int.Type:
-                let intValue = tObject[keyPath: self.keyPath] as! Int
+        guard O.self == T.self else {
+            throw Error.typeMismatch
+        }
+        let tObject = object as! T
+        switch V.self {
+        case is Int.Type:
+            let intValue = tObject[keyPath: self.keyPath] as! Int
+            resultCode = statement.bindInt(value: intValue, index: index)
+        case is Int?.Type:
+            if let intValue = tObject[keyPath: self.keyPath] as! Int? {
                 resultCode = statement.bindInt(value: intValue, index: index)
-            case is String.Type:
-                let stringValue = tObject[keyPath: self.keyPath] as! String
-                resultCode = statement.bindText(value: stringValue, index: index)
-            default:
-                throw Error.unknownType
+            }else{
+                resultCode = statement.bindNull(index: index)
             }
-        }else{
-            fatalError()
+        case is String.Type:
+            let stringValue = tObject[keyPath: self.keyPath] as! String
+            resultCode = statement.bindText(value: stringValue, index: index)
+        case is String?.Type:
+            if let stringValue = tObject[keyPath: self.keyPath] as! String? {
+                resultCode = statement.bindText(value: stringValue, index: index)
+            }else{
+                resultCode = statement.bindNull(index: index)
+            }
+        default:
+            throw Error.unknownType
         }
         return resultCode
     }

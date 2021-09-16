@@ -28,6 +28,7 @@ enum SQLiteApiProviderCallType {
                          _ len: Int32,
                          _ dtor: (@convention(c) (UnsafeMutableRawPointer?) -> Void)!)
     case sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32)
+    case sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32)
     case sqlite3ValueInt(_ value: OpaquePointer!)
     case sqlite3ValueText(_ value: OpaquePointer!)
 }

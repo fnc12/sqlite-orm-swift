@@ -98,6 +98,11 @@ protocol SQLiteApiProvider: AnyObject {
     func sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32) -> Int32
     
     /**
+     *  `sqlite3_bind_null`
+     */
+    func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32
+    
+    /**
      *  `sqlite3_value_int`
      */
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32
@@ -116,6 +121,10 @@ final class SQLiteApiProviderImpl: SQLiteApiProvider {
     
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32 {
         return sqlite3_value_int(value)
+    }
+    
+    func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32 {
+        return sqlite3_bind_null(pStmt, idx)
     }
     
     func sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32) -> Int32 {

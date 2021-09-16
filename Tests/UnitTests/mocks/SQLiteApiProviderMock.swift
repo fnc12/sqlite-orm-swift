@@ -170,6 +170,16 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
         }
     }
     
+    func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32 {
+        let call = self.makeCall(callType: .sqlite3BindNull(pStmt, idx))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_bind_null(pStmt, idx)
+        }else{
+            return 0
+        }
+    }
+    
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32 {
         let call = self.makeCall(callType: .sqlite3ValueInt(value))
         self.calls.append(call)

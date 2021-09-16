@@ -1,7 +1,7 @@
 import Foundation
 @testable import sqlite_orm_swift
 
-final class StatementTestable: Statement {
+final class StatementTestable: StatementImpl {
     struct BindIntCall: Equatable {
         let value: Int
         let index: Int

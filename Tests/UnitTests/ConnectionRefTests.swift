@@ -24,7 +24,7 @@ class ConnectionRefTests: XCTestCase {
         let stmt = OpaquePointer(bitPattern: 1)!
         self.apiProvider.sqlite3PrepareV2StmtToAssign = stmt
         let statement = try connectionRef.prepare(sql: sql)
-        XCTAssertEqual(statement.stmt, stmt)
+        XCTAssertEqual((statement as! StatementImpl).stmt, stmt)
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls[0].callType {
         case .sqlite3PrepareV2(let db, _, _, _, _):
