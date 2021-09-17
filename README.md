@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/fnc12/sqlite-orm-swift/blob/master/logo.png" alt="Sublime's custom image" width="999"/>
+  <img src="https://github.com/fnc12/sqlite-orm-swift/blob/master/logo.png" alt="Sublime's custom image" width="600"/>
 </p>
 
 # SQLiteOrm-Swift
