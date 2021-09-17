@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/fnc12/sqlite-orm-swift/blob/master/logo.png" alt="Sublime's custom image" width="999"/>
+</p>
+
 # SQLiteOrm-Swift
 
 ![example workflow](https://github.com/fnc12/sqlite-orm-swift/actions/workflows/swift.yml/badge.svg)
