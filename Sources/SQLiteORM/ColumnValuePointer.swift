@@ -37,6 +37,4 @@ extension ColumnValuePointer: SQLiteValue {
     var isNull: Bool {
         return self.apiProvider.sqlite3ColumnType(self.stmt, Int32(self.columnIndex)) == self.apiProvider.SQLITE_NULL
     }
-    
-    
 }
