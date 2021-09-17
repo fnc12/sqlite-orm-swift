@@ -323,7 +323,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kz.outlawstudio.UnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.3.2;
 			};
 			name = Debug;
 		};
@@ -341,7 +341,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kz.outlawstudio.UnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.3.2;
 			};
 			name = Release;
 		};
@@ -353,7 +353,7 @@
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.3.2;
 			};
 			name = Debug;
 		};
@@ -365,7 +365,7 @@
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.3.2;
 			};
 			name = Release;
 		};
