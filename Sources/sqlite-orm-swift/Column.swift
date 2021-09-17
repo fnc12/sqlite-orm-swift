@@ -64,7 +64,7 @@ public class Column<T, V>: AnyColumn {
             let intValue = tObject[keyPath: self.keyPath] as! Int
             resultCode = statement.bindInt(value: intValue, index: index)
         case is Int?.Type:
-            let intValueMaybe = tObject[keyPath: self.keyPath] as! Int?
+            let intValueMaybe = tObject[keyPath: self.keyPath] as? Int
             if nil != intValueMaybe {
                 resultCode = statement.bindInt(value: intValueMaybe!, index: index)
             }else{
@@ -74,7 +74,7 @@ public class Column<T, V>: AnyColumn {
             let stringValue = tObject[keyPath: self.keyPath] as! String
             resultCode = statement.bindText(value: stringValue, index: index)
         case is String?.Type:
-            let stringValueMaybe = tObject[keyPath: self.keyPath] as! String?
+            let stringValueMaybe = tObject[keyPath: self.keyPath] as? String
             if nil != stringValueMaybe {
                 resultCode = statement.bindText(value: stringValueMaybe!, index: index)
             }else{
