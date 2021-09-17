@@ -68,13 +68,13 @@ do {
                                                Column(name: "last_name", keyPath: \User.lastName, constraints: notNull()),
                                                Column(name: "birth_date", keyPath: \User.birthDate, constraints: notNull()),
                                                Column(name: "image_url", keyPath: \User.imageUrl),
-                                               Column(name: "type_id", keyPath: \User.typeId)),
+                                               Column(name: "type_id", keyPath: \User.typeId, constraints: notNull())),
                                 Table<UserType>(name: "user_types",
                                                 columns:
                                                     Column(name: "id", keyPath: \UserType.id, constraints: primaryKey(), notNull()),
                                                     Column(name: "name", keyPath: \UserType.name, constraints: notNull())))
 }catch{
-    print("error happened")
+    print("error happened \(error)")
 }
 ```
 
@@ -112,7 +112,7 @@ user.imageUrl = "https://cdn1.iconfinder.com/data/icons/man-icon-set/100/man_ico
 try storage.update(object: user)
 ```
 
-And delete. To delete you have to pass a whole object. Also we need to explicitly tell which class of object we want to delete.
+And delete. To delete you have to pass a whole object.
 
 ```swift
 try storage.delete(object: user)
@@ -121,5 +121,32 @@ try storage.delete(object: user)
 Also we can extract all objects into `Array`:
 
 ```swift
-
+let allUsers: [User] = try storage.getAll()
+print("allUsers (\(allUsers.count):")
+for user in allUsers {
+    print(user)
+}
 ```
+
+# Migrations functionality
+
+There are no explicit `up` and `down` functions that are used to be used in migrations. Instead `SQLiteORM` offers `syncSchema` function that takes responsibility of comparing actual db file schema with one you specified in `Storage` init call and if something is not equal it alters or drops/creates schema.
+
+```swift
+try storage.syncSchema(preserve: true)
+```
+
+Please beware that `syncSchema` doesn't guarantee that data will be saved. It *tries* to save it only. Below you can see rules list that `syncSchema` follows during call:
+* if there are excess tables exist in db they are ignored (not dropped)
+* every table from storage is compared with it's db analog and 
+    * if table doesn't exist it is created
+    * if table exists its colums are being compared with table_info from db and
+        * if there are columns in db that do not exist in storage (excess) table will be dropped and recreated if `preserve` is `false`, and table will be copied into temporary table without excess columns, source table will be dropped, copied table will be renamed to source table (sqlite remove column technique) if `preserve` is `true`. Beware that setting it to `true` may take time for copying table rows.
+        * if there are columns in storage that do not exist in db they will be added using 'ALTER TABLE ... ADD COLUMN ...' command and table data will not be dropped but if any of added columns is null but has not default value table will be dropped and recreated
+        * if there is any column existing in both db and storage but differs by any of properties (pk, notnull) table will be dropped and recreated (dflt_value isn't checked cause there can be ambiguity in default values, please beware).
+
+The best practice is to call this function right after storage creation.
+
+# Notes
+
+To work well your data model class must inherit from `Initializable` which required only `init()` with no arguments existance and must not have const fields mapped to database cause they are assigned during queries. Otherwise code won't compile.
