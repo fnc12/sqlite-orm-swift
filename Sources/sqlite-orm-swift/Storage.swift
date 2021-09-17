@@ -344,17 +344,14 @@ public class Storage: NSObject {
                 throw Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount), storageColumnsCount: table.columns.count)
             }
             switch resultCode {
-            case apiProvider.SQLITE_ROW:
+            case self.apiProvider.SQLITE_ROW:
                 var object = T()
                 for (columnIndex, anyColumn) in table.columns.enumerated() {
-                    let sqliteValue = statement.columnValue(columnIndex: columnIndex)
-                    guard sqliteValue.isValid else {
-                        throw Error.valueIsNull
-                    }
-                    try anyColumn.assign(object: &object, statement: statement, columnIndex: columnIndex)
+                    let columnValuePointer = statement.columnValuePointer(with: columnIndex)
+                    try anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
                 }
                 result.append(object)
-            case apiProvider.SQLITE_DONE:
+            case self.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
@@ -385,8 +382,8 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                resultCode = try column.bind(statement: statement, object: object, index: bindIndex)
-                guard resultCode == apiProvider.SQLITE_OK else {
+                resultCode = try column.bind(binder: statement, object: object, index: bindIndex)
+                guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
                     throw Error.sqliteError(code: resultCode, text: errorString)
                 }
@@ -394,7 +391,7 @@ public class Storage: NSObject {
             }
         }
         resultCode = statement.step()
-        guard apiProvider.SQLITE_DONE == resultCode else {
+        guard self.apiProvider.SQLITE_DONE == resultCode else {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
@@ -434,8 +431,8 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if !column.isPrimaryKey {
-                resultCode = try column.bind(statement: statement, object: object, index: bindIndex)
-                guard resultCode == apiProvider.SQLITE_OK else {
+                resultCode = try column.bind(binder: statement, object: object, index: bindIndex)
+                guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
                     throw Error.sqliteError(code: resultCode, text: errorString)
                 }
@@ -444,9 +441,9 @@ public class Storage: NSObject {
         }
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                resultCode = try column.bind(statement: statement, object: object, index: bindIndex)
+                resultCode = try column.bind(binder: statement, object: object, index: bindIndex)
                 bindIndex += 1
-                guard resultCode == apiProvider.SQLITE_OK else {
+                guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
                     throw Error.sqliteError(code: resultCode, text: errorString)
                 }
@@ -459,7 +456,7 @@ public class Storage: NSObject {
         }
     }
     
-    public func get<T>(id: Any...) throws -> T? where T: Initializable {
+    public func get<T>(id: Bindable...) throws -> T? where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -486,15 +483,15 @@ public class Storage: NSObject {
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode: Int32 = 0
         for (idIndex, idValue) in id.enumerated() {
-            resultCode = try statement.bind(value: idValue, index: idIndex + 1)
-            guard resultCode == apiProvider.SQLITE_OK else {
+            resultCode = idValue.bind(to: statement, index: idIndex + 1)
+            guard resultCode == self.apiProvider.SQLITE_OK else {
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
         }
         resultCode = statement.step()
         switch resultCode {
-        case apiProvider.SQLITE_ROW:
+        case self.apiProvider.SQLITE_ROW:
             let table = anyTable as! Table<T>
             var object = T()
             for (columnIndex, anyColumn) in table.columns.enumerated() {
@@ -505,7 +502,7 @@ public class Storage: NSObject {
                 try anyColumn.assign(object: &object, sqliteValue: sqliteValue)
             }
             return object
-        case apiProvider.SQLITE_DONE:
+        case self.apiProvider.SQLITE_DONE:
             return nil
         default:
             let errorString = connectionRef.errorMessage

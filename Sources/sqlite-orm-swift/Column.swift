@@ -1,6 +1,6 @@
 import Foundation
 
-public class Column<T, V>: AnyColumn {
+public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLiteValue {
     let keyPath: WritableKeyPath<T, V>
     
     public init(name: String, keyPath: WritableKeyPath<T, V>) {
@@ -14,79 +14,21 @@ public class Column<T, V>: AnyColumn {
         super.init(name: name, constraints: constraintsArray)
     }
     
-    override func assign<O>(object: inout O, statement: Statement, columnIndex: Int) throws {
-        guard O.self == T.self else {
-            throw Error.unknownType
-        }
-        var tObject = object as! T
-        switch V.self {
-        case is Int.Type:
-            let intValue = statement.columnInt(index: columnIndex)
-            let vValue = intValue as! V
-            tObject[keyPath: self.keyPath] = vValue
-        case is String.Type:
-            let stringValue = statement.columnText(index: columnIndex)
-            tObject[keyPath: self.keyPath] = stringValue as! V
-        default:
-            throw Error.unknownType
-        }
-        object = tObject as! O
-    }
-    
     override func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
         guard O.self == T.self else {
             throw Error.unknownType
         }
         var tObject = object as! T
-        switch V.self {
-        case is Int.Type:
-            let intValue = sqliteValue.integer
-            let vValue = intValue as! V
-            tObject[keyPath: self.keyPath] = vValue
-        case is Int?.Type:
-            let intValueMaybe = sqliteValue.integerMaybe
-            let vValue = intValueMaybe as! V
-            tObject[keyPath: self.keyPath] = vValue
-        case is String.Type:
-            let stringValue = sqliteValue.text
-            tObject[keyPath: self.keyPath] = stringValue as! V
-        case is String?.Type:
-            let stringValueMaybe = sqliteValue.textMaybe
-            tObject[keyPath: self.keyPath] = stringValueMaybe as! V
-        default:
-            throw Error.unknownType
-        }
+        tObject[keyPath: self.keyPath] = .init(sqliteValue: sqliteValue)
         object = tObject as! O
     }
     
-    override func bind<O>(statement: Statement, object: O, index: Int) throws -> Int32 {
-        var resultCode = Int32(0)
+    override func bind<O>(binder: Binder, object: O, index: Int) throws -> Int32 {
         guard O.self == T.self else {
             throw Error.unknownType
         }
         let tObject = object as! T
-        switch V.self {
-        case is Int.Type:
-            let intValue = tObject[keyPath: self.keyPath] as! Int
-            resultCode = statement.bindInt(value: intValue, index: index)
-        case is Int?.Type:
-            if let intValue = tObject[keyPath: self.keyPath] as? Int {
-                resultCode = statement.bindInt(value: intValue, index: index)
-            }else{
-                resultCode = statement.bindNull(index: index)
-            }
-        case is String.Type:
-            let stringValue = tObject[keyPath: self.keyPath] as! String
-            resultCode = statement.bindText(value: stringValue, index: index)
-        case is String?.Type:
-            if let stringValue = tObject[keyPath: self.keyPath] as? String {
-                resultCode = statement.bindText(value: stringValue, index: index)
-            }else{
-                resultCode = statement.bindNull(index: index)
-            }
-        default:
-            throw Error.unknownType
-        }
+        let resultCode = tObject[keyPath: self.keyPath].bind(to: binder, index: index)
         return resultCode
     }
     

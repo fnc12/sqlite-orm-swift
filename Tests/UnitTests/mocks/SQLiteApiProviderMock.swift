@@ -36,6 +36,46 @@ class SQLiteApiProviderMock: NSObject {
 
 extension SQLiteApiProviderMock: SQLiteApiProvider {
     
+    func sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
+        let call = self.makeCall(callType: .sqlite3ColumnType(pStmt, iCol))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_column_type(pStmt, iCol)
+        }else{
+            return 0
+        }
+    }
+    
+    func sqlite3ColumnDouble(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Double {
+        let call = self.makeCall(callType: .sqlite3ColumnDouble(pStmt, iCol))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_column_double(pStmt, iCol)
+        }else{
+            return 0
+        }
+    }
+    
+    func sqlite3ValueDouble(_ value: OpaquePointer!) -> Double {
+        let call = self.makeCall(callType: .sqlite3ValueDouble(value))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_value_double(value)
+        }else{
+            return 0
+        }
+    }
+    
+    func sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double) -> Int32 {
+        let call = self.makeCall(callType: .sqlite3BindDouble(pStmt, idx, value))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_bind_double(pStmt, idx, value)
+        }else{
+            return 0
+        }
+    }
+    
     func sqlite3ValueType(_ value: OpaquePointer!) -> Int32 {
         let call = self.makeCall(callType: .sqlite3ValueType(value))
         self.calls.append(call)

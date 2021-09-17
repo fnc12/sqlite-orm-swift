@@ -4,7 +4,7 @@ import XCTest
 class StatementTests: XCTestCase {
     let pointer = OpaquePointer(bitPattern: 1)!
     
-    var statement: Statement!
+    var statement: StatementImpl!
     var apiProvider: SQLiteApiProviderMock!
     
     override func setUpWithError() throws {
@@ -15,43 +15,6 @@ class StatementTests: XCTestCase {
     override func tearDownWithError() throws {
         self.statement = nil
         self.apiProvider = nil
-    }
-    
-    func testBind() throws {
-        struct TestCase {
-            let value: Any
-            let index: Int
-            let bindIntCalls: [StatementTestable.BindIntCall]
-            let bindTextCalls: [StatementTestable.BindTextCall]
-            let expectError: Bool
-        }
-        typealias BindIntCall = StatementTestable.BindIntCall
-        typealias BindTextCall = StatementTestable.BindTextCall
-        let testCases = [
-            TestCase(value: 1, index: 3, bindIntCalls: [BindIntCall(value: 1, index: 3)], bindTextCalls: [], expectError: false),
-            TestCase(value: "ototo", index: 2, bindIntCalls: [], bindTextCalls: [BindTextCall(value: "ototo", index: 2)], expectError: false),
-            TestCase(value: Dictionary<Int, Int>(), index: 0, bindIntCalls: [], bindTextCalls: [], expectError: true)
-        ]
-        for testCase in testCases {
-            let statementTestable = StatementTestable(stmt: self.pointer, apiProvider: self.apiProvider)
-            self.statement = statementTestable
-            XCTAssertEqual(statementTestable.bindIntCalls, [])
-            XCTAssertEqual(statementTestable.bindTextCalls, [])
-            if !testCase.expectError {
-                _ = try self.statement.bind(value: testCase.value, index: testCase.index)
-                XCTAssertEqual(statementTestable.bindIntCalls, testCase.bindIntCalls)
-                XCTAssertEqual(statementTestable.bindTextCalls, testCase.bindTextCalls)
-            }else{
-                do {
-                    _ = try self.statement.bind(value: testCase.value, index: testCase.index)
-                }catch sqlite_orm_swift.Error.unknownType {
-                    XCTAssert(true)
-                }catch {
-                    XCTAssert(false)
-                }
-            }
-            self.statement = nil
-        }
     }
     
     func testBindText() {
@@ -147,7 +110,7 @@ class StatementTests: XCTestCase {
             let sqliteValue = self.statement.columnValue(columnIndex: columnIndex)
             XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: columnIndex,
                                                                           callType: .sqlite3ColumnValue(self.pointer, Int32(columnIndex)))])
-            XCTAssertEqual(sqliteValue.handle, opaquePointerToReturn)
+            XCTAssertEqual((sqliteValue as! SQLiteValueImpl).handle, opaquePointerToReturn)
             XCTAssert((sqliteValue as! SQLiteValueImpl).apiProvider === self.apiProvider)
             self.apiProvider.calls.removeAll()
         }

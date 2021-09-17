@@ -5,9 +5,9 @@ class SQLiteValueMock: NSObject {
     var handle: OpaquePointer! = nil
     var isValid: Bool = false
     var integer: Int = 0
-    var integerMaybe: Int? = nil
+    var double: Double = 0
     var text: String = ""
-    var textMaybe: String? = nil
+    var isNull: Bool = false
 }
 
 extension SQLiteValueMock: SQLiteValue {

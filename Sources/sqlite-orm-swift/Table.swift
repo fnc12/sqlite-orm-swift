@@ -6,12 +6,12 @@ public class Table<T>: AnyTable {
         return T.self
     }
     
-    func bindNonPrimaryKey(statement: Statement, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
+    func bindNonPrimaryKey(statement: Binder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
         var resultCode = Int32(0)
         var columnIndex = 0
         for anyColumn in self.columns {
             if !anyColumn.isPrimaryKey {
-                resultCode = try anyColumn.bind(statement: statement, object: object, index: columnIndex + 1)
+                resultCode = try anyColumn.bind(binder: statement, object: object, index: columnIndex + 1)
                 columnIndex += 1
                 if apiProvider.SQLITE_OK != resultCode {
                     break
@@ -21,10 +21,10 @@ public class Table<T>: AnyTable {
         return resultCode
     }
     
-    func bind(statement: Statement, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
+    func bind(statement: Binder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
         var resultCode = Int32(0)
         for (columnIndex, anyColumn) in self.columns.enumerated() {
-            resultCode = try anyColumn.bind(statement: statement, object: object, index: columnIndex + 1)
+            resultCode = try anyColumn.bind(binder: statement, object: object, index: columnIndex + 1)
             if apiProvider.SQLITE_OK != resultCode {
                 break
             }

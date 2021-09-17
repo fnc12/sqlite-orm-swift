@@ -85,9 +85,19 @@ protocol SQLiteApiProvider: AnyObject {
     func sqlite3ColumnText(_ pStmt: OpaquePointer!, _ iCol: Int32) -> UnsafePointer<UInt8>!
     
     /**
+     *  `sqlite3_column_type`
+     */
+    func sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32
+    
+    /**
      *  `sqlite3_column_int`
      */
     func sqlite3ColumnInt(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32
+    
+    /**
+     *  `sqlite3_column_double`
+     */
+    func sqlite3ColumnDouble(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Double
     
     /**
      *  `sqlite3_bind_text`
@@ -104,6 +114,11 @@ protocol SQLiteApiProvider: AnyObject {
     func sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32) -> Int32
     
     /**
+     *  `sqlite3_bind_double`
+     */
+    func sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double) -> Int32
+    
+    /**
      *  `sqlite3_bind_null`
      */
     func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32
@@ -112,6 +127,11 @@ protocol SQLiteApiProvider: AnyObject {
      *  `sqlite3_value_int`
      */
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32
+    
+    /**
+     *  `sqlite3_value_double`
+     */
+    func sqlite3ValueDouble(_ value: OpaquePointer!) -> Double
     
     /**
      *  `sqlite3_value_text`
@@ -138,8 +158,16 @@ final class SQLiteApiProviderImpl: SQLiteApiProvider {
         return sqlite3_value_int(value)
     }
     
+    func sqlite3ValueDouble(_ value: OpaquePointer!) -> Double {
+        return sqlite3_value_double(value)
+    }
+    
     func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32 {
         return sqlite3_bind_null(pStmt, idx)
+    }
+    
+    func sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double) -> Int32 {
+        return sqlite3_bind_double(pStmt, idx, value)
     }
     
     func sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32) -> Int32 {
@@ -160,8 +188,16 @@ final class SQLiteApiProviderImpl: SQLiteApiProvider {
         return sqlite3_column_int(pStmt, iCol)
     }
     
+    func sqlite3ColumnDouble(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Double {
+        return sqlite3_column_double(pStmt, iCol)
+    }
+    
     func sqlite3ColumnText(_ pStmt: OpaquePointer!, _ iCol: Int32) -> UnsafePointer<UInt8>! {
         return sqlite3_column_text(pStmt, iCol)
+    }
+    
+    func sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
+        return sqlite3_column_type(pStmt, iCol)
     }
     
     func sqlite3ColumnValue(_ pStmt: OpaquePointer!, _ iCol: Int32) -> OpaquePointer! {

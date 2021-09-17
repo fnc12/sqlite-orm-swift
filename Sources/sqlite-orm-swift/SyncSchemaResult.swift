@@ -35,8 +35,11 @@ public enum SyncSchemaResult {
      *      4. data_type mismatch between table and storage.
      */
     case droppedAndRecreated
+}
+
+extension SyncSchemaResult: CustomStringConvertible {
     
-    var description: String {
+    public var description: String {
         switch self {
         case .newTableCreated: return "new table created"
         case .alredyInSync: return "table and storage is already in sync."

@@ -32,12 +32,8 @@ public class AnyColumn: NSObject {
         })
     }
     
-    func bind<O>(statement: Statement, object: O, index: Int) throws -> Int32 {
+    func bind<O>(binder: Binder, object: O, index: Int) throws -> Int32 {
         return 0
-    }
-    
-    func assign<O>(object: inout O, statement: Statement, columnIndex: Int) throws {
-        //..
     }
     
     func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
