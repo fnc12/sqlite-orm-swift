@@ -1,5 +1,5 @@
 import Foundation
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 final class BinderMock: NSObject {
     

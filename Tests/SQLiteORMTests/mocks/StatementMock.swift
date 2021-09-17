@@ -1,5 +1,5 @@
 import Foundation
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 func equals(_ x : Any, _ y : Any) -> Bool {
     guard x is AnyHashable else { return false }

@@ -1,6 +1,6 @@
 import Foundation
 import SQLite3
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class SQLiteApiProviderMock: NSObject {
     let SQLITE_ROW: Int32 = SQLite3.SQLITE_ROW

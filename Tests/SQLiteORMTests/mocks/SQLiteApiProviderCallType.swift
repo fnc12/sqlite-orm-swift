@@ -1,5 +1,5 @@
 import Foundation
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 enum SQLiteApiProviderCallType {
     case sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!)

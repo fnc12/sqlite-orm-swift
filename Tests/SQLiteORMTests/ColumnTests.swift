@@ -1,5 +1,5 @@
 import XCTest
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class ColumnTests: XCTestCase {
     struct User {
@@ -84,7 +84,7 @@ class ColumnTests: XCTestCase {
         do {
             try self.intOptionalColumn.assign(object: &visit, sqliteValue: self.sqliteValueMock)
             XCTAssert(false)
-        }catch sqlite_orm_swift.Error.unknownType {
+        }catch SQLiteORM.Error.unknownType {
             XCTAssert(true)
         }catch{
             XCTAssert(false)
@@ -141,7 +141,7 @@ class ColumnTests: XCTestCase {
         do {
             _ = try self.intColumn.bind(binder: self.binderMock, object: visit, index: 1)
             XCTAssert(false)
-        }catch sqlite_orm_swift.Error.unknownType{
+        }catch SQLiteORM.Error.unknownType{
             XCTAssert(true)
         }catch{
             XCTAssert(false)

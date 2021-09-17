@@ -1,5 +1,5 @@
 import XCTest
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class SQLiteValueTests: XCTestCase {
     let pointer = OpaquePointer(bitPattern: 1)!

@@ -1,5 +1,5 @@
 import Foundation
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class SQLiteValueMock: NSObject {
     var handle: OpaquePointer! = nil

@@ -1,5 +1,5 @@
 import XCTest
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class ConnectionRefTests: XCTestCase {
     var connectionHolder: ConnectionHolderMock!
@@ -41,7 +41,7 @@ class ConnectionRefTests: XCTestCase {
         do {
             _ = try connectionRef.prepare(sql: sql)
             XCTAssert(false)
-        }catch sqlite_orm_swift.Error.sqliteError(let code, _){
+        }catch SQLiteORM.Error.sqliteError(let code, _){
             XCTAssertEqual(code, 1)
         }catch{
             XCTAssert(false)
@@ -55,7 +55,7 @@ class ConnectionRefTests: XCTestCase {
         do {
             _ = try connectionRef.prepare(sql: sql)
             XCTAssert(false)
-        }catch sqlite_orm_swift.Error.databaseIsNull {
+        }catch SQLiteORM.Error.databaseIsNull {
             XCTAssert(true)
         }catch{
             XCTAssert(false)

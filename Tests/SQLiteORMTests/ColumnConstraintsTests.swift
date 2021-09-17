@@ -1,5 +1,5 @@
 import XCTest
-import sqlite_orm_swift
+import SQLiteORM
 
 class ColumnConstraintsTests: XCTestCase {
 

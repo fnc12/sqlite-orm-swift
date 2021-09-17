@@ -1,5 +1,5 @@
 import Foundation
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 class ConnectionHolderMock: NSObject {
     var dbMaybe: OpaquePointer?

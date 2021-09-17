@@ -1,5 +1,5 @@
 import XCTest
-@testable import sqlite_orm_swift
+@testable import SQLiteORM
 
 func compareUnordered<T>(_ lhs: Array<T>, _ rhs: Array<T>) -> Bool where T: Equatable {
     guard lhs.count == rhs.count else {
@@ -102,7 +102,7 @@ class StorageTests: XCTestCase {
             var visits: [Visit] = try storage.getAll()
             XCTAssert(false)
             visits.removeAll()
-        }catch sqlite_orm_swift.Error.typeIsNotMapped {
+        }catch SQLiteORM.Error.typeIsNotMapped {
             XCTAssert(true)
         }catch{
             XCTAssert(false)
@@ -113,7 +113,7 @@ class StorageTests: XCTestCase {
         do {
             let _: User? = try storage.get(id: 1)
             XCTAssert(false)
-        }catch sqlite_orm_swift.Error.sqliteError(_, _) {
+        }catch SQLiteORM.Error.sqliteError(_, _) {
             XCTAssert(true)
         }catch{
             XCTAssert(false)
