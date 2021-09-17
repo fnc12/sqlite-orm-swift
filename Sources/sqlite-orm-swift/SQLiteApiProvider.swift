@@ -7,6 +7,12 @@ protocol SQLiteApiProvider: AnyObject {
     var SQLITE_STATIC: DestructorType { get }
     var SQLITE_TRANSIENT: DestructorType { get }
     
+    var SQLITE_INTEGER: Int32 { get }
+    var SQLITE_FLOAT: Int32 { get }
+    var SQLITE_BLOB: Int32 { get }
+    var SQLITE_NULL: Int32 { get }
+    var SQLITE_TEXT: Int32 { get }
+    
     typealias Int64 = sqlite3_int64
     typealias DestructorType = @convention(c) (UnsafeMutableRawPointer?) -> Void
     
@@ -111,9 +117,18 @@ protocol SQLiteApiProvider: AnyObject {
      *  `sqlite3_value_text`
      */
     func sqlite3ValueText(_ value: OpaquePointer!) -> UnsafePointer<UInt8>!
+    
+    /**
+     *  `sqlite3_value_type`
+     */
+    func sqlite3ValueType(_ value: OpaquePointer!) -> Int32
 }
 
 final class SQLiteApiProviderImpl: SQLiteApiProvider {
+    
+    func sqlite3ValueType(_ value: OpaquePointer!) -> Int32 {
+        return sqlite3_value_type(value)
+    }
     
     func sqlite3ValueText(_ value: OpaquePointer!) -> UnsafePointer<UInt8>! {
         return sqlite3_value_text(value)
@@ -196,6 +211,12 @@ final class SQLiteApiProviderImpl: SQLiteApiProvider {
     func sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!) -> Int32 {
         return sqlite3_open(filename, ppDb)
     }
+    
+    let SQLITE_INTEGER: Int32 = SQLite3.SQLITE_INTEGER
+    let SQLITE_FLOAT: Int32 = SQLite3.SQLITE_FLOAT
+    let SQLITE_BLOB: Int32 = SQLite3.SQLITE_BLOB
+    let SQLITE_NULL: Int32 = SQLite3.SQLITE_NULL
+    let SQLITE_TEXT: Int32 = SQLite3.SQLITE_TEXT
     
     let SQLITE_ROW: Int32 = SQLite3.SQLITE_ROW
     let SQLITE_DONE: Int32 = SQLite3.SQLITE_DONE

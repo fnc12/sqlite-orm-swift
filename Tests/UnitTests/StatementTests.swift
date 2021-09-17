@@ -148,7 +148,7 @@ class StatementTests: XCTestCase {
             XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: columnIndex,
                                                                           callType: .sqlite3ColumnValue(self.pointer, Int32(columnIndex)))])
             XCTAssertEqual(sqliteValue.handle, opaquePointerToReturn)
-            XCTAssert(sqliteValue.apiProvider === self.apiProvider)
+            XCTAssert((sqliteValue as! SQLiteValueImpl).apiProvider === self.apiProvider)
             self.apiProvider.calls.removeAll()
         }
     }

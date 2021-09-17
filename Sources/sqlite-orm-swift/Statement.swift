@@ -36,7 +36,7 @@ class StatementImpl: NSObject, Statement {
     
     func columnValue(columnIndex: Int) -> SQLiteValue {
         let handle = self.apiProvider.sqlite3ColumnValue(self.stmt, Int32(columnIndex))
-        return SQLiteValue(handle: handle, apiProvider: self.apiProvider)
+        return SQLiteValueImpl(handle: handle, apiProvider: self.apiProvider)
     }
     
     func columnText(index: Int) -> String {

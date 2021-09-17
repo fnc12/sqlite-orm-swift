@@ -34,29 +34,35 @@ public class Column<T, V>: AnyColumn {
     }
     
     override func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
-        if O.self == T.self {
-            var tObject = object as! T
-            switch V.self {
-            case is Int.Type:
-                let intValue = sqliteValue.integer
-                let vValue = intValue as! V
-                tObject[keyPath: self.keyPath] = vValue
-            case is String.Type:
-                let stringValue = sqliteValue.text
-                tObject[keyPath: self.keyPath] = stringValue as! V
-            default:
-                throw Error.unknownType
-            }
-            object = tObject as! O
-        }else{
+        guard O.self == T.self else {
             throw Error.unknownType
         }
+        var tObject = object as! T
+        switch V.self {
+        case is Int.Type:
+            let intValue = sqliteValue.integer
+            let vValue = intValue as! V
+            tObject[keyPath: self.keyPath] = vValue
+        case is Int?.Type:
+            let intValueMaybe = sqliteValue.integerMaybe
+            let vValue = intValueMaybe as! V
+            tObject[keyPath: self.keyPath] = vValue
+        case is String.Type:
+            let stringValue = sqliteValue.text
+            tObject[keyPath: self.keyPath] = stringValue as! V
+        case is String?.Type:
+            let stringValueMaybe = sqliteValue.textMaybe
+            tObject[keyPath: self.keyPath] = stringValueMaybe as! V
+        default:
+            throw Error.unknownType
+        }
+        object = tObject as! O
     }
     
     override func bind<O>(statement: Statement, object: O, index: Int) throws -> Int32 {
         var resultCode = Int32(0)
         guard O.self == T.self else {
-            throw Error.typeMismatch
+            throw Error.unknownType
         }
         let tObject = object as! T
         switch V.self {
@@ -64,9 +70,8 @@ public class Column<T, V>: AnyColumn {
             let intValue = tObject[keyPath: self.keyPath] as! Int
             resultCode = statement.bindInt(value: intValue, index: index)
         case is Int?.Type:
-            let intValueMaybe = tObject[keyPath: self.keyPath] as? Int
-            if nil != intValueMaybe {
-                resultCode = statement.bindInt(value: intValueMaybe!, index: index)
+            if let intValue = tObject[keyPath: self.keyPath] as? Int {
+                resultCode = statement.bindInt(value: intValue, index: index)
             }else{
                 resultCode = statement.bindNull(index: index)
             }
@@ -74,9 +79,8 @@ public class Column<T, V>: AnyColumn {
             let stringValue = tObject[keyPath: self.keyPath] as! String
             resultCode = statement.bindText(value: stringValue, index: index)
         case is String?.Type:
-            let stringValueMaybe = tObject[keyPath: self.keyPath] as? String
-            if nil != stringValueMaybe {
-                resultCode = statement.bindText(value: stringValueMaybe!, index: index)
+            if let stringValue = tObject[keyPath: self.keyPath] as? String {
+                resultCode = statement.bindText(value: stringValue, index: index)
             }else{
                 resultCode = statement.bindNull(index: index)
             }

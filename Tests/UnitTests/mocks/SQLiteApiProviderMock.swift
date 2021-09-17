@@ -10,6 +10,12 @@ class SQLiteApiProviderMock: NSObject {
     let SQLITE_STATIC: DestructorType = unsafeBitCast(0, to: sqlite3_destructor_type.self)
     let SQLITE_TRANSIENT: DestructorType = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     
+    let SQLITE_INTEGER: Int32 = SQLite3.SQLITE_INTEGER
+    let SQLITE_FLOAT: Int32 = SQLite3.SQLITE_FLOAT
+    let SQLITE_BLOB: Int32 = SQLite3.SQLITE_BLOB
+    let SQLITE_NULL: Int32 = SQLite3.SQLITE_NULL
+    let SQLITE_TEXT: Int32 = SQLite3.SQLITE_TEXT
+    
     var isProxy = false
     
     var calls = [SQLiteApiProviderCall]()
@@ -29,6 +35,17 @@ class SQLiteApiProviderMock: NSObject {
 }
 
 extension SQLiteApiProviderMock: SQLiteApiProvider {
+    
+    func sqlite3ValueType(_ value: OpaquePointer!) -> Int32 {
+        let call = self.makeCall(callType: .sqlite3ValueType(value))
+        self.calls.append(call)
+        if self.isProxy {
+            return sqlite3_value_type(value)
+        }else{
+            return 0
+        }
+    }
+    
     func sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!) -> Int32 {
         let call = self.makeCall(callType: .sqlite3Open(filename, ppDb))
         self.calls.append(call)

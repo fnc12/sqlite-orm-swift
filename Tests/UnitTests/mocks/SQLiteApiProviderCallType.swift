@@ -31,6 +31,7 @@ enum SQLiteApiProviderCallType {
     case sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32)
     case sqlite3ValueInt(_ value: OpaquePointer!)
     case sqlite3ValueText(_ value: OpaquePointer!)
+    case sqlite3ValueType(_ value: OpaquePointer!)
 }
 
 extension SQLiteApiProviderCallType: Equatable {
@@ -42,6 +43,8 @@ extension SQLiteApiProviderCallType: Equatable {
     
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
+        case let (.sqlite3ValueType(leftValue), .sqlite3ValueType(rightValue)):
+            return leftValue == rightValue
         case let (.sqlite3Open(leftFilename, leftDbPointer), .sqlite3Open(rightFilename, rightDbPointer)):
             return (strcmp(leftFilename, rightFilename) == 0) && leftDbPointer == rightDbPointer
         case let (.sqlite3Errmsg(leftDb), .sqlite3Errmsg(rightDb)):

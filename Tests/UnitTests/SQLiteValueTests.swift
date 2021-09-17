@@ -9,7 +9,7 @@ class SQLiteValueTests: XCTestCase {
     
     override func setUpWithError() throws {
         self.apiProvider = .init()
-        self.sqliteValue = SQLiteValue(handle: self.pointer, apiProvider: self.apiProvider)
+        self.sqliteValue = SQLiteValueImpl(handle: self.pointer, apiProvider: self.apiProvider)
     }
 
     override func tearDownWithError() throws {
@@ -23,8 +23,8 @@ class SQLiteValueTests: XCTestCase {
             let expected: Bool
         }
         let testCases = [
-            TestCase(value: SQLiteValue(handle: nil, apiProvider: self.apiProvider), expected: false),
-            TestCase(value: SQLiteValue(handle: OpaquePointer(bitPattern: 1), apiProvider: self.apiProvider), expected: true),
+            TestCase(value: SQLiteValueImpl(handle: nil, apiProvider: self.apiProvider), expected: false),
+            TestCase(value: SQLiteValueImpl(handle: OpaquePointer(bitPattern: 1), apiProvider: self.apiProvider), expected: true),
         ]
         for testCase in testCases {
             let value = testCase.value

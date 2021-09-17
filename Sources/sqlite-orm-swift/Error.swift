@@ -11,5 +11,4 @@ public enum Error: Swift.Error {
     case failedCastingSwiftStringToCString
     case invalidBuilder
     case unableToGetObjectWithoutPrimaryKeys
-    case typeMismatch
 }
