@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ColumnBinder: AnyObject {
+public protocol Binder: AnyObject {
     func bindInt(value: Int) -> Int32
     func bindDouble(value: Double) -> Int32
     func bindText(value: String) -> Int32
@@ -18,7 +18,7 @@ class ColumnBinderImpl: NSObject {
     }
 }
 
-extension ColumnBinderImpl: ColumnBinder {
+extension ColumnBinderImpl: Binder {
     
     func bindInt(value: Int) -> Int32 {
         return self.futureColumnBinder.bindInt(value: value, index: self.columnIndex)

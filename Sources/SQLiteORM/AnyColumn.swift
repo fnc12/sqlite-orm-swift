@@ -36,7 +36,7 @@ public class AnyColumn: NSObject {
         return ""
     }
     
-    func bind<O>(columnBinder: ColumnBinder, object: O) throws -> Int32 {
+    func bind<O>(binder: Binder, object: O) throws -> Int32 {
         return 0
     }
     

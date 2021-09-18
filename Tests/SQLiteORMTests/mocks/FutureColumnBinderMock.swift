@@ -1,7 +1,7 @@
 import Foundation
 @testable import SQLiteORM
 
-final class BinderMock: NSObject {
+final class FutureColumnBinderMock: NSObject {
     
     enum CallType: Equatable {
         case bindInt(value: Int, index: Int)
@@ -44,7 +44,7 @@ final class BinderMock: NSObject {
     }
 }
 
-extension BinderMock: FutureColumnBinder {
+extension FutureColumnBinderMock: FutureColumnBinder {
     
     func bindInt(value: Int, index: Int) -> Int32 {
         let call = self.makeCall(callType: .bindInt(value: value, index: index))

@@ -98,19 +98,19 @@ class ColumnTests: XCTestCase {
             self.columnBinderMock = .init()
             var user = User()
             user.id = value
-            _ = try self.intColumn.bind(columnBinder: self.columnBinderMock, object: user)
+            _ = try self.intColumn.bind(binder: self.columnBinderMock, object: user)
             XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindInt(value: value))])
             
             //  bind nullable int
             self.columnBinderMock = .init()
             user.idMaybe = value
-            _ = try self.intOptionalColumn.bind(columnBinder: self.columnBinderMock, object: user)
+            _ = try self.intOptionalColumn.bind(binder: self.columnBinderMock, object: user)
             XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindInt(value: value))])
             
             //  bind null as int
             self.columnBinderMock = .init()
             user.idMaybe = nil
-            _ = try self.intOptionalColumn.bind(columnBinder: self.columnBinderMock, object: user)
+            _ = try self.intOptionalColumn.bind(binder: self.columnBinderMock, object: user)
             XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindNull)])
 
         }
@@ -118,26 +118,26 @@ class ColumnTests: XCTestCase {
         //  bind string
         self.columnBinderMock = .init()
         var user = User(id: 0, name: "Rachel")
-        _ = try self.stringColumn.bind(columnBinder: self.columnBinderMock, object: user)
+        _ = try self.stringColumn.bind(binder: self.columnBinderMock, object: user)
         XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindText(value: "Rachel"))])
         
         //  bind nullable string
         self.columnBinderMock = .init()
         user.nameMaybe = "One"
-        _ = try self.stringOptionalColumn.bind(columnBinder: self.columnBinderMock, object: user)
+        _ = try self.stringOptionalColumn.bind(binder: self.columnBinderMock, object: user)
         XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindText(value: "One"))])
         
         //  bind null as string
         self.columnBinderMock = .init()
         user.nameMaybe = nil
-        _ = try self.stringOptionalColumn.bind(columnBinder: self.columnBinderMock, object: user)
+        _ = try self.stringOptionalColumn.bind(binder: self.columnBinderMock, object: user)
         XCTAssertEqual(self.columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindNull)])
     }
     
     func testBindThrowUnknownType() throws {
         let visit = Visit(id: 10)
         do {
-            _ = try self.intColumn.bind(columnBinder: self.columnBinderMock, object: visit)
+            _ = try self.intColumn.bind(binder: self.columnBinderMock, object: visit)
             XCTAssert(false)
         }catch SQLiteORM.Error.unknownType{
             XCTAssert(true)

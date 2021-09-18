@@ -43,7 +43,7 @@ class ColumnBinderMock: NSObject {
     }
 }
 
-extension ColumnBinderMock: ColumnBinder {
+extension ColumnBinderMock: Binder {
     
     func bindInt(value: Int) -> Int32 {
         let call = self.makeCall(with: .bindInt(value: value))

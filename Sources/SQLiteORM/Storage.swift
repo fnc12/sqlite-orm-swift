@@ -382,8 +382,8 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
-                resultCode = try column.bind(columnBinder: columnBinder, object: object)
+                let binder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
+                resultCode = try column.bind(binder: binder, object: object)
                 guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
                     throw Error.sqliteError(code: resultCode, text: errorString)
@@ -432,8 +432,8 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if !column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
-                resultCode = try column.bind(columnBinder: columnBinder, object: object)
+                let binder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
+                resultCode = try column.bind(binder: binder, object: object)
                 guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
                     throw Error.sqliteError(code: resultCode, text: errorString)
@@ -443,8 +443,8 @@ public class Storage: NSObject {
         }
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
-                resultCode = try column.bind(columnBinder: columnBinder, object: object)
+                let binder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
+                resultCode = try column.bind(binder: binder, object: object)
                 bindIndex += 1
                 guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
