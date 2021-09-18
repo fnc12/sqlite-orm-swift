@@ -31,7 +31,7 @@ class ConnectionRef: NSObject {
         return String(cString: UnsafePointer(cString), encoding: .utf8) ?? ""
     }
     
-    func prepare(sql: String) throws -> Statement & FutureColumnBinder {
+    func prepare(sql: String) throws -> Statement & ColumnBinder {
         guard let db = self.db else {
             throw Error.databaseIsNull
         }

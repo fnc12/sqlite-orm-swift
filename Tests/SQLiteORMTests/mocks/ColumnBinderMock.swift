@@ -1,23 +1,24 @@
 import Foundation
 @testable import SQLiteORM
 
-class ColumnBinderMock: NSObject {
+final class ColumnBinderMock: NSObject {
+    
     enum CallType: Equatable {
-        case bindInt(value: Int)
-        case bindDouble(value: Double)
-        case bindText(value: String)
-        case bindNull
+        case bindInt(value: Int, index: Int)
+        case bindDouble(value: Double, index: Int)
+        case bindText(value: String, index: Int)
+        case bindNull(index: Int)
         
-        static func ==(lhs: Self, rhs: Self) -> Bool {
+        static func==(lhs: Self, rhs: Self) -> Bool {
             switch (lhs, rhs) {
-            case let (.bindInt(leftValue), .bindInt(rightValue)):
-                return leftValue == rightValue
-            case let (.bindDouble(leftValue), .bindDouble(rightValue)):
-                return leftValue == rightValue
-            case let (.bindText(leftValue), .bindText(rightValue)):
-                return leftValue == rightValue
-            case (.bindNull, .bindNull):
-                return true
+            case (.bindInt(let leftValue, let leftIndex), .bindInt(let rightValue, let rightIndex)):
+                return leftValue == rightValue && leftIndex == rightIndex
+            case (.bindDouble(let leftValue, let leftIndex), .bindDouble(let rightValue, let rightIndex)):
+                return leftValue == rightValue && leftIndex == rightIndex
+            case (.bindText(let leftValue, let leftIndex), .bindText(let rightValue, let rightIndex)):
+                return leftValue == rightValue && leftIndex == rightIndex
+            case (.bindNull(let leftIndex), .bindNull(let rightIndex)):
+                return leftIndex == rightIndex
             default:
                 return false
             }
@@ -28,7 +29,7 @@ class ColumnBinderMock: NSObject {
         let id: Int
         let callType: CallType
         
-        static func ==(lhs: Self, rhs: Self) -> Bool {
+        static func==(lhs: Self, rhs: Self) -> Bool {
             return lhs.id == rhs.id && lhs.callType == rhs.callType
         }
     }
@@ -36,36 +37,36 @@ class ColumnBinderMock: NSObject {
     var nextCallId = 0
     var calls = [Call]()
     
-    private func makeCall(with callType: CallType) -> Call {
-        let res = Call(id: self.nextCallId, callType: callType)
+    private func makeCall(callType: CallType) -> Call {
+        let res = Call(id: nextCallId, callType: callType)
         self.nextCallId += 1
         return res
     }
 }
 
-extension ColumnBinderMock: Binder {
+extension ColumnBinderMock: ColumnBinder {
     
-    func bindInt(value: Int) -> Int32 {
-        let call = self.makeCall(with: .bindInt(value: value))
+    func bindInt(value: Int, index: Int) -> Int32 {
+        let call = self.makeCall(callType: .bindInt(value: value, index: index))
         self.calls.append(call)
         return 0
     }
     
-    func bindDouble(value: Double) -> Int32 {
-        let call = self.makeCall(with: .bindDouble(value: value))
+    func bindDouble(value: Double, index: Int) -> Int32 {
+        let call = self.makeCall(callType: .bindDouble(value: value, index: index))
         self.calls.append(call)
         return 0
     }
     
-    func bindText(value: String) -> Int32 {
-        let call = self.makeCall(with: .bindText(value: value))
+    func bindText(value: String, index: Int) -> Int32 {
+        let call = self.makeCall(callType: .bindText(value: value, index: index))
         self.calls.append(call)
         return 0
     }
     
-    func bindNull() -> Int32 {
-        let call = self.makeCall(with: .bindNull)
+    func bindNull(index: Int) -> Int32 {
+        let call = self.makeCall(callType: .bindNull(index: index))
         self.calls.append(call)
         return 0
-    }
+    }    
 }
