@@ -32,7 +32,11 @@ public class AnyColumn: NSObject {
         })
     }
     
-    func bind<O>(binder: Binder, object: O, index: Int) throws -> Int32 {
+    var sqliteTypeName: String {
+        return ""
+    }
+    
+    func bind<O>(columnBinder: ColumnBinder, object: O) throws -> Int32 {
         return 0
     }
     

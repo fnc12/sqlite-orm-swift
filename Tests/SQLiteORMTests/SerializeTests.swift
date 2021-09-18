@@ -17,31 +17,6 @@ class SerializeTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
-    func testType() {
-        struct TestCase {
-            let type: Any.Type
-            let expected: String
-        }
-        let testCases = [
-            TestCase(type: Int.self, expected: "INTEGER"),
-            TestCase(type: Int?.self, expected: "INTEGER"),
-            TestCase(type: UInt.self, expected: "INTEGER"),
-            TestCase(type: UInt?.self, expected: "INTEGER"),
-            TestCase(type: Bool.self, expected: "INTEGER"),
-            TestCase(type: Bool?.self, expected: "INTEGER"),
-            TestCase(type: String.self, expected: "TEXT"),
-            TestCase(type: String?.self, expected: "TEXT"),
-            TestCase(type: Float.self, expected: "REAL"),
-            TestCase(type: Float?.self, expected: "REAL"),
-            TestCase(type: Double.self, expected: "REAL"),
-            TestCase(type: Double?.self, expected: "REAL"),
-        ]
-        for testCase in testCases {
-            let value = serialize(type: testCase.type)
-            XCTAssertEqual(value, testCase.expected)
-        }
-    }
-    
     func testAnyColumn() {
         struct TestCase {
             let anyColumn: AnyColumn

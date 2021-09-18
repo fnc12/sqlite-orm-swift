@@ -48,7 +48,7 @@ public class AnyTable: NSObject {
         var res = [TableInfo]()
         res.reserveCapacity(self.columns.count)
         for column in self.columns {
-            let typeName = serialize(type: column.fieldType)
+            let typeName = column.sqliteTypeName
             let isPrimaryKey = column.isPrimaryKey ? 1 : 0
             let isNotNull = column.isNotNull
             res.append(TableInfo(cid: -1, name: column.name, type: typeName, notNull: isNotNull, dfltValue: "", pk: isPrimaryKey))

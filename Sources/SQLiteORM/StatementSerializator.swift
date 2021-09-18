@@ -57,7 +57,7 @@ func serialize(columnConstraint: ColumnConstraint) -> String {
 }
 
 func serialize(column: AnyColumn) -> String {
-    let typeString = serialize(type: column.fieldType)
+    let typeString = column.sqliteTypeName
     var res = "\(column.name) \(typeString)"
     for constraint in column.constraints {
         let constraintString = serialize(columnConstraint: constraint)
@@ -65,17 +65,4 @@ func serialize(column: AnyColumn) -> String {
         res += constraintString
     }
     return res
-}
-
-func serialize(type: Any.Type) -> String {
-    switch type {   //  TODO: find how to get non-nullable T from T?
-    case is Int.Type, is UInt.Type, is Bool.Type, is Int?.Type, is UInt?.Type, is Bool?.Type:
-        return "INTEGER"
-    case is String.Type, is String?.Type:
-        return "TEXT"
-    case is Float.Type, is Double.Type, is Float?.Type, is Double?.Type:
-        return "REAL"
-    default:
-        fatalError()
-    }
 }

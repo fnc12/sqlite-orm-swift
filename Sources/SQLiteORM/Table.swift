@@ -11,7 +11,8 @@ public class Table<T>: AnyTable {
         var columnIndex = 0
         for anyColumn in self.columns {
             if !anyColumn.isPrimaryKey {
-                resultCode = try anyColumn.bind(binder: statement, object: object, index: columnIndex + 1)
+                let columnBinder = ColumnBinderImpl(columnIndex: columnIndex + 1, binder: statement)
+                resultCode = try anyColumn.bind(columnBinder: columnBinder, object: object)
                 columnIndex += 1
                 if apiProvider.SQLITE_OK != resultCode {
                     break
@@ -24,7 +25,8 @@ public class Table<T>: AnyTable {
     func bind(statement: Binder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
         var resultCode = Int32(0)
         for (columnIndex, anyColumn) in self.columns.enumerated() {
-            resultCode = try anyColumn.bind(binder: statement, object: object, index: columnIndex + 1)
+            let columnBinder = ColumnBinderImpl(columnIndex: columnIndex + 1, binder: statement)
+            resultCode = try anyColumn.bind(columnBinder: columnBinder, object: object)
             if apiProvider.SQLITE_OK != resultCode {
                 break
             }

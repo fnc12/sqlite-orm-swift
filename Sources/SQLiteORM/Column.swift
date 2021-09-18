@@ -23,13 +23,16 @@ public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLite
         object = tObject as! O
     }
     
-    override func bind<O>(binder: Binder, object: O, index: Int) throws -> Int32 {
+    override func bind<O>(columnBinder: ColumnBinder, object: O) throws -> Int32 {
         guard O.self == T.self else {
             throw Error.unknownType
         }
         let tObject = object as! T
-        let resultCode = tObject[keyPath: self.keyPath].bind(to: binder, index: index)
-        return resultCode
+        return tObject[keyPath: self.keyPath].bind(to: columnBinder)
+    }
+    
+    override var sqliteTypeName: String {
+        return V.sqliteTypeName()
     }
     
     override var fieldType: Any.Type {
