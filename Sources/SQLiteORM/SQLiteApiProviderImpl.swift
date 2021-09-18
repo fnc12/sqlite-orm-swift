@@ -3,6 +3,8 @@ import SQLite3
 
 final class SQLiteApiProviderImpl: SQLiteApiProvider {
     
+    static let shared = SQLiteApiProviderImpl()
+    
     func sqlite3ValueType(_ value: OpaquePointer!) -> Int32 {
         return sqlite3_value_type(value)
     }
@@ -38,8 +40,6 @@ final class SQLiteApiProviderImpl: SQLiteApiProvider {
                          _ dtor: (@convention(c) (UnsafeMutableRawPointer?) -> Void)!) -> Int32 {
         return sqlite3_bind_text(pStmt, idx, value, len, dtor)
     }
-    
-    static let shared = SQLiteApiProviderImpl()
     
     func sqlite3ColumnInt(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
         return sqlite3_column_int(pStmt, iCol)

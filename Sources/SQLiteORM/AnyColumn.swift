@@ -1,5 +1,7 @@
 import Foundation
 
+/// This is a base class for all columns. It stores type independent information: name and
+/// constraints.
 public class AnyColumn: NSObject {
     let name: String
     let constraints: [ColumnConstraint]
@@ -10,6 +12,9 @@ public class AnyColumn: NSObject {
         super.init()
     }
     
+    /// Returns `true` if this column has `PRIMARY KEY` constraint and `false` otherwise.
+    ///
+    /// - complexity *O(n)* where *n* is amount of constraints stored inside this column.
     var isPrimaryKey: Bool {
         return self.constraints.contains(where: {
             switch $0 {
@@ -21,6 +26,9 @@ public class AnyColumn: NSObject {
         })
     }
     
+    /// Returns `true` if this column has `NOT NULL` constraint and `false` otherwise.
+    ///
+    /// - complexity *O(n)* where *n* is amount of constraints stored inside this column.
     var isNotNull: Bool {
         return self.constraints.contains(where: {
             switch $0 {
@@ -32,19 +40,30 @@ public class AnyColumn: NSObject {
         })
     }
     
+    /// This is a base property that must be overridden by subclasses.
+    /// This text is used when `Storage.syncSchema` call creates a table.
+    /// Returns SQLite type representation of field type of this column. E.g. `TEXT` for
+    /// `String`, `INTEGER` for `Int`, `REAL` for `Double` etc.
     var sqliteTypeName: String {
         return ""
     }
     
+    /// Used to bind a value stored inside a field from `object`.
+    /// This function must be overridden by subclasses.
+    ///
+    /// - Parameter binder: binder object used to bind values.
+    /// - Parameter object: object of type mapped to this column.
+    /// - Returns: SQLite code returned by `sqlite3_bind_*` routine called within this function.
     func bind<O>(binder: Binder, object: O) throws -> Int32 {
         return 0
     }
     
+    /// Use this function to obtain value from SQLite value and assign it to a field mapped
+    /// with this column.
+    ///
+    /// - Parameter object: object passed by reference which will be modified after this call.
+    /// - Parameter sqliteValue: object used to obtain typed data dependent of field type if this column.
     func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
         //..
-    }
-    
-    var fieldType: Any.Type {
-        return Void.self
     }
 }
