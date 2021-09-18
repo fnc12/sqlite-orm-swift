@@ -15,7 +15,7 @@ class StatementImpl: NSObject {
     }
 }
 
-extension StatementImpl: Binder {
+extension StatementImpl: FutureColumnBinder {
     func bindInt(value: Int, index: Int) -> Int32 {
         return self.apiProvider.sqlite3BindInt(self.stmt, Int32(index), Int32(value))
     }

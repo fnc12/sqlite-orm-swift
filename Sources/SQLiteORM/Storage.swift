@@ -382,7 +382,7 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, binder: statement)
+                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
                 resultCode = try column.bind(columnBinder: columnBinder, object: object)
                 guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
@@ -432,7 +432,7 @@ public class Storage: NSObject {
         var resultCode = Int32(0)
         for column in anyTable.columns {
             if !column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, binder: statement)
+                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
                 resultCode = try column.bind(columnBinder: columnBinder, object: object)
                 guard resultCode == self.apiProvider.SQLITE_OK else {
                     let errorString = connectionRef.errorMessage
@@ -443,7 +443,7 @@ public class Storage: NSObject {
         }
         for column in anyTable.columns {
             if column.isPrimaryKey {
-                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, binder: statement)
+                let columnBinder = ColumnBinderImpl(columnIndex: bindIndex, futureColumnBinder: statement)
                 resultCode = try column.bind(columnBinder: columnBinder, object: object)
                 bindIndex += 1
                 guard resultCode == self.apiProvider.SQLITE_OK else {
@@ -486,7 +486,7 @@ public class Storage: NSObject {
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode: Int32 = 0
         for (idIndex, idValue) in id.enumerated() {
-            let columnBinder = ColumnBinderImpl(columnIndex: idIndex + 1, binder: statement)
+            let columnBinder = ColumnBinderImpl(columnIndex: idIndex + 1, futureColumnBinder: statement)
             resultCode = idValue.bind(to: columnBinder)
             guard resultCode == self.apiProvider.SQLITE_OK else {
                 let errorString = connectionRef.errorMessage
@@ -537,7 +537,7 @@ public class Storage: NSObject {
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         let table = anyTable as! Table<T>
-        var resultCode = try table.bindNonPrimaryKey(statement: statement, object: object, apiProvider: self.apiProvider)
+        var resultCode = try table.bindNonPrimaryKey(futureColumnBinder: statement, object: object, apiProvider: self.apiProvider)
         guard resultCode == apiProvider.SQLITE_OK else {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
@@ -573,7 +573,7 @@ public class Storage: NSObject {
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         let table = anyTable as! Table<T>
-        var resultCode = try table.bind(statement: statement, object: object, apiProvider: self.apiProvider)
+        var resultCode = try table.bind(futureColumnBinder: statement, object: object, apiProvider: self.apiProvider)
         guard resultCode == apiProvider.SQLITE_OK else {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)

@@ -44,7 +44,7 @@ final class BinderMock: NSObject {
     }
 }
 
-extension BinderMock: Binder {
+extension BinderMock: FutureColumnBinder {
     
     func bindInt(value: Int, index: Int) -> Int32 {
         let call = self.makeCall(callType: .bindInt(value: value, index: index))

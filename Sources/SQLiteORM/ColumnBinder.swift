@@ -9,11 +9,11 @@ public protocol ColumnBinder: AnyObject {
 
 class ColumnBinderImpl: NSObject {
     let columnIndex: Int
-    let binder: Binder
+    let futureColumnBinder: FutureColumnBinder
     
-    init(columnIndex: Int, binder: Binder) {
+    init(columnIndex: Int, futureColumnBinder: FutureColumnBinder) {
         self.columnIndex = columnIndex
-        self.binder = binder
+        self.futureColumnBinder = futureColumnBinder
         super.init()
     }
 }
@@ -21,18 +21,18 @@ class ColumnBinderImpl: NSObject {
 extension ColumnBinderImpl: ColumnBinder {
     
     func bindInt(value: Int) -> Int32 {
-        return self.binder.bindInt(value: value, index: self.columnIndex)
+        return self.futureColumnBinder.bindInt(value: value, index: self.columnIndex)
     }
     
     func bindDouble(value: Double) -> Int32 {
-        return self.binder.bindDouble(value: value, index: self.columnIndex)
+        return self.futureColumnBinder.bindDouble(value: value, index: self.columnIndex)
     }
     
     func bindText(value: String) -> Int32 {
-        return self.binder.bindText(value: value, index: self.columnIndex)
+        return self.futureColumnBinder.bindText(value: value, index: self.columnIndex)
     }
     
     func bindNull() -> Int32 {
-        return self.binder.bindNull(index: self.columnIndex)
+        return self.futureColumnBinder.bindNull(index: self.columnIndex)
     }
 }
