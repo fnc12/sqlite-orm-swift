@@ -7,43 +7,30 @@ func equals(_ x : Any, _ y : Any) -> Bool {
     return (x as! AnyHashable) == (y as! AnyHashable)
 }
 
-class StatementMock: NSObject {
-    override init() {
-        super.init()
-    }
+class StatementMock: Mock<StatementCallType> {
     
-    enum CallType: Equatable  {
-        case step
-        case columnCount
-        case columnValue(columnIndex: Int)
-        case columnText(index: Int)
-        case columnInt(index: Int)
-        
-        static func==(lhs: Self, rhs: Self) -> Bool {
-            switch (lhs, rhs) {
-            case (.step, .step):
-                return true
-            case (.columnCount, .columnCount):
-                return true
-            case (.columnText(let leftIndex), .columnText(let rightIndex)):
-                return leftIndex == rightIndex
-            case (.columnInt(let leftIndex), .columnInt(let rightIndex)):
-                return leftIndex == rightIndex
-            default:
-                return false
-            }
+}
+
+enum StatementCallType: Equatable  {
+    case step
+    case columnCount
+    case columnValue(columnIndex: Int)
+    case columnText(index: Int)
+    case columnInt(index: Int)
+    
+    static func==(lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.step, .step):
+            return true
+        case (.columnCount, .columnCount):
+            return true
+        case (.columnText(let leftIndex), .columnText(let rightIndex)):
+            return leftIndex == rightIndex
+        case (.columnInt(let leftIndex), .columnInt(let rightIndex)):
+            return leftIndex == rightIndex
+        default:
+            return false
         }
-    }
-    
-    typealias Call = MockCall<CallType>
-    
-    var nextCallId = 0
-    var calls = [Call]()
-    
-    private func makeCall(callType: CallType) -> Call {
-        let res = Call(id: nextCallId, callType: callType)
-        self.nextCallId += 1
-        return res
     }
 }
 

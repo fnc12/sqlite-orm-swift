@@ -1,17 +1,8 @@
 import Foundation
 @testable import SQLiteORM
 
-class BinderMock: Mock<BinderCallType> {
-    typealias Call = MockCall<BinderCallType>
+final class BinderMock: Mock<BinderCallType> {
     
-    var nextCallId = 0
-    var calls = [Call]()
-    
-    private func makeCall(with callType: BinderCallType) -> Call {
-        let res = MockCall(id: self.nextCallId, callType: callType)
-        self.nextCallId += 1
-        return res
-    }
 }
 
 enum BinderCallType: Equatable {
