@@ -22,13 +22,7 @@ class ConnectionRef: NSObject {
     }
     
     var errorMessage: String {
-        guard let db = self.db else {
-            return ""
-        }
-        guard let cString = self.connection.apiProvider.sqlite3Errmsg(db) else {
-            return ""
-        }
-        return String(cString: UnsafePointer(cString), encoding: .utf8) ?? ""
+        return self.connection.errorMessage
     }
     
     func prepare(sql: String) throws -> Statement & ColumnBinder {

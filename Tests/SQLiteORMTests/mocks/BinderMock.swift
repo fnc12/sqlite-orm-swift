@@ -1,7 +1,7 @@
 import Foundation
 @testable import SQLiteORM
 
-class BinderMock: NSObject {
+class BinderMock: Mock<CallType> {
     enum CallType: Equatable {
         case bindInt(value: Int)
         case bindDouble(value: Double)
@@ -24,20 +24,13 @@ class BinderMock: NSObject {
         }
     }
     
-    struct Call: Equatable {
-        let id: Int
-        let callType: CallType
-        
-        static func==(lhs: Self, rhs: Self) -> Bool {
-            return lhs.id == rhs.id && lhs.callType == rhs.callType
-        }
-    }
+    typealias Call = MockCall<CallType>
     
     var nextCallId = 0
     var calls = [Call]()
     
     private func makeCall(with callType: CallType) -> Call {
-        let res = Call(id: self.nextCallId, callType: callType)
+        let res = MockCall(id: self.nextCallId, callType: callType)
         self.nextCallId += 1
         return res
     }

@@ -10,15 +10,19 @@ public class Storage: NSObject {
     let connection: ConnectionHolder
     private let apiProvider: SQLiteApiProvider
     
-    init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
+    init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
         self.inMemory = filename.isEmpty || filename == ":memory:"
         self.tables = tables
-        self.connection = ConnectionHolderImpl(filename: filename, apiProvider: apiProvider)
+        self.connection = connection
         self.apiProvider = apiProvider
         super.init()
         if self.inMemory {
             try self.connection.increment()
         }
+    }
+    
+    convenience init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
+        try self.init(filename: filename, apiProvider: apiProvider, connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider), tables: tables)
     }
     
     public convenience init(filename: String, tables: AnyTable...) throws {
@@ -38,6 +42,24 @@ public class Storage: NSObject {
     public func tableExists(with name: String) throws -> Bool {
         let connectionRef = try ConnectionRef(connection: self.connection)
         return try self.tableExists(with: name, connectionRef: connectionRef)
+    }
+    
+    public func beginTransaction() throws {
+        try self.connection.increment()
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "BEGIN TRANSACTION")
+    }
+    
+    public func commit() throws {
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "COMMIT")
+        try self.connection.decrement()
+    }
+    
+    public func rollback() throws {
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "ROLLBACK")
+        try self.connection.decrement()
     }
     
     private func tableExists(with name: String, connectionRef: ConnectionRef) throws -> Bool {
@@ -88,7 +110,9 @@ public class Storage: NSObject {
         return res
     }
     
-    static private func calculateRemoveAddColumns(columnsToAdd: inout [TableInfo], storageTableInfo: inout [TableInfo], dbTableInfo: inout [TableInfo]) -> Bool {
+    static private func calculateRemoveAddColumns(columnsToAdd: inout [TableInfo],
+                                                  storageTableInfo: inout [TableInfo],
+                                                  dbTableInfo: inout [TableInfo]) -> Bool {
         var notEqual = false
         
         //  iterate through storage columns

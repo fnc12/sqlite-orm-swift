@@ -35,14 +35,7 @@ class StatementMock: NSObject {
         }
     }
     
-    struct Call: Equatable {
-        let id: Int
-        let callType: CallType
-        
-        static func==(lhs: Self, rhs: Self) -> Bool {
-            return lhs.id == rhs.id && lhs.callType == rhs.callType
-        }
-    }
+    typealias Call = MockCall<CallType>
     
     var nextCallId = 0
     var calls = [Call]()

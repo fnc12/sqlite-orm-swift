@@ -5,6 +5,7 @@ class ConnectionHolderMock: NSObject {
     var dbMaybe: OpaquePointer?
     var apiProvider: SQLiteApiProvider
     var filename: String
+    var errorMessage: String = ""
     
     var incrementCallsCount = 0
     var decrementCallsCount = 0
@@ -18,7 +19,7 @@ class ConnectionHolderMock: NSObject {
     }
 }
 
-extension ConnectionHolderMock: ConnectionHolder {
+extension ConnectionHolderMock: ConnectionHolder {    
     
     func increment() throws {
         self.incrementCallsCount += 1

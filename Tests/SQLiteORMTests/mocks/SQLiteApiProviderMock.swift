@@ -2,6 +2,8 @@ import Foundation
 import SQLite3
 @testable import SQLiteORM
 
+typealias SQLiteApiProviderCall = MockCall<SQLiteApiProviderCallType>
+
 class SQLiteApiProviderMock: NSObject {
     let SQLITE_ROW: Int32 = SQLite3.SQLITE_ROW
     let SQLITE_DONE: Int32 = SQLite3.SQLITE_DONE
@@ -26,6 +28,8 @@ class SQLiteApiProviderMock: NSObject {
     var sqlite3ErrmsgToReturn: UnsafePointer<CChar>!
     var sqlite3PrepareV2ToReturn: Int32?
     var sqlite3PrepareV2StmtToAssign: OpaquePointer?
+    var sqlite3OpenDbToAssign: OpaquePointer?
+    var sqlite3OpenToReturn: Int32?
     
     func makeCall(callType: SQLiteApiProviderCallType) -> SQLiteApiProviderCall {
         let res = SQLiteApiProviderCall(id: self.nextCallId, callType: callType)
@@ -92,7 +96,14 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
         if self.isProxy {
             return sqlite3_open(filename, ppDb)
         }else{
-            return 0
+            if self.sqlite3OpenDbToAssign != nil {
+                ppDb.pointee = self.sqlite3OpenDbToAssign
+            }
+            if let valueToReturn = self.sqlite3OpenToReturn {
+                return valueToReturn
+            }else{
+                return 0
+            }
         }
     }
     
