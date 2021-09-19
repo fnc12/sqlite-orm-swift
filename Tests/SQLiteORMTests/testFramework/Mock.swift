@@ -11,4 +11,9 @@ class Mock<T>: NSObject where T: Equatable {
         self.nextCallId += 1
         return res
     }
+    
+    func resetCalls() {
+        self.calls.removeAll()
+        self.nextCallId = 0
+    }
 }

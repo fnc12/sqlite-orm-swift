@@ -79,8 +79,8 @@ class StorageTests: XCTestCase {
         _ = storage
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls[0].callType {
-        case .sqlite3Open(_, _):
-            XCTAssert(true)
+        case .sqlite3Open(let filename, _):
+            XCTAssertEqual(filename, "")
         default:
             XCTAssert(false)
         }
@@ -248,12 +248,30 @@ class StorageTransactionTests: XCTestCase {
         self.apiProvider = nil
     }
     
+    func testRollback() throws {
+        self.connectionHolderMock.resetCalls()
+        try self.storage.rollback()
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
+                                                         ConnectionHolderMock.Call(id: 1, callType: .decrement),
+                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "ROLLBACK", nil, nil, nil))])
+    }
+    
+    func testCommit() throws {
+        self.connectionHolderMock.resetCalls()
+        try self.storage.commit()
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
+                                                         ConnectionHolderMock.Call(id: 1, callType: .decrement),
+                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "COMMIT", nil, nil, nil))])
+    }
+    
     func testBeginTransaction() throws {
-        self.connectionHolderMock.calls.removeAll()
-        self.connectionHolderMock.nextCallId = 0
+        self.connectionHolderMock.resetCalls()
         try self.storage.beginTransaction()
         XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
                                                          ConnectionHolderMock.Call(id: 1, callType: .increment),
                                                          ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "BEGIN TRANSACTION", nil, nil, nil))])
     }
 }
