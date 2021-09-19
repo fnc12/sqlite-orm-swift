@@ -35,14 +35,14 @@ class SQLiteValueTests: XCTestCase {
     func testInteger() {
         _ = self.sqliteValue.integer
         
-        let expectedCalls = [SQLiteApiProviderCall(id: 0, callType: .sqlite3ValueInt(self.pointer))]
+        let expectedCalls = [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ValueInt(self.pointer))]
         XCTAssertEqual(expectedCalls, self.apiProvider.calls)
     }
     
     func testText() {
         _ = self.sqliteValue.text
         
-        let expectedCalls = [SQLiteApiProviderCall(id: 0, callType: .sqlite3ValueText(self.pointer))]
+        let expectedCalls = [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ValueText(self.pointer))]
         XCTAssertEqual(expectedCalls, self.apiProvider.calls)
     }
 

@@ -36,7 +36,7 @@ class StatementTests: XCTestCase {
             let nsValue = NSString(string: testCase.value)
             let expectedCallType = SQLiteApiProviderCallType.sqlite3BindText(self.pointer, Int32(testCase.index), nsValue.utf8String, -1,
                                                                              self.apiProvider.SQLITE_TRANSIENT)
-            let expectedCalls = [SQLiteApiProviderCall(id: index, callType: expectedCallType)]
+            let expectedCalls = [SQLiteApiProviderMock.Call(id: index, callType: expectedCallType)]
             XCTAssertEqual(self.apiProvider.calls, expectedCalls)
             self.apiProvider.calls.removeAll()
         }
@@ -60,8 +60,8 @@ class StatementTests: XCTestCase {
         for (index, testCase) in testCases.enumerated() {
             XCTAssertEqual(self.apiProvider.calls, [])
             _ = self.statement.bindInt(value: testCase.value, index: testCase.index)
-            let expectedCalls = [SQLiteApiProviderCall(id: index,
-                                                       callType: .sqlite3BindInt(self.pointer, Int32(testCase.index), Int32(testCase.value)))]
+            let expectedCalls = [SQLiteApiProviderMock.Call(id: index,
+                                                            callType: .sqlite3BindInt(self.pointer, Int32(testCase.index), Int32(testCase.value)))]
             XCTAssertEqual(self.apiProvider.calls, expectedCalls)
             self.apiProvider.calls.removeAll()
         }
@@ -71,7 +71,7 @@ class StatementTests: XCTestCase {
         for index in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])
             _ = self.statement.columnInt(index: index)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: index, callType: .sqlite3ColumnInt(self.pointer, Int32(index)))])
+            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnInt(self.pointer, Int32(index)))])
             self.apiProvider.calls.removeAll()
         }
     }
@@ -96,7 +96,7 @@ class StatementTests: XCTestCase {
             }
             
             let text = self.statement.columnText(index: index)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: index, callType: .sqlite3ColumnText(self.pointer, Int32(index)))])
+            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnText(self.pointer, Int32(index)))])
             XCTAssertEqual(text, testCase.stringToReturn)
             self.apiProvider.calls.removeAll()
         }
@@ -108,8 +108,8 @@ class StatementTests: XCTestCase {
         for columnIndex in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])
             let sqliteValue = self.statement.columnValue(columnIndex: columnIndex)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: columnIndex,
-                                                                          callType: .sqlite3ColumnValue(self.pointer, Int32(columnIndex)))])
+            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: columnIndex,
+                                                                               callType: .sqlite3ColumnValue(self.pointer, Int32(columnIndex)))])
             XCTAssertEqual((sqliteValue as! SQLiteValueImpl).handle, opaquePointerToReturn)
             XCTAssert((sqliteValue as! SQLiteValueImpl).apiProvider === self.apiProvider)
             self.apiProvider.calls.removeAll()
@@ -119,13 +119,13 @@ class StatementTests: XCTestCase {
     func testColumnCount() {
         XCTAssertEqual(self.apiProvider.calls, [])
         _ = self.statement.columnCount()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: 0, callType: .sqlite3ColumnCount(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ColumnCount(self.pointer))])
     }
     
     func testStep() {
         XCTAssertEqual(self.apiProvider.calls, [])
         _ = self.statement.step()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: 0, callType: .sqlite3Step(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Step(self.pointer))])
     }
     
     func testDeinit() {
@@ -134,6 +134,6 @@ class StatementTests: XCTestCase {
         XCTAssertEqual(self.apiProvider.calls, [])
         
         newStatement = nil
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: 0, callType: .sqlite3Finalize(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Finalize(self.pointer))])
     }
 }

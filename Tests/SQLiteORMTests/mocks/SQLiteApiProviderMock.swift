@@ -2,8 +2,6 @@ import Foundation
 import SQLite3
 @testable import SQLiteORM
 
-typealias SQLiteApiProviderCall = MockCall<SQLiteApiProviderCallType>
-
 class SQLiteApiProviderMock: Mock<SQLiteApiProviderCallType> {
     let SQLITE_ROW: Int32 = SQLite3.SQLITE_ROW
     let SQLITE_DONE: Int32 = SQLite3.SQLITE_DONE
@@ -83,7 +81,8 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3Open(filename, ppDb))
+        let filenameString = String(cString: filename)
+        let call = self.makeCall(with: .sqlite3Open(filenameString, ppDb))
         self.calls.append(call)
         if self.isProxy {
             return sqlite3_open(filename, ppDb)
@@ -140,7 +139,14 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
         }
     }
     
-    func sqlite3Exec(_ db: OpaquePointer!, _ sql: UnsafePointer<CChar>!, _ callback: ExecCallback!, _ data: UnsafeMutableRawPointer!, _ errmsg: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!) -> Int32 {
+    func sqlite3Exec(_ db: OpaquePointer!,
+                     _ sql: UnsafePointer<CChar>!,
+                     _ callback: ExecCallback!,
+                     _ data: UnsafeMutableRawPointer!,
+                     _ errmsg: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!) -> Int32 {
+        let sqlString = String(cString: sql)
+        let call = self.makeCall(with: .sqlite3Exec(db, sqlString, callback, data, errmsg))
+        self.calls.append(call)
         if self.isProxy {
             return sqlite3_exec(db, sql, callback, data, errmsg)
         }else{

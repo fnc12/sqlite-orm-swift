@@ -2,7 +2,7 @@ import Foundation
 @testable import SQLiteORM
 
 enum SQLiteApiProviderCallType {
-    case sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!)
+    case sqlite3Open(_ filename: String, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!)
     case sqlite3Errmsg(_ ppDb: OpaquePointer!)
     case sqlite3Close(_ ppDb: OpaquePointer!)
     case sqlite3LastInsertRowid(_ ppDb: OpaquePointer!)
@@ -12,7 +12,7 @@ enum SQLiteApiProviderCallType {
                           _ ppStmt: UnsafeMutablePointer<OpaquePointer?>!,
                           _ pzTail: UnsafeMutablePointer<UnsafePointer<CChar>?>!)
     case sqlite3Exec(_ db: OpaquePointer!,
-                     _ sql: UnsafePointer<CChar>!,
+                     _ sql: String,
                      _ callback: SQLiteApiProvider.ExecCallback!,
                      _ data: UnsafeMutableRawPointer!,
                      _ errmsg: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!)

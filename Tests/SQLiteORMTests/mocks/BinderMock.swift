@@ -11,7 +11,7 @@ enum BinderCallType: Equatable {
     case bindText(value: String)
     case bindNull
     
-    static func ==(lhs: Self, rhs: Self) -> Bool {
+    static func==(lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.bindInt(leftValue), .bindInt(rightValue)):
             return leftValue == rightValue

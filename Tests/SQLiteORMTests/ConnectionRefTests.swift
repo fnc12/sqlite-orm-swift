@@ -18,6 +18,13 @@ class ConnectionRefTests: XCTestCase {
         self.apiProvider = nil
     }
     
+    func testExec() throws {
+        let sql = "BEGIN TRANSACTION"
+        let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
+        try connectionRef.exec(sql: sql)
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, sql, nil, nil, nil))])
+    }
+    
     func testPrepareWithNullStatementError() throws {
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         let sql = "SELECT * FROM all_humans"
@@ -61,9 +68,7 @@ class ConnectionRefTests: XCTestCase {
             XCTAssert(false)
         }
         XCTAssertEqual(self.apiProvider.calls, [])
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
     func testErrorMessage() throws {
@@ -73,9 +78,7 @@ class ConnectionRefTests: XCTestCase {
             self.connectionHolderMock.errorMessage = errorMessage
             let errorMessage = connectionRef.errorMessage
             XCTAssertEqual(errorMessage, errorMessage)
-            XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-            XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-            XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+            XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
         }
     }
     
@@ -83,9 +86,7 @@ class ConnectionRefTests: XCTestCase {
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         let errorMessage = connectionRef.errorMessage
         XCTAssertEqual(errorMessage, "")
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
     func testErrorMessageDbNil() throws {
@@ -93,44 +94,33 @@ class ConnectionRefTests: XCTestCase {
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         let errorMessage = connectionRef.errorMessage
         XCTAssertEqual(errorMessage, "")
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
     func testLastInsertRowid() throws {
         XCTAssertEqual(self.apiProvider.calls, [])
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         _ = connectionRef.lastInsertRowid
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderCall(id: 0, callType: .sqlite3LastInsertRowid(self.db))])
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3LastInsertRowid(self.db))])
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
     func testDb() throws {
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         let db = connectionRef.db
         XCTAssertEqual(db, self.db)
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
     func testCtorAndDtor() throws {
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [])
         var connectionRef: ConnectionRef? = try ConnectionRef(connection: self.connectionHolderMock)
         _ = connectionRef
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 0)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
         
         connectionRef = nil
-        XCTAssertEqual(self.connectionHolderMock.incrementCallsCount, 1)
-        XCTAssertEqual(self.connectionHolderMock.decrementCallsCount, 0)
-        XCTAssertEqual(self.connectionHolderMock.decrementUnsafeCallsCount, 1)
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
+                                                         ConnectionHolderMock.Call(id: 1, callType: .decrementUnsafe)])
     }
 
 }

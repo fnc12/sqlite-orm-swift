@@ -249,7 +249,11 @@ class StorageTransactionTests: XCTestCase {
     }
     
     func testBeginTransaction() throws {
+        self.connectionHolderMock.calls.removeAll()
+        self.connectionHolderMock.nextCallId = 0
         try self.storage.beginTransaction()
-        
+        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
+                                                         ConnectionHolderMock.Call(id: 1, callType: .increment),
+                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
     }
 }

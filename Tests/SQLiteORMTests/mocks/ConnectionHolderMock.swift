@@ -1,15 +1,11 @@
 import Foundation
 @testable import SQLiteORM
 
-class ConnectionHolderMock: NSObject {
+class ConnectionHolderMock: Mock<ConnectionHolderCallType> {
     var dbMaybe: OpaquePointer?
     var apiProvider: SQLiteApiProvider
     var filename: String
     var errorMessage: String = ""
-    
-    var incrementCallsCount = 0
-    var decrementCallsCount = 0
-    var decrementUnsafeCallsCount = 0
     
     init(dbMaybe: OpaquePointer?, apiProvider: SQLiteApiProvider, filename: String) {
         self.dbMaybe = dbMaybe
@@ -19,17 +15,26 @@ class ConnectionHolderMock: NSObject {
     }
 }
 
+enum ConnectionHolderCallType: Equatable {
+    case increment
+    case decrementUnsafe
+    case decrement
+}
+
 extension ConnectionHolderMock: ConnectionHolder {    
     
     func increment() throws {
-        self.incrementCallsCount += 1
+        let call = self.makeCall(with: .increment)
+        self.calls.append(call)
     }
     
     func decrementUnsafe() {
-        self.decrementUnsafeCallsCount += 1
+        let call = self.makeCall(with: .decrementUnsafe)
+        self.calls.append(call)
     }
     
     func decrement() throws {
-        self.decrementCallsCount += 1
+        let call = self.makeCall(with: .decrement)
+        self.calls.append(call)
     }
 }

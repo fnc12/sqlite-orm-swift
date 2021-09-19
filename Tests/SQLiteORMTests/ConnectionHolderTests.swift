@@ -43,8 +43,7 @@ class ConnectionHolderTests: XCTestCase {
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls.first!.callType {
         case .sqlite3Open(let filename, _):
-            let nsFilename = NSString(string: self.filename)
-            XCTAssertEqual(strcmp(nsFilename.utf8String, filename), 0)
+            XCTAssertEqual(filename, self.filename)
         default:
             XCTAssert(false)
         }
