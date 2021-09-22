@@ -16,7 +16,7 @@ class SQLiteApiProviderMock: Mock<SQLiteApiProviderCallType> {
     let SQLITE_NULL: Int32 = SQLite3.SQLITE_NULL
     let SQLITE_TEXT: Int32 = SQLite3.SQLITE_TEXT
     
-    var isProxy = false
+    var forwardsCalls = false
     
     var sqlite3ColumnValueToReturn: OpaquePointer?
     var sqlite3ColumnTextToReturn: UnsafePointer<UInt8>?
@@ -33,7 +33,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
         let call = self.makeCall(with: .sqlite3ColumnType(pStmt, iCol))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_type(pStmt, iCol)
         }else{
             return 0
@@ -43,7 +43,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnDouble(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Double {
         let call = self.makeCall(with: .sqlite3ColumnDouble(pStmt, iCol))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_double(pStmt, iCol)
         }else{
             return 0
@@ -53,7 +53,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ValueDouble(_ value: OpaquePointer!) -> Double {
         let call = self.makeCall(with: .sqlite3ValueDouble(value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_value_double(value)
         }else{
             return 0
@@ -63,7 +63,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double) -> Int32 {
         let call = self.makeCall(with: .sqlite3BindDouble(pStmt, idx, value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_bind_double(pStmt, idx, value)
         }else{
             return 0
@@ -73,7 +73,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ValueType(_ value: OpaquePointer!) -> Int32 {
         let call = self.makeCall(with: .sqlite3ValueType(value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_value_type(value)
         }else{
             return 0
@@ -84,7 +84,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
         let filenameString = String(cString: filename)
         let call = self.makeCall(with: .sqlite3Open(filenameString, ppDb))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_open(filename, ppDb)
         }else{
             if self.sqlite3OpenDbToAssign != nil {
@@ -99,7 +99,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3Errmsg(_ ppDb: OpaquePointer!) -> UnsafePointer<CChar>! {
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_errmsg(ppDb)
         }else{
             return self.sqlite3ErrmsgToReturn
@@ -109,7 +109,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3Close(_ ppDb: OpaquePointer!) -> Int32 {
         let call = self.makeCall(with: .sqlite3Close(ppDb))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_close(ppDb)
         }else{
             return 0
@@ -119,7 +119,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3LastInsertRowid(_ ppDb: OpaquePointer!) -> SQLiteApiProvider.Int64 {
         let call = self.makeCall(with: .sqlite3LastInsertRowid(ppDb))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_last_insert_rowid(ppDb)
         }else{
             return 0
@@ -127,9 +127,9 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3PrepareV2(_ db: OpaquePointer!, _ zSql: UnsafePointer<CChar>!, _ nByte: Int32, _ ppStmt: UnsafeMutablePointer<OpaquePointer?>!, _ pzTail: UnsafeMutablePointer<UnsafePointer<CChar>?>!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3PrepareV2(db, zSql, nByte, ppStmt, pzTail))
+        let call = self.makeCall(with: .sqlite3PrepareV2(db, String(cString: zSql), nByte, ppStmt, pzTail))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail)
         }else{
             if let value = self.sqlite3PrepareV2StmtToAssign {
@@ -147,7 +147,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
         let sqlString = String(cString: sql)
         let call = self.makeCall(with: .sqlite3Exec(db, sqlString, callback, data, errmsg))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_exec(db, sql, callback, data, errmsg)
         }else{
             return 0
@@ -157,7 +157,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3Finalize(_ pStmt: OpaquePointer!) {
         let call = self.makeCall(with: .sqlite3Finalize(pStmt))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             sqlite3_finalize(pStmt)
         }
     }
@@ -165,7 +165,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3Step(_ pStmt: OpaquePointer!) -> Int32 {
         let call = self.makeCall(with: .sqlite3Step(pStmt))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_step(pStmt)
         }else{
             return 0
@@ -175,7 +175,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnCount(_ pStmt: OpaquePointer!) -> Int32 {
         let call = self.makeCall(with: .sqlite3ColumnCount(pStmt))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_count(pStmt)
         }else{
             return 0
@@ -185,7 +185,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnValue(_ pStmt: OpaquePointer!, _ iCol: Int32) -> OpaquePointer! {
         let call = self.makeCall(with: .sqlite3ColumnValue(pStmt, iCol))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_value(pStmt, iCol)
         }else{
             return self.sqlite3ColumnValueToReturn
@@ -195,7 +195,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnText(_ pStmt: OpaquePointer!, _ iCol: Int32) -> UnsafePointer<UInt8>! {
         let call = self.makeCall(with: .sqlite3ColumnText(pStmt, iCol))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_text(pStmt, iCol)
         }else{
             return self.sqlite3ColumnTextToReturn
@@ -205,7 +205,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ColumnInt(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
         let call = self.makeCall(with: .sqlite3ColumnInt(pStmt, iCol))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_column_int(pStmt, iCol)
         }else{
             return self.sqlite3ColumnIntToReturn ?? 0
@@ -219,7 +219,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
                          _ dtor: (@convention(c) (UnsafeMutableRawPointer?) -> Void)!) -> Int32 {
         let call = self.makeCall(with: .sqlite3BindText(pStmt, idx, value, len, dtor))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_bind_text(pStmt, idx, value, len, dtor)
         }else{
             return 0
@@ -229,7 +229,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32) -> Int32 {
         let call = self.makeCall(with: .sqlite3BindInt(pStmt, idx, value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_bind_int(pStmt, idx, value)
         }else{
             return 0
@@ -239,7 +239,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32) -> Int32 {
         let call = self.makeCall(with: .sqlite3BindNull(pStmt, idx))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_bind_null(pStmt, idx)
         }else{
             return 0
@@ -249,7 +249,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32 {
         let call = self.makeCall(with: .sqlite3ValueInt(value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_value_int(value)
         }else{
             return 0
@@ -259,7 +259,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     func sqlite3ValueText(_ value: OpaquePointer!) -> UnsafePointer<UInt8>! {
         let call = self.makeCall(with: .sqlite3ValueText(value))
         self.calls.append(call)
-        if self.isProxy {
+        if self.forwardsCalls {
             return sqlite3_value_text(value)
         }else{
             return nil

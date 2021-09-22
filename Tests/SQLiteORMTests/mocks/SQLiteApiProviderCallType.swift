@@ -7,7 +7,7 @@ enum SQLiteApiProviderCallType {
     case sqlite3Close(_ ppDb: OpaquePointer!)
     case sqlite3LastInsertRowid(_ ppDb: OpaquePointer!)
     case sqlite3PrepareV2(_ db: OpaquePointer!,
-                          _ zSql: UnsafePointer<CChar>!,
+                          _ zSql: String,
                           _ nByte: Int32,
                           _ ppStmt: UnsafeMutablePointer<OpaquePointer?>!,
                           _ pzTail: UnsafeMutablePointer<UnsafePointer<CChar>?>!)
@@ -60,7 +60,7 @@ extension SQLiteApiProviderCallType: Equatable {
         case let (.sqlite3PrepareV2(leftDb, leftZSql, leftNByte, leftPPStmt, leftPZTail),
                   .sqlite3PrepareV2(rightDb, rightZSql, rightNByte, rightPPStmt, rightPZTail)):
             return leftDb == rightDb && (strcmp(leftZSql, rightZSql) == 0) && leftNByte == rightNByte
-                && leftPPStmt == rightPPStmt
+                && ((leftPPStmt == ignorePointer || rightPPStmt == ignorePointer) ? true : leftPPStmt == rightPPStmt)
                 && leftPZTail == rightPZTail
         case let (.sqlite3Exec(leftDb, leftSql, leftCallback, leftData, leftErrmg),
                   .sqlite3Exec(rightDb, rightSql, rightCallback, rightData, rightErrmg)):
@@ -68,9 +68,9 @@ extension SQLiteApiProviderCallType: Equatable {
                 && leftData == rightData
                 && leftErrmg == rightErrmg
         case let (.sqlite3Finalize(leftPStmt), .sqlite3Finalize(rightPStmt)):
-            return leftPStmt == rightPStmt
+            return (leftPStmt == ignorePointer2 || rightPStmt == ignorePointer2) ? true : leftPStmt == rightPStmt
         case let (.sqlite3Step(leftPStmt), .sqlite3Step(rightPStmt)):
-            return leftPStmt == rightPStmt
+            return (leftPStmt == ignorePointer2 || rightPStmt == ignorePointer2) ? true : leftPStmt == rightPStmt
         case let (.sqlite3ColumnCount(leftPStmt), .sqlite3ColumnCount(rightPStmt)):
             return leftPStmt == rightPStmt
         case let (.sqlite3ColumnValue(leftPStmt, leftICol), .sqlite3ColumnValue(rightPStmt, rightICol)):
@@ -82,7 +82,7 @@ extension SQLiteApiProviderCallType: Equatable {
         case let (.sqlite3ColumnInt(leftPStmt, leftICol), .sqlite3ColumnInt(rightPStmt, rightICol)):
             return leftPStmt == rightPStmt && leftICol == rightICol
         case let (.sqlite3ColumnDouble(leftPStmt, leftICol), .sqlite3ColumnDouble(rightPStmt, rightICol)):
-            return leftPStmt == rightPStmt && leftICol == rightICol
+            return (leftPStmt == ignorePointer2 || rightPStmt == ignorePointer2) ? true : leftPStmt == rightPStmt && leftICol == rightICol
         case let (.sqlite3BindText(leftPStmt, leftIdx, leftValue, leftLen, leftDtor),
                   .sqlite3BindText(rightPStmt, rightIdx, rightValue, rightLen, rightDtor)):
             return leftPStmt == rightPStmt && leftIdx == rightIdx && (strcmp(leftValue, rightValue) == 0)

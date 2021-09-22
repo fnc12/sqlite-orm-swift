@@ -63,4 +63,8 @@ extension StatementImpl: Statement {
     func columnInt(index: Int) -> Int {
         return Int(self.apiProvider.sqlite3ColumnInt(self.stmt, Int32(index)))
     }
+    
+    func columnDouble(index: Int) -> Double {
+        return self.apiProvider.sqlite3ColumnDouble(self.stmt, Int32(index))
+    }
 }

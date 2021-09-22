@@ -44,24 +44,6 @@ public class Storage: NSObject {
         return try self.tableExists(with: name, connectionRef: connectionRef)
     }
     
-    public func beginTransaction() throws {
-        try self.connection.increment()
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        try connectionRef.exec(sql: "BEGIN TRANSACTION")
-    }
-    
-    public func commit() throws {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        try connectionRef.exec(sql: "COMMIT")
-        try self.connection.decrement()
-    }
-    
-    public func rollback() throws {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        try connectionRef.exec(sql: "ROLLBACK")
-        try self.connection.decrement()
-    }
-    
     private func tableExists(with name: String, connectionRef: ConnectionRef) throws -> Bool {
         var res = false
         let sql = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '\(name)'"
@@ -607,5 +589,56 @@ public class Storage: NSObject {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
+    }
+}
+
+extension Storage {
+    
+    public func beginTransaction() throws {
+        try self.connection.increment()
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "BEGIN TRANSACTION")
+    }
+    
+    public func commit() throws {
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "COMMIT")
+        try self.connection.decrement()
+    }
+    
+    public func rollback() throws {
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        try connectionRef.exec(sql: "ROLLBACK")
+        try self.connection.decrement()
+    }
+}
+
+extension Storage {
+    public func avg<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> Double? {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql = "SELECT AVG(\(column.name)) FROM \(table.name)"
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res: Double?
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                res = statement.columnDouble(index: 0)
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
     }
 }

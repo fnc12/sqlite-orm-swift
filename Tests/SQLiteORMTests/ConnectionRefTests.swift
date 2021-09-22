@@ -34,8 +34,9 @@ class ConnectionRefTests: XCTestCase {
         XCTAssertEqual((statement as! StatementImpl).stmt, stmt)
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls[0].callType {
-        case .sqlite3PrepareV2(let db, _, _, _, _):
+        case .sqlite3PrepareV2(let db, let sql, _, _, _):
             XCTAssertEqual(db, self.db)
+            XCTAssertEqual(sql, "SELECT * FROM all_humans")
         default:
             XCTAssert(false)
         }

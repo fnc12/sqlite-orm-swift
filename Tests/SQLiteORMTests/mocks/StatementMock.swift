@@ -17,6 +17,7 @@ enum StatementCallType: Equatable  {
     case columnValue(columnIndex: Int)
     case columnText(index: Int)
     case columnInt(index: Int)
+    case columnDouble(index: Int)
     
     static func==(lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
@@ -24,9 +25,11 @@ enum StatementCallType: Equatable  {
             return true
         case (.columnCount, .columnCount):
             return true
-        case (.columnText(let leftIndex), .columnText(let rightIndex)):
+        case let (.columnText(leftIndex), .columnText(rightIndex)):
             return leftIndex == rightIndex
-        case (.columnInt(let leftIndex), .columnInt(let rightIndex)):
+        case let (.columnInt(leftIndex), .columnInt(rightIndex)):
+            return leftIndex == rightIndex
+        case let (.columnDouble(leftIndex), .columnDouble(rightIndex)):
             return leftIndex == rightIndex
         default:
             return false
@@ -57,6 +60,10 @@ extension StatementMock: Statement {
     }
     
     func columnInt(index: Int) -> Int {
+        return 0
+    }
+    
+    func columnDouble(index: Int) -> Double {
         return 0
     }
 }

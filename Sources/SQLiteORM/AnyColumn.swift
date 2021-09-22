@@ -5,10 +5,12 @@ import Foundation
 public class AnyColumn: NSObject {
     let name: String
     let constraints: [ColumnConstraint]
+    private let _keyPath: AnyKeyPath
     
-    init(name: String, constraints: [ColumnConstraint]) {
+    init(name: String, constraints: [ColumnConstraint], keyPath: AnyKeyPath) {
         self.name = name
         self.constraints = constraints
+        self._keyPath = keyPath
         super.init()
     }
     
@@ -24,6 +26,12 @@ public class AnyColumn: NSObject {
                 return false
             }
         })
+    }
+    
+    ///  Returns key path stored within this column.
+    ///  Must be overridden in subclass.
+    var keyPath: AnyKeyPath {
+        return self._keyPath
     }
     
     /// Returns `true` if this column has `NOT NULL` constraint and `false` otherwise.

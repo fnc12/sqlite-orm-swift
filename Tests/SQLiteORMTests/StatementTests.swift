@@ -67,6 +67,15 @@ class StatementTests: XCTestCase {
         }
     }
     
+    func testColumnDouble() {
+        for index in 0..<10 {
+            XCTAssertEqual(self.apiProvider.calls, [])
+            _ = self.statement.columnDouble(index: index)
+            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnDouble(self.pointer, Int32(index)))])
+            self.apiProvider.calls.removeAll()
+        }
+    }
+    
     func testColumnInt() {
         for index in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])

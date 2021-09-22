@@ -1,18 +1,6 @@
 import XCTest
 @testable import SQLiteORM
 
-func compareUnordered<T>(_ lhs: Array<T>, _ rhs: Array<T>) -> Bool where T: Equatable {
-    guard lhs.count == rhs.count else {
-        return false
-    }
-    for item in lhs {
-        guard rhs.contains(where: { $0 == item }) else {
-            return false
-        }
-    }
-    return true
-}
-
 class StorageTests: XCTestCase {
     struct User: Initializable, Equatable {
         var id = 0
@@ -45,7 +33,7 @@ class StorageTests: XCTestCase {
     }
     
     func testFilename() throws {
-        self.apiProvider.isProxy = true
+        self.apiProvider.forwardsCalls = true
         struct TestCase {
             let filename: String
         }
@@ -63,7 +51,7 @@ class StorageTests: XCTestCase {
     }
     
     func testCtorFile() throws {
-        self.apiProvider.isProxy = true
+        self.apiProvider.forwardsCalls = true
         let storage = try Storage(filename: "db.sqlite",
                                   apiProvider: apiProvider,
                                   tables: [])
@@ -72,7 +60,7 @@ class StorageTests: XCTestCase {
     }
     
     func testCtorDtorInMemory() throws {
-        self.apiProvider.isProxy = true
+        self.apiProvider.forwardsCalls = true
         var storage: Storage? = try Storage(filename: "",
                                             apiProvider: self.apiProvider,
                                             tables: [])
@@ -212,66 +200,4 @@ class StorageTests: XCTestCase {
         XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
     }
 
-}
-
-class StorageTransactionTests: XCTestCase {
-    struct User: Initializable, Equatable {
-        var id = 0
-        var name = ""
-        
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            return lhs.id == rhs.id && lhs.name == rhs.name
-        }
-    }
-    
-    var storage: Storage!
-    let filename = ""
-    var apiProvider: SQLiteApiProviderMock!
-    var connectionHolderMock: ConnectionHolderMock!
-    let db = OpaquePointer(bitPattern: 1)!
-    
-    override func setUpWithError() throws {
-        self.apiProvider = .init()
-        self.connectionHolderMock = .init(dbMaybe: self.db, apiProvider: self.apiProvider, filename: self.filename)
-        self.storage = try .init(filename: self.filename,
-                                 apiProvider: self.apiProvider,
-                                 connection: self.connectionHolderMock,
-                                 tables: [Table<User>(name: "users",
-                                                      columns:
-                                                        Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                        Column(name: "name", keyPath: \User.name, constraints: notNull()))])
-    }
-    
-    override func tearDownWithError() throws {
-        self.storage = nil
-        self.connectionHolderMock = nil
-        self.apiProvider = nil
-    }
-    
-    func testRollback() throws {
-        self.connectionHolderMock.resetCalls()
-        try self.storage.rollback()
-        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
-                                                         ConnectionHolderMock.Call(id: 1, callType: .decrement),
-                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "ROLLBACK", nil, nil, nil))])
-    }
-    
-    func testCommit() throws {
-        self.connectionHolderMock.resetCalls()
-        try self.storage.commit()
-        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
-                                                         ConnectionHolderMock.Call(id: 1, callType: .decrement),
-                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "COMMIT", nil, nil, nil))])
-    }
-    
-    func testBeginTransaction() throws {
-        self.connectionHolderMock.resetCalls()
-        try self.storage.beginTransaction()
-        XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment),
-                                                         ConnectionHolderMock.Call(id: 1, callType: .increment),
-                                                         ConnectionHolderMock.Call(id: 2, callType: .decrementUnsafe)])
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Exec(self.db, "BEGIN TRANSACTION", nil, nil, nil))])
-    }
 }

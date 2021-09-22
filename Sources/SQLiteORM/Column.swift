@@ -12,7 +12,6 @@ import Foundation
 ///     Column(name: "first_name", keyPath: \User.firstName, constraints: primaryKey(), notNull())
 ///
 public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLiteValue {
-    let keyPath: WritableKeyPath<T, V>
     
     /// The simplest constructor used to create a column without column constraints.
     ///
@@ -20,8 +19,7 @@ public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLite
     ///     Column(name: "identifier", keyPath: \User.id)
     ///     Column(name: "country_name", keyPath: \User.countryName)
     public init(name: String, keyPath: WritableKeyPath<T, V>) {
-        self.keyPath = keyPath
-        super.init(name: name, constraints: [])
+        super.init(name: name, constraints: [], keyPath: keyPath)
     }
     
     /// Constructor used to create a column with column constraints.
@@ -30,9 +28,14 @@ public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLite
     ///     Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull())
     ///     Column(name: "first_name", keyPath: \User.firstName, constraints: notNull())
     public init(name: String, keyPath: WritableKeyPath<T, V>, constraints: ConstraintBuilder...) {
-        self.keyPath = keyPath
         let constraintsArray = constraints.map{ $0.constraint }
-        super.init(name: name, constraints: constraintsArray)
+        super.init(name: name, constraints: constraintsArray, keyPath: keyPath)
+    }
+    
+    /// Returns `WritableKeyPath` stored in this column. This is a computed property
+    /// cause keyPath is actually stored inside base class
+    override var keyPath: WritableKeyPath<T, V> {
+        return super.keyPath as! WritableKeyPath<T, V>
     }
     
     /// This is overridden function of superclass. Created for internal usage only.

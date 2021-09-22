@@ -2,6 +2,7 @@ import Foundation
 
 public enum Error: Swift.Error {
     case typeIsNotMapped
+    case columnNotFound
     case sqliteError(code: Int32, text: String)
     case databaseIsNull
     case statementIsNull
