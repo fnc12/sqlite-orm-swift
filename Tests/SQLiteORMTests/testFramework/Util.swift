@@ -11,6 +11,3 @@ func compareUnordered<T>(_ lhs: Array<T>, _ rhs: Array<T>) -> Bool where T: Equa
     }
     return true
 }
-
-let ignorePointer = UnsafeMutablePointer<OpaquePointer?>(bitPattern: Int.max)!
-let ignorePointer2 = OpaquePointer(bitPattern: Int.max)

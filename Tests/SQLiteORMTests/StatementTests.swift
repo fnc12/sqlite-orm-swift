@@ -71,7 +71,7 @@ class StatementTests: XCTestCase {
         for index in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])
             _ = self.statement.columnDouble(index: index)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnDouble(self.pointer, Int32(index)))])
+            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnDouble(.value(self.pointer), Int32(index)))])
             self.apiProvider.calls.removeAll()
         }
     }
@@ -80,7 +80,9 @@ class StatementTests: XCTestCase {
         for index in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])
             _ = self.statement.columnInt(index: index)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnInt(self.pointer, Int32(index)))])
+            XCTAssertEqual(self.apiProvider.calls, [
+                SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnInt(.value(self.pointer), Int32(index)))
+            ])
             self.apiProvider.calls.removeAll()
         }
     }
@@ -134,7 +136,7 @@ class StatementTests: XCTestCase {
     func testStep() {
         XCTAssertEqual(self.apiProvider.calls, [])
         _ = self.statement.step()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Step(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Step(.value(self.pointer)))])
     }
     
     func testDeinit() {
@@ -143,6 +145,6 @@ class StatementTests: XCTestCase {
         XCTAssertEqual(self.apiProvider.calls, [])
         
         newStatement = nil
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Finalize(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Finalize(.value(self.pointer)))])
     }
 }

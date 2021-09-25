@@ -41,7 +41,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3ColumnDouble(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Double {
-        let call = self.makeCall(with: .sqlite3ColumnDouble(pStmt, iCol))
+        let call = self.makeCall(with: .sqlite3ColumnDouble(.value(pStmt!), iCol))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_column_double(pStmt, iCol)
@@ -127,7 +127,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3PrepareV2(_ db: OpaquePointer!, _ zSql: UnsafePointer<CChar>!, _ nByte: Int32, _ ppStmt: UnsafeMutablePointer<OpaquePointer?>!, _ pzTail: UnsafeMutablePointer<UnsafePointer<CChar>?>!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3PrepareV2(db, String(cString: zSql), nByte, ppStmt, pzTail))
+        let call = self.makeCall(with: .sqlite3PrepareV2(db, String(cString: zSql), nByte, .init(ppStmt!), pzTail))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail)
@@ -155,7 +155,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3Finalize(_ pStmt: OpaquePointer!) {
-        let call = self.makeCall(with: .sqlite3Finalize(pStmt))
+        let call = self.makeCall(with: .sqlite3Finalize(.value(pStmt!)))
         self.calls.append(call)
         if self.forwardsCalls {
             sqlite3_finalize(pStmt)
@@ -163,7 +163,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3Step(_ pStmt: OpaquePointer!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3Step(pStmt))
+        let call = self.makeCall(with: .sqlite3Step(.value(pStmt!)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_step(pStmt)
@@ -203,7 +203,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3ColumnInt(_ pStmt: OpaquePointer!, _ iCol: Int32) -> Int32 {
-        let call = self.makeCall(with: .sqlite3ColumnInt(pStmt, iCol))
+        let call = self.makeCall(with: .sqlite3ColumnInt(.value(pStmt!), iCol))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_column_int(pStmt, iCol)

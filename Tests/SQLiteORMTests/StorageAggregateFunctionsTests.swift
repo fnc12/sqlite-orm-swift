@@ -29,10 +29,45 @@ class StorageAggregateFunctionsTests: XCTestCase {
         self.apiProvider = nil
     }
     
-    func testAvgColumnNotFound() throws {
+    func testCountAll() throws {
+        try self.storage.syncSchema(preserve: false)
+        self.apiProvider.resetCalls()
+        var count = try self.storage.count(all: AvgTest.self)
+        
+        let db = self.storage.connection.dbMaybe!
+        
+        XCTAssertEqual(count, 0)
+        XCTAssertEqual(self.apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(*) FROM avg_test", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
+        
+        try self.storage.replace(object: AvgTest(value: 1))
+        count = try self.storage.count(all: AvgTest.self)
+        XCTAssertEqual(count, 1)
+    }
+    
+    func testCountAllNotMappedType() throws {
+        try self.storage.syncSchema(preserve: false)
         self.apiProvider.resetCalls()
         do {
-            _ = try storage.avg(\AvgTest.unused)
+            _ = try self.storage.count(all: Unknown.self)
+            XCTAssert(false)
+        }catch SQLiteORM.Error.typeIsNotMapped{
+            XCTAssert(true)
+        }catch{
+            XCTAssert(false)
+        }
+    }
+    
+    func testAvgColumnNotFound() throws {
+        try self.storage.syncSchema(preserve: false)
+        self.apiProvider.resetCalls()
+        do {
+            _ = try self.storage.avg(\AvgTest.unused)
             XCTAssert(false)
         }catch SQLiteORM.Error.columnNotFound{
             XCTAssert(true)
@@ -42,9 +77,10 @@ class StorageAggregateFunctionsTests: XCTestCase {
     }
     
     func testAvgNotMappedType() throws {
+        try self.storage.syncSchema(preserve: false)
         self.apiProvider.resetCalls()
         do {
-            _ = try storage.avg(\Unknown.value)
+            _ = try self.storage.avg(\Unknown.value)
             XCTAssert(false)
         }catch SQLiteORM.Error.typeIsNotMapped{
             XCTAssert(true)
@@ -54,7 +90,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
     }
     
     func testAvgComplex() throws {
-        try storage.syncSchema(preserve: false)
+        try self.storage.syncSchema(preserve: false)
         try self.storage.replace(object: AvgTest(value: 1))
         try self.storage.replace(object: AvgTest(value: 4))
         try self.storage.replace(object: AvgTest(value: 10))
@@ -64,11 +100,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
         self.apiProvider.resetCalls()
         let avgValue = try self.storage.avg(\AvgTest.value)
         XCTAssertEqual(avgValue, Double(1 + 4 + 10) / 3)
-        XCTAssertEqual(self.apiProvider.calls.count, 5)
-        XCTAssertEqual(self.apiProvider.calls[0], .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT AVG(value) FROM avg_test", -1, ignorePointer, nil)))
-        XCTAssertEqual(self.apiProvider.calls[1], .init(id: 1, callType: .sqlite3Step(ignorePointer2)))
-        XCTAssertEqual(self.apiProvider.calls[2], .init(id: 2, callType: .sqlite3ColumnDouble(ignorePointer2, 0)))
-        XCTAssertEqual(self.apiProvider.calls[3], .init(id: 3, callType: .sqlite3Step(ignorePointer2)))
-        XCTAssertEqual(self.apiProvider.calls[4], .init(id: 4, callType: .sqlite3Finalize(ignorePointer2)))
+        XCTAssertEqual(self.apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
     }
 }
