@@ -29,6 +29,26 @@ class StorageAggregateFunctionsTests: XCTestCase {
         self.apiProvider = nil
     }
     
+    func testCount() throws {
+        try self.storage.syncSchema(preserve: false)
+        self.apiProvider.resetCalls()
+        var count = try self.storage.count(\AvgTest.value)
+        let db = self.storage.connection.dbMaybe!
+        
+        XCTAssertEqual(count, 0)
+        XCTAssertEqual(self.apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(value) FROM avg_test", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
+        
+        try self.storage.replace(object: AvgTest(value: 1))
+        count = try self.storage.count(\AvgTest.value)
+        XCTAssertEqual(count, 1)
+    }
+    
     func testCountAll() throws {
         try self.storage.syncSchema(preserve: false)
         self.apiProvider.resetCalls()

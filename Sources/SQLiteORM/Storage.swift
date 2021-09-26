@@ -614,6 +614,34 @@ extension Storage {
 }
 
 extension Storage {
+    public func count<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> Int {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql = "SELECT COUNT(\(column.name)) FROM \(table.name)"
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res = 0
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                res = statement.columnInt(index: 0)
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
+    }
+    
     public func count<T>(all of:T.Type) throws -> Int {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
