@@ -614,6 +614,50 @@ extension Storage {
 }
 
 extension Storage {
+    func groupConcatInternal<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String?) throws -> String? {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql: String
+        if nil == separator {
+            sql = "SELECT GROUP_CONCAT(\(column.name)) FROM \(table.name)"
+        }else{
+            sql = "SELECT GROUP_CONCAT(\(column.name), '\(separator!)') FROM \(table.name)"
+        }
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res: String?
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                let columnValue = statement.columnValue(columnIndex: 0)
+                if !columnValue.isNull {
+                    res = columnValue.text
+                }
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
+    }
+    
+    public func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String) throws -> String? {
+        return try self.groupConcatInternal(columnKeyPath, separator: separator)
+    }
+    
+    public func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> String? {
+        return try self.groupConcatInternal(columnKeyPath, separator: nil)
+    }
+    
     public func count<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> Int {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped

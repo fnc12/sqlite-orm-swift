@@ -19,8 +19,8 @@ enum SQLiteApiProviderCallType {
     case sqlite3Finalize(_ pStmt: Ignorable<OpaquePointer>)
     case sqlite3Step(_ pStmt: Ignorable<OpaquePointer>)
     case sqlite3ColumnCount(_ pStmt: OpaquePointer!)
-    case sqlite3ColumnValue(_ pStmt: OpaquePointer!, _ iCol: Int32)
-    case sqlite3ColumnText(_ pStmt: OpaquePointer!, _ iCol: Int32)
+    case sqlite3ColumnValue(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
+    case sqlite3ColumnText(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
     case sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32)
     case sqlite3ColumnInt(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
     case sqlite3ColumnDouble(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
@@ -33,8 +33,8 @@ enum SQLiteApiProviderCallType {
     case sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double)
     case sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32)
     case sqlite3ValueInt(_ value: OpaquePointer!)
-    case sqlite3ValueText(_ value: OpaquePointer!)
-    case sqlite3ValueType(_ value: OpaquePointer!)
+    case sqlite3ValueText(_ value: Ignorable<OpaquePointer>)
+    case sqlite3ValueType(_ value: Ignorable<OpaquePointer>)
     case sqlite3ValueDouble(_ value: OpaquePointer!)
 }
 

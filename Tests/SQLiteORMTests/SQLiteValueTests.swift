@@ -42,7 +42,7 @@ class SQLiteValueTests: XCTestCase {
     func testText() {
         _ = self.sqliteValue.text
         
-        let expectedCalls = [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ValueText(self.pointer))]
+        let expectedCalls = [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ValueText(.value(self.pointer)))]
         XCTAssertEqual(expectedCalls, self.apiProvider.calls)
     }
 

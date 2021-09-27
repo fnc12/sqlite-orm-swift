@@ -107,7 +107,9 @@ class StatementTests: XCTestCase {
             }
             
             let text = self.statement.columnText(index: index)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnText(self.pointer, Int32(index)))])
+            XCTAssertEqual(self.apiProvider.calls, [
+                SQLiteApiProviderMock.Call(id: index, callType: .sqlite3ColumnText(.value(self.pointer), Int32(index)))
+            ])
             XCTAssertEqual(text, testCase.stringToReturn)
             self.apiProvider.calls.removeAll()
         }
@@ -119,8 +121,9 @@ class StatementTests: XCTestCase {
         for columnIndex in 0..<10 {
             XCTAssertEqual(self.apiProvider.calls, [])
             let sqliteValue = self.statement.columnValue(columnIndex: columnIndex)
-            XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: columnIndex,
-                                                                               callType: .sqlite3ColumnValue(self.pointer, Int32(columnIndex)))])
+            XCTAssertEqual(self.apiProvider.calls, [
+                SQLiteApiProviderMock.Call(id: columnIndex, callType: .sqlite3ColumnValue(.value(self.pointer), Int32(columnIndex)))
+            ])
             XCTAssertEqual((sqliteValue as! SQLiteValueImpl).handle, opaquePointerToReturn)
             XCTAssert((sqliteValue as! SQLiteValueImpl).apiProvider === self.apiProvider)
             self.apiProvider.calls.removeAll()
