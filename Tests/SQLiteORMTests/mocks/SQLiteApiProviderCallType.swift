@@ -35,7 +35,7 @@ enum SQLiteApiProviderCallType {
     case sqlite3ValueInt(_ value: OpaquePointer!)
     case sqlite3ValueText(_ value: Ignorable<OpaquePointer>)
     case sqlite3ValueType(_ value: Ignorable<OpaquePointer>)
-    case sqlite3ValueDouble(_ value: OpaquePointer!)
+    case sqlite3ValueDouble(_ value: Ignorable<OpaquePointer>)
 }
 
 extension SQLiteApiProviderCallType: Equatable {

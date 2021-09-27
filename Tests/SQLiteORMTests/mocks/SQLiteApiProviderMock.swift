@@ -51,7 +51,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3ValueDouble(_ value: OpaquePointer!) -> Double {
-        let call = self.makeCall(with: .sqlite3ValueDouble(value))
+        let call = self.makeCall(with: .sqlite3ValueDouble(.value(value)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_value_double(value)

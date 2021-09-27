@@ -1,5 +1,7 @@
 import Foundation
 
+/// This is a base class for table. Tables are created using subclass instances.
+/// This class stores table name and columns information.
 public class AnyTable: NSObject {
     let name: String
     let columns: [AnyColumn]

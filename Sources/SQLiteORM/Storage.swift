@@ -614,6 +614,37 @@ extension Storage {
 }
 
 extension Storage {
+    func max<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql = "SELECT MAX(\(column.name)) FROM \(table.name)"
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res: F?
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                let columnValue = statement.columnValue(columnIndex: 0)
+                if !columnValue.isNull {
+                    res = F(sqliteValue: columnValue)
+                }
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
+    }
+    
     func groupConcatInternal<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String?) throws -> String? {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -728,7 +759,10 @@ extension Storage {
             resultCode = statement.step()
             switch resultCode {
             case self.apiProvider.SQLITE_ROW:
-                res = statement.columnDouble(index: 0)
+                let columnValue = statement.columnValue(columnIndex: 0)
+                if !columnValue.isNull {
+                    res = columnValue.double
+                }
             case self.apiProvider.SQLITE_DONE:
                 break
             default:
