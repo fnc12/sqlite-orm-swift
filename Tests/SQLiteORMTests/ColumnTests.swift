@@ -144,6 +144,5 @@ class ColumnTests: XCTestCase {
         }catch{
             XCTAssert(false)
         }
-        
     }
 }

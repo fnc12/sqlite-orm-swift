@@ -185,37 +185,60 @@ class StorageAggregateFunctionsTests: XCTestCase {
     }
     
     func testCountAll() throws {
-        try self.storage.syncSchema(preserve: false)
-        self.apiProvider.resetCalls()
-        var count = try self.storage.count(all: AvgTest.self)
-        
-        let db = self.storage.connection.dbMaybe!
-        
-        XCTAssertEqual(count, 0)
-        XCTAssertEqual(self.apiProvider.calls, [
-            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(*) FROM avg_test", -1, .ignore, nil)),
-            .init(id: 1, callType: .sqlite3Step(.ignore)),
-            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
-            .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
-        ])
-        
-        try self.storage.replace(object: AvgTest(value: 1))
-        count = try self.storage.count(all: AvgTest.self)
-        XCTAssertEqual(count, 1)
-    }
-    
-    func testCountAllNotMappedType() throws {
-        try self.storage.syncSchema(preserve: false)
-        self.apiProvider.resetCalls()
-        do {
-            _ = try self.storage.count(all: Unknown.self)
-            XCTAssert(false)
-        }catch SQLiteORM.Error.typeIsNotMapped{
-            XCTAssert(true)
-        }catch{
-            XCTAssert(false)
+        struct CountTest: Initializable {
+            var value = Double(0)
         }
+        try testCase(#function, routine: {
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: "",
+                                      apiProvider: apiProvider,
+                                      tables: [Table<CountTest>(name: "count_test",
+                                                                columns: Column(name: "value", keyPath: \CountTest.value))])
+            try storage.syncSchema(preserve: false)
+            try section("error notMapedType", routine: {
+                do {
+                    _ = try storage.count(all: Unknown.self)
+                    XCTAssert(false)
+                }catch SQLiteORM.Error.typeIsNotMapped{
+                    XCTAssert(true)
+                }catch{
+                    XCTAssert(false)
+                }
+            })
+            try section("no error", routine: {
+                var expectedCount = 0
+                var expectedCalls = [SQLiteApiProviderMock.Call]()
+                let db = storage.connection.dbMaybe!
+                try section("no rows", routine: {
+                    expectedCount = 0
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                })
+                try section("3 rows", routine: {
+                    try storage.replace(object: CountTest(value: 1))
+                    try storage.replace(object: CountTest(value: 2))
+                    try storage.replace(object: CountTest(value: 3))
+                    expectedCount = 3
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                })
+                apiProvider.resetCalls()
+                let count = try storage.count(all: CountTest.self)
+                XCTAssertEqual(count, expectedCount)
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+            })
+        })
     }
     
     func testAvg() throws {
