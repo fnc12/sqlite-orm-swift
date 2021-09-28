@@ -6,13 +6,13 @@ class BinderTests: XCTestCase {
     func testBinder() throws {
         try testCase(#function) {
             let columnBinderMock = ColumnBinderMock()
-            for columnIndex in 1..<10 {
+            for columnIndex in 1..<3 {
                 try section("bind null \(columnIndex)") {
                     let binder = BinderImpl(columnIndex: columnIndex, columnBinder: columnBinderMock)
                     _ = binder.bindNull()
                     XCTAssertEqual(columnBinderMock.calls, [ColumnBinderMock.Call(id: 0, callType: .bindNull(index: columnIndex))])
                 }
-                for value in 0..<10 {
+                for value in 0..<3 {
                     try section("bind text \(columnIndex)_\(value)") {
                         let binder = BinderImpl(columnIndex: columnIndex, columnBinder: columnBinderMock)
                         let stringValue = "text\(value)"

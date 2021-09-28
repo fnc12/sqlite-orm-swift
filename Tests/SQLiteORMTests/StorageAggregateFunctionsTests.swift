@@ -165,23 +165,84 @@ class StorageAggregateFunctionsTests: XCTestCase {
     }
     
     func testCount() throws {
-        try self.storage.syncSchema(preserve: false)
-        self.apiProvider.resetCalls()
-        var count = try self.storage.count(\AvgTest.value)
-        let db = self.storage.connection.dbMaybe!
-        
-        XCTAssertEqual(count, 0)
-        XCTAssertEqual(self.apiProvider.calls, [
-            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(value) FROM avg_test", -1, .ignore, nil)),
-            .init(id: 1, callType: .sqlite3Step(.ignore)),
-            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
-            .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
-        ])
-        
-        try self.storage.replace(object: AvgTest(value: 1))
-        count = try self.storage.count(\AvgTest.value)
-        XCTAssertEqual(count, 1)
+        struct CountTest: Initializable {
+            var value: Double?
+            var unknown: Double?
+        }
+        try testCase(#function, routine: {
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: "",
+                                      apiProvider: apiProvider,
+                                      tables: [Table<CountTest>(name: "count_test",
+                                                                columns: Column(name: "value", keyPath: \CountTest.value))])
+            try storage.syncSchema(preserve: false)
+            try section("error", routine: {
+                try section("notMappedType", routine: {
+                    do {
+                        _ = try storage.count(\Unknown.value)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.typeIsNotMapped{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+                try section("columnNotFound", routine: {
+                    do {
+                        _ = try storage.count(\CountTest.unknown)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.columnNotFound{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+            })
+            try section("no error", routine: {
+                let db = storage.connection.dbMaybe!
+                var expectedCount = 0
+                var expectedCalls = [SQLiteApiProviderMock.Call]()
+                try section("no rows", routine: {
+                    expectedCount = 0
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                })
+                try section("one row with null", routine: {
+                    try storage.replace(object: CountTest(value: nil))
+                    expectedCount = 0
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                })
+                try section("three rows without null", routine: {
+                    try storage.replace(object: CountTest(value: 10))
+                    try storage.replace(object: CountTest(value: 20))
+                    try storage.replace(object: CountTest(value: 30))
+                    expectedCount = 3
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                })
+                apiProvider.resetCalls()
+                let count = try storage.count(\CountTest.value)
+                XCTAssertEqual(count, expectedCount)
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+            })
+        })
     }
     
     func testCountAll() throws {
