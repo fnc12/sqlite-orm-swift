@@ -158,50 +158,47 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult = [String?]()
                 var result: String?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
-                try section("1 argument no rows", routine: {
+                try section("1 argument", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = [nil]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("one row", routine: {
+                        try storage.replace(object: GroupConcatTest(value: 1))
+                        expectedResult = ["1"]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueText(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("two rows", routine: {
+                        try storage.replace(object: GroupConcatTest(value: 3))
+                        try storage.replace(object: GroupConcatTest(value: 5))
+                        expectedResult = ["3,5", "5,3"]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueText(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
                     apiProvider.resetCalls()
                     result = try storage.groupConcat(\GroupConcatTest.value)
-                    expectedResult = [nil]
-                    expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-                        .init(id: 4, callType: .sqlite3Step(.ignore)),
-                        .init(id: 5, callType: .sqlite3Finalize(.ignore)),
-                    ]
-                })
-                try section("1 argument one row", routine: {
-                    try storage.replace(object: GroupConcatTest(value: 1))
-                    apiProvider.resetCalls()
-                    result = try storage.groupConcat(\GroupConcatTest.value)
-                    expectedResult = ["1"]
-                    expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-                        .init(id: 4, callType: .sqlite3ValueText(.ignore)),
-                        .init(id: 5, callType: .sqlite3Step(.ignore)),
-                        .init(id: 6, callType: .sqlite3Finalize(.ignore)),
-                    ]
-                })
-                try section("1 argument two rows", routine: {
-                    try storage.delete(object: GroupConcatTest(value: 1))   //  TODO fix sections and remove it
-                    try storage.replace(object: GroupConcatTest(value: 3))
-                    try storage.replace(object: GroupConcatTest(value: 5))
-                    apiProvider.resetCalls()
-                    result = try storage.groupConcat(\GroupConcatTest.value)
-                    expectedResult = ["3,5", "5,3"]
-                    expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-                        .init(id: 4, callType: .sqlite3ValueText(.ignore)),
-                        .init(id: 5, callType: .sqlite3Step(.ignore)),
-                        .init(id: 6, callType: .sqlite3Finalize(.ignore)),
-                    ]
                 })
                 //  TODO: add tests for GROUP_CONCAT with 2 arguments
                 XCTAssert(expectedResult.contains(result))
