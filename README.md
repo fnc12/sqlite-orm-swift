@@ -6,7 +6,7 @@
 
 ![example workflow](https://github.com/fnc12/sqlite-orm-swift/actions/workflows/swift.yml/badge.svg)
 
-SQLiteOrm-Swift is an ORM library for SQLite3 built with Swift 5
+SQLiteORM-Swift is an ORM library for SQLite3 built with Swift 5
 
 # Advantages
 
@@ -56,7 +56,7 @@ CREATE TABLE user_types (
     name TEXT NOT NULL)
 ```
 
-Now we tell `SQLiteOrm` library about our schema and provide database filename. We create `storage` helper object that has CRUD interface. Also we create every table and every column. All code is intuitive and minimalistic.
+Now we tell `SQLiteORM` library about our schema and provide database filename. We create `storage` helper object that has CRUD interface. Also we create every table and every column. All code is intuitive and minimalistic.
 
 ```swift
 let path = getDocumentsDirectory() + "/db.sqlite"
