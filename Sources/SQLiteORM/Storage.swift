@@ -373,7 +373,7 @@ public class Storage: NSObject {
         }
         let primaryKeyColumnNames = anyTable.primaryKeyColumnNames
         guard !primaryKeyColumnNames.isEmpty else {
-            throw Error.unableToGetObjectWithoutPrimaryKeys
+            throw Error.unableToDeleteObjectWithoutPrimaryKeys
         }
         var sql = "DELETE FROM '\(anyTable.name)' WHERE"
         for (primaryKeyColumnNameIndex, primaryKeyColumnName) in primaryKeyColumnNames.enumerated() {

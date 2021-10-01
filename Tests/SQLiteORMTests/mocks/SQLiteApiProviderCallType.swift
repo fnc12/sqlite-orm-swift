@@ -32,7 +32,7 @@ enum SQLiteApiProviderCallType {
     case sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32)
     case sqlite3BindDouble(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Double)
     case sqlite3BindNull(_ pStmt: OpaquePointer!, _ idx: Int32)
-    case sqlite3ValueInt(_ value: OpaquePointer!)
+    case sqlite3ValueInt(_ value: Ignorable<OpaquePointer>)
     case sqlite3ValueText(_ value: Ignorable<OpaquePointer>)
     case sqlite3ValueType(_ value: Ignorable<OpaquePointer>)
     case sqlite3ValueDouble(_ value: Ignorable<OpaquePointer>)

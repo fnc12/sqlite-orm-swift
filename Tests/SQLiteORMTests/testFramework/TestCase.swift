@@ -1,77 +1,406 @@
 import Foundation
 import XCTest
 
-struct SectionIteration {
-    static var all = [SectionIteration]()
+class SectionIteration {
+    var name: String
+    let parent: SectionIteration?
+    var children = [SectionIteration]()
+    var runCount = 0
+    var isRunning = false
+    var cachedLeavesCount = 0
+    var didRunThisTime = false
     
-    var sectionsCount = 0
-    var currentSectionIndex = 0
-    var sectionsPassed = 0
-    var passedSectionNames = [String]()
+    init(name: String, parent: SectionIteration?) {
+        self.name = name
+        self.parent = parent
+    }
+    
+    func findTheFarestRunningChild() -> SectionIteration? {
+        func findTheFarestRunningChild(_ target: SectionIteration) -> SectionIteration? {
+            if target.children.isEmpty {
+                return target
+            }else{
+                if let runningChild = target.children.first(where: { $0.isRunning }) {
+                    return findTheFarestRunningChild(runningChild)
+                }else{
+                    return target
+                }
+            }
+        }
+        
+        if self.isRunning {
+            return findTheFarestRunningChild(self)
+        }else{
+            return nil
+        }
+    }
+    
+    static var root: SectionIteration?
+}
+
+enum TestError: Error {
+    case testCaseInsideTestCaseIsProhibited
+    case sectionIsNotLocatedInsideTestCase
+    case noRunningSectionFound
 }
 
 func testCase(_ name: String, routine: @escaping (() throws -> ())) throws {
-    SectionIteration.all.append(SectionIteration())
-    let iterationIndex = SectionIteration.all.count - 1
-    repeat {
+    guard nil == SectionIteration.root else {
+        throw TestError.testCaseInsideTestCaseIsProhibited
+    }
+    let root = SectionIteration(name: name, parent: nil)
+    SectionIteration.root = root
+    
+    //  run for the first time
+    root.isRunning = true
+    try routine()
+    root.isRunning = false
+    root.runCount += 1
+    
+    func countLeaves(node: SectionIteration) -> Int {
+        var res = 0
+        if node.children.isEmpty {
+            res = 1
+        }else{
+            for child in node.children {
+                let childLeavesCount = countLeaves(node: child)
+                child.cachedLeavesCount = childLeavesCount
+                res += childLeavesCount
+            }
+        }
+        return res
+    }
+    
+    func resetDidRunFlag(node: SectionIteration) {
+        node.didRunThisTime = false
+        node.children.forEach(resetDidRunFlag)
+    }
+    
+    //  run 2..<leavesCount times
+    while root.runCount < countLeaves(node: root) {
+        resetDidRunFlag(node: root)
+        root.isRunning = true
         try routine()
-        SectionIteration.all[iterationIndex].currentSectionIndex += 1
-        SectionIteration.all[iterationIndex].sectionsPassed = 0
-        SectionIteration.all[iterationIndex].passedSectionNames.removeAll()
-    } while SectionIteration.all[iterationIndex].currentSectionIndex < SectionIteration.all[iterationIndex].sectionsCount
-    SectionIteration.all.removeLast()
+        root.isRunning = false
+        root.runCount += 1
+    }
+    
+    SectionIteration.root = nil
 }
 
 func section(_ name: String, routine: @escaping (() throws -> ())) throws {
-    let outerIterationIndex = SectionIteration.all.count - 1
-    if SectionIteration.all[outerIterationIndex].passedSectionNames.contains(name) {
-        fatalError("Section \(name) already exists in this context")
+    guard nil != SectionIteration.root else {
+        throw TestError.sectionIsNotLocatedInsideTestCase
     }
-    if 0 == SectionIteration.all[outerIterationIndex].currentSectionIndex {
-        SectionIteration.all[outerIterationIndex].sectionsCount += 1
+    guard let theFarestRunningChild = SectionIteration.root!.findTheFarestRunningChild() else {
+        throw TestError.noRunningSectionFound
     }
-    if SectionIteration.all[outerIterationIndex].currentSectionIndex == SectionIteration.all[outerIterationIndex].sectionsPassed {
-        SectionIteration.all.append(SectionIteration())
-        let iterationIndex = SectionIteration.all.count - 1
-        repeat {
+    if 0 == SectionIteration.root!.runCount {
+        theFarestRunningChild.children.append(.init(name: name, parent: theFarestRunningChild))
+        if theFarestRunningChild.children.count == 1 {
+            theFarestRunningChild.children.last!.isRunning = true
             try routine()
-            SectionIteration.all[iterationIndex].currentSectionIndex += 1
-            SectionIteration.all[iterationIndex].sectionsPassed = 0
-            SectionIteration.all[iterationIndex].passedSectionNames.removeAll()
-        } while SectionIteration.all[iterationIndex].currentSectionIndex < SectionIteration.all[iterationIndex].sectionsCount
-        SectionIteration.all.removeLast()
+            theFarestRunningChild.children.last!.isRunning = false
+            theFarestRunningChild.children.last!.runCount += 1
+        }
+    }else{
+        let thisSectionIteration: SectionIteration
+        if let foundSectionIteration = theFarestRunningChild.children.first(where: { $0.name == name }) {
+            thisSectionIteration = foundSectionIteration
+            if thisSectionIteration.runCount < thisSectionIteration.cachedLeavesCount {
+                let hasDidRunThisTimeChildren = thisSectionIteration.parent!.children.contains(where: { $0.didRunThisTime })
+                if !hasDidRunThisTimeChildren {
+                    thisSectionIteration.isRunning = true
+                    try routine()
+                    thisSectionIteration.isRunning = false
+                    thisSectionIteration.didRunThisTime = true
+                    thisSectionIteration.runCount += 1
+                }
+            }
+        }else{
+            thisSectionIteration = .init(name: name, parent: theFarestRunningChild)
+            theFarestRunningChild.children.append(thisSectionIteration)
+            let hasDidRunThisTimeChildren = thisSectionIteration.parent!.children.contains(where: { $0.didRunThisTime })
+            if !hasDidRunThisTimeChildren {
+                thisSectionIteration.isRunning = true
+                try routine()
+                thisSectionIteration.isRunning = false
+                thisSectionIteration.didRunThisTime = true
+                thisSectionIteration.runCount += 1
+            }
+        }
     }
-    SectionIteration.all[outerIterationIndex].sectionsPassed += 1
-    SectionIteration.all[outerIterationIndex].passedSectionNames.append(name)
 }
 
 class SectionsTest: XCTestCase {
-    func test() throws {
-        var totalText = ""
-        try testCase(#function) {
-            var text = ""
-            var expected = ""
-            totalText += "1"
-            
-            text += "a"
-            try section("a") {
-                text += "b"
-                totalText += "2"
-                try section("c") {
-                    totalText += "4"
-                }
-                try section("d") {
-                    totalText += "5"
-                }
-                expected = "abb"
-            }
-            try section("b") {
-                text += "c"
-                expected = "ac"
-                totalText += "3"
-            }
-            XCTAssertEqual(text, expected)
-        }
-        XCTAssertEqual(totalText, "1242513")
+    
+    func test3Levels3_3Sections() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section1CallsCount = 0
+        var section2CallsCount = 0
+        var section00CallsCount = 0
+        var section01CallsCount = 0
+        var section02CallsCount = 0
+        var section10CallsCount = 0
+        var section11CallsCount = 0
+        var section12CallsCount = 0
+        var section20CallsCount = 0
+        var section21CallsCount = 0
+        var section22CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+                try section("00", routine: {
+                    section00CallsCount += 1
+                    text += "2"
+                })
+                try section("01", routine: {
+                    section01CallsCount += 1
+                    text += "3"
+                })
+                try section("02", routine: {
+                    section02CallsCount += 1
+                    text += "4"
+                })
+            })
+            try section("1", routine: {
+                section1CallsCount += 1
+                text += "5"
+                try section("10", routine: {
+                    section10CallsCount += 1
+                    text += "6"
+                })
+                try section("11", routine: {
+                    section11CallsCount += 1
+                    text += "7"
+                })
+                try section("12", routine: {
+                    section12CallsCount += 1
+                    text += "8"
+                })
+            })
+            try section("2", routine: {
+                section2CallsCount += 1
+                text += "9"
+                try section("20", routine: {
+                    section20CallsCount += 1
+                    text += "a"
+                })
+                try section("21", routine: {
+                    section21CallsCount += 1
+                    text += "b"
+                })
+                try section("22", routine: {
+                    section22CallsCount += 1
+                    text += "c"
+                })
+            })
+        })
+        XCTAssertEqual(text, "01201301405605705809a09b09c")
+        XCTAssertEqual(section0CallsCount, 3)
+        XCTAssertEqual(section1CallsCount, 3)
+        XCTAssertEqual(section2CallsCount, 3)
+        XCTAssertEqual(section00CallsCount, 1)
+        XCTAssertEqual(section01CallsCount, 1)
+        XCTAssertEqual(section02CallsCount, 1)
+        XCTAssertEqual(section10CallsCount, 1)
+        XCTAssertEqual(section11CallsCount, 1)
+        XCTAssertEqual(section12CallsCount, 1)
+        XCTAssertEqual(section20CallsCount, 1)
+        XCTAssertEqual(section21CallsCount, 1)
+        XCTAssertEqual(section22CallsCount, 1)
+        XCTAssertEqual(testCaseCallsCount, 9)
+    }
+    
+    func test2Levels2_2Sections() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section1CallsCount = 0
+        var section00CallsCount = 0
+        var section01CallsCount = 0
+        var section10CallsCount = 0
+        var section11CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+                try section("00", routine: {
+                    section00CallsCount += 1
+                    text += "2"
+                })
+                try section("01", routine: {
+                    section01CallsCount += 1
+                    text += "3"
+                })
+            })
+            try section("1", routine: {
+                section1CallsCount += 1
+                text += "4"
+                try section("10", routine: {
+                    section10CallsCount += 1
+                    text += "5"
+                })
+                try section("11", routine: {
+                    section11CallsCount += 1
+                    text += "6"
+                })
+            })
+        })
+        XCTAssertEqual(text, "012013045046")
+        XCTAssertEqual(section10CallsCount, 1)
+        XCTAssertEqual(section11CallsCount, 1)
+        XCTAssertEqual(section00CallsCount, 1)
+        XCTAssertEqual(section01CallsCount, 1)
+        XCTAssertEqual(section1CallsCount, 2)
+        XCTAssertEqual(section0CallsCount, 2)
+        XCTAssertEqual(testCaseCallsCount, 4)
+    }
+    
+    func test2Levels1_2Sections() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section00CallsCount = 0
+        var section01CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+                try section("00", routine: {
+                    section00CallsCount += 1
+                    text += "2"
+                })
+                try section("01", routine: {
+                    section01CallsCount += 1
+                    text += "3"
+                })
+            })
+        })
+        XCTAssertEqual(text, "012013")
+        XCTAssertEqual(testCaseCallsCount, 2)
+        XCTAssertEqual(section0CallsCount, 2)
+        XCTAssertEqual(section00CallsCount, 1)
+        XCTAssertEqual(section01CallsCount, 1)
+    }
+    
+    func test2Levels1Section() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section00CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+                try section("00", routine: {
+                    section00CallsCount += 1
+                    text += "2"
+                })
+            })
+        })
+        XCTAssertEqual(text, "012")
+        XCTAssertEqual(testCaseCallsCount, 1)
+        XCTAssertEqual(section0CallsCount, 1)
+        XCTAssertEqual(section00CallsCount, 1)
+    }
+    
+    func test1Level4Sections() throws{
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section1CallsCount = 0
+        var section2CallsCount = 0
+        var section3CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+            })
+            try section("1", routine: {
+                section1CallsCount += 1
+                text += "2"
+            })
+            try section("2", routine: {
+                section2CallsCount += 1
+                text += "3"
+            })
+            try section("3", routine: {
+                section3CallsCount += 1
+                text += "4"
+            })
+        })
+        XCTAssertEqual(testCaseCallsCount, 4)
+        XCTAssertEqual(section0CallsCount, 1)
+        XCTAssertEqual(section1CallsCount, 1)
+        XCTAssertEqual(section2CallsCount, 1)
+        XCTAssertEqual(section3CallsCount, 1)
+        XCTAssertEqual(text, "01020304")
+    }
+    
+    func test1Level3Sections() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section1CallsCount = 0
+        var section2CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+            })
+            try section("1", routine: {
+                section1CallsCount += 1
+                text += "2"
+            })
+            try section("2", routine: {
+                section2CallsCount += 1
+                text += "3"
+            })
+        })
+        XCTAssertEqual(testCaseCallsCount, 3)
+        XCTAssertEqual(section0CallsCount, 1)
+        XCTAssertEqual(section1CallsCount, 1)
+        XCTAssertEqual(section2CallsCount, 1)
+        XCTAssertEqual(text, "010203")
+    }
+    
+    func test1Level2Sections() throws {
+        var testCaseCallsCount = 0
+        var section0CallsCount = 0
+        var section1CallsCount = 0
+        var text = ""
+        try testCase(#function, routine: {
+            testCaseCallsCount += 1
+            text += "0"
+            try section("0", routine: {
+                section0CallsCount += 1
+                text += "1"
+            })
+            try section("1", routine: {
+                section1CallsCount += 1
+                text += "2"
+            })
+        })
+        XCTAssertEqual(text, "0102")
+        XCTAssertEqual(testCaseCallsCount, 2)
+        XCTAssertEqual(section0CallsCount, 1)
+        XCTAssertEqual(section1CallsCount, 1)
     }
 }
+

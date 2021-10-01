@@ -247,7 +247,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3ValueInt(_ value: OpaquePointer!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3ValueInt(value))
+        let call = self.makeCall(with: .sqlite3ValueInt(.value(value)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_value_int(value)
