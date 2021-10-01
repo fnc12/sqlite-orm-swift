@@ -614,7 +614,7 @@ extension Storage {
 }
 
 extension Storage {
-    func max<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
+    func maxInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>) throws -> R? where R: ConstructableFromSQLiteValue {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -626,14 +626,14 @@ extension Storage {
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
-        var res: F?
+        var res: R?
         repeat {
             resultCode = statement.step()
             switch resultCode {
             case self.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
-                    res = F(sqliteValue: columnValue)
+                    res = R(sqliteValue: columnValue)
                 }
             case self.apiProvider.SQLITE_DONE:
                 break
@@ -643,6 +643,14 @@ extension Storage {
             }
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
+    }
+    
+    public func max<T, F>(_ columnKeyPath: KeyPath<T, Optional<F>>) throws -> F? where F: ConstructableFromSQLiteValue {
+        return try self.maxInternal(columnKeyPath)
+    }
+    
+    public func max<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
+        return try self.maxInternal(columnKeyPath)
     }
     
     func groupConcatInternal<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String?) throws -> String? {

@@ -37,24 +37,11 @@ class StorageAggregateFunctionsTests: XCTestCase {
         self.apiProvider = nil
     }
     
-    func testMaxNullableNil() throws {
-        
-    }
-    
-    func testMaxNotNil() throws {
-        try self.storage.syncSchema(preserve: false)
-        try self.storage.replace(object: AvgTest(value: 1))
-        try self.storage.replace(object: AvgTest(value: 2))
-        try self.storage.replace(object: AvgTest(value: 3))
-        self.apiProvider.resetCalls()
-        let max = try self.storage.max(\AvgTest.value)
-        XCTAssertEqual(max, 3)
-    }
-    
     func testMax() throws {
         try testCase(#function, routine: {
             struct MaxTest {
-                var value = 0
+                var value: Int = 0
+                var nullableValue: Int? = 0
                 var unknown = 0
             }
             let apiProvider = SQLiteApiProviderMock()
@@ -62,60 +49,127 @@ class StorageAggregateFunctionsTests: XCTestCase {
             let storage = try Storage(filename: "",
                                       apiProvider: apiProvider,
                                       tables: [Table<MaxTest>(name: "max_test",
-                                                              columns: Column(name: "value", keyPath: \MaxTest.value))])
+                                                              columns:
+                                                                Column(name: "value", keyPath: \MaxTest.value),
+                                                                Column(name: "null_value", keyPath: \MaxTest.nullableValue))])
             try storage.syncSchema(preserve: false)
+            try section("error", routine: {
+                try section("error notMappedType", routine: {
+                    do {
+                        _ = try storage.max(\Unknown.value)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.typeIsNotMapped{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+                try section("error columnNotFound", routine: {
+                    do {
+                        _ = try storage.max(\MaxTest.unknown)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.columnNotFound{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+            })
+            try section("no error", routine: {
+                let db = storage.connection.dbMaybe!
+                var expectedResult: Int?
+                var result: Int?
+                var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("not nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: MaxTest(value: 10))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: MaxTest(value: 4))
+                        try storage.replace(object: MaxTest(value: 6))
+                        expectedResult = 6
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.max(\MaxTest.value)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+                try section("nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(null_value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: MaxTest(value: 0, nullableValue: 10))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(null_value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: MaxTest(value: 0, nullableValue: 4))
+                        try storage.replace(object: MaxTest(value: 0, nullableValue: 6))
+                        expectedResult = 6
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(null_value) FROM max_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.max(\MaxTest.nullableValue)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+            })
         })
-    }
-    
-    func testMaxNil() throws {
-        try self.storage.syncSchema(preserve: false)
-        self.apiProvider.resetCalls()
-        let max = try self.storage.max(\AvgTest.value)
-        let db = self.storage.connection.dbMaybe!
-        XCTAssertEqual(max, nil)
-        XCTAssertEqual(self.apiProvider.calls, [
-            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MAX(value) FROM avg_test", -1, .ignore, nil)),
-            .init(id: 1, callType: .sqlite3Step(.ignore)),
-            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-            .init(id: 4, callType: .sqlite3Step(.ignore)),
-            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
-        ])
-    }
-    
-    func testGroupConcat2ArgumentsNotNil() throws {
-        try self.storage.syncSchema(preserve: false)
-        try self.storage.replace(object: AvgTest(value: 6))
-        try self.storage.replace(object: AvgTest(value: 1))
-        self.apiProvider.resetCalls()
-        let result = try self.storage.groupConcat(\AvgTest.value, separator: "-")
-        let db = self.storage.connection.dbMaybe!
-        XCTAssert(result == "6.0-1.0" || result == "1.0-6.0")
-        XCTAssertEqual(self.apiProvider.calls, [
-            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value, '-') FROM avg_test", -1, .ignore, nil)),
-            .init(id: 1, callType: .sqlite3Step(.ignore)),
-            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-            .init(id: 4, callType: .sqlite3ValueText(.ignore)),
-            .init(id: 5, callType: .sqlite3Step(.ignore)),
-            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
-        ])
-    }
-    
-    func testGroupConcat2ArgumentsNil() throws {
-        try self.storage.syncSchema(preserve: false)
-        self.apiProvider.resetCalls()
-        let result = try self.storage.groupConcat(\AvgTest.value, separator: "-")
-        let db = self.storage.connection.dbMaybe!
-        XCTAssertEqual(result, nil)
-        XCTAssertEqual(self.apiProvider.calls, [
-            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value, '-') FROM avg_test", -1, .ignore, nil)),
-            .init(id: 1, callType: .sqlite3Step(.ignore)),
-            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-            .init(id: 4, callType: .sqlite3Step(.ignore)),
-            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
-        ])
     }
     
     func testGroupConcat() throws {
@@ -200,7 +254,48 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     apiProvider.resetCalls()
                     result = try storage.groupConcat(\GroupConcatTest.value)
                 })
-                //  TODO: add tests for GROUP_CONCAT with 2 arguments
+                try section("2 arguments", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = [nil]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value, '-') FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("one row", routine: {
+                        try storage.replace(object: GroupConcatTest(value: 3))
+                        expectedResult = ["3"]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value, '-') FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueText(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("two rows", routine: {
+                        try storage.replace(object: GroupConcatTest(value: 3))
+                        try storage.replace(object: GroupConcatTest(value: 5))
+                        expectedResult = ["3-5", "5-3"]
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT GROUP_CONCAT(value, '-') FROM group_concat_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueText(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.groupConcat(\GroupConcatTest.value, separator: "-")
+                })
                 XCTAssert(expectedResult.contains(result))
                 XCTAssertEqual(apiProvider.calls, expectedApiCalls)
             })
