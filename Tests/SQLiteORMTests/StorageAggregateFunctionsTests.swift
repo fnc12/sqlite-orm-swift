@@ -37,6 +37,141 @@ class StorageAggregateFunctionsTests: XCTestCase {
         self.apiProvider = nil
     }
     
+    func testMin() throws {
+        try testCase(#function, routine: {
+            struct MinTest {
+                var value: Int = 0
+                var nullableValue: Int? = 0
+                var unknown = 0
+            }
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: "",
+                                      apiProvider: apiProvider,
+                                      tables: [Table<MinTest>(name: "min_test",
+                                                              columns:
+                                                                Column(name: "value", keyPath: \MinTest.value),
+                                                                Column(name: "null_value", keyPath: \MinTest.nullableValue))])
+            try storage.syncSchema(preserve: false)
+            try section("error", routine: {
+                try section("error notMappedType", routine: {
+                    do {
+                        _ = try storage.max(\Unknown.value)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.typeIsNotMapped{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+                try section("error columnNotFound", routine: {
+                    do {
+                        _ = try storage.max(\MinTest.unknown)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.columnNotFound{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+            })
+            try section("no error", routine: {
+                let db = storage.connection.dbMaybe!
+                var expectedResult: Int?
+                var result: Int?
+                var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("not nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: MinTest(value: 10))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: MinTest(value: 4))
+                        try storage.replace(object: MinTest(value: 6))
+                        expectedResult = 4
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.min(\MinTest.value)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+                try section("nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(null_value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: MinTest(value: 0, nullableValue: 10))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(null_value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: MinTest(value: 0, nullableValue: 4))
+                        try storage.replace(object: MinTest(value: 0, nullableValue: 6))
+                        expectedResult = 4
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT MIN(null_value) FROM min_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.min(\MinTest.nullableValue)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+            })
+        })
+    }
+    
     func testMax() throws {
         try testCase(#function, routine: {
             struct MaxTest {

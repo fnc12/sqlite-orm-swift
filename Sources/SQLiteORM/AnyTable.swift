@@ -6,12 +6,14 @@ public class AnyTable: NSObject {
     let name: String
     let columns: [AnyColumn]
     
+    /// Constructor that must be called from subclass constructor.
     public init(name: String, columns: AnyColumn...) {
         self.name = name
         self.columns = columns
         super.init()
     }
     
+    /// Getter for type mapped to this table. Got to be overridden inside subclass
     var type: Any.Type {
         return Void.self
     }

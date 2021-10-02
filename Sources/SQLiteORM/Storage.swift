@@ -614,6 +614,45 @@ extension Storage {
 }
 
 extension Storage {
+    func minInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>) throws -> R? where R: ConstructableFromSQLiteValue {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql = "SELECT MIN(\(column.name)) FROM \(table.name)"
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res: R?
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                let columnValue = statement.columnValue(columnIndex: 0)
+                if !columnValue.isNull {
+                    res = R(sqliteValue: columnValue)
+                }
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
+    }
+    
+    public func min<T, F>(_ columnKeyPath: KeyPath<T, Optional<F>>) throws -> F? where F: ConstructableFromSQLiteValue {
+        return try self.minInternal(columnKeyPath)
+    }
+    
+    public func min<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
+        return try self.minInternal(columnKeyPath)
+    }
+    
     func maxInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>) throws -> R? where R: ConstructableFromSQLiteValue {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
