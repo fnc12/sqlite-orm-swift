@@ -2,39 +2,143 @@ import XCTest
 @testable import SQLiteORM
 
 class StorageAggregateFunctionsTests: XCTestCase {
-    struct AvgTest: Initializable {
-        var value = Double(0)
-        var unused = Double(0)
-    }
-    
-    struct StructWithNullable: Initializable {
-        var value: Int?
-    }
-    
     struct Unknown {
         var value = Double(0)
     };
     
-    var storage: Storage!
-    var storageWithNullable: Storage!
-    var apiProvider: SQLiteApiProviderMock!
-    let filename = ""
-    
-    override func setUpWithError() throws {
-        self.apiProvider = .init()
-        self.apiProvider.forwardsCalls = true
-        self.storage = try Storage(filename: self.filename,
-                                   apiProvider: self.apiProvider,
-                                   tables: [Table<AvgTest>(name: "avg_test",
-                                                           columns: Column(name: "value", keyPath: \AvgTest.value))])
-        self.storageWithNullable = try Storage(filename: self.filename,
-                                               apiProvider: self.apiProvider,
-                                               tables: [Table<StructWithNullable>(name: "max_test", columns: Column(name: "value", keyPath: \StructWithNullable.value))])
-    }
-    
-    override func tearDownWithError() throws {
-        self.storage = nil
-        self.apiProvider = nil
+    func testSum() throws {
+        try testCase(#function, routine: {
+            struct SumTest {
+                var value: Int = 0
+                var nullableValue: Int? = 0
+                var unknown = 0
+            }
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: "",
+                                      apiProvider: apiProvider,
+                                      tables: [Table<SumTest>(name: "sum_test",
+                                                              columns:
+                                                                Column(name: "value", keyPath: \SumTest.value),
+                                                                Column(name: "null_value", keyPath: \SumTest.nullableValue))])
+            try storage.syncSchema(preserve: false)
+            try section("error", routine: {
+                try section("error notMappedType", routine: {
+                    do {
+                        _ = try storage.sum(\Unknown.value)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.typeIsNotMapped{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+                try section("error columnNotFound", routine: {
+                    do {
+                        _ = try storage.sum(\SumTest.unknown)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.columnNotFound{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+            })
+            try section("no error", routine: {
+                let db = storage.connection.dbMaybe!
+                var expectedResult: Double?
+                var result: Double?
+                var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("not nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: SumTest(value: 1))
+                        expectedResult = 1
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: SumTest(value: 2))
+                        try storage.replace(object: SumTest(value: 3))
+                        expectedResult = 5
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.sum(\SumTest.value)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+                try section("nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = nil
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(null_value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: SumTest(value: 0, nullableValue: 3))
+                        expectedResult = 3
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(null_value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: SumTest(value: 0, nullableValue: 4))
+                        try storage.replace(object: SumTest(value: 0, nullableValue: 6))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT SUM(null_value) FROM sum_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.sum(\SumTest.nullableValue)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+            })
+        })
     }
     
     func testMin() throws {
@@ -56,7 +160,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             try section("error", routine: {
                 try section("error notMappedType", routine: {
                     do {
-                        _ = try storage.max(\Unknown.value)
+                        _ = try storage.min(\Unknown.value)
                         XCTAssert(false)
                     }catch SQLiteORM.Error.typeIsNotMapped{
                         XCTAssert(true)
@@ -66,7 +170,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
                 try section("error columnNotFound", routine: {
                     do {
-                        _ = try storage.max(\MinTest.unknown)
+                        _ = try storage.min(\MinTest.unknown)
                         XCTAssert(false)
                     }catch SQLiteORM.Error.columnNotFound{
                         XCTAssert(true)
@@ -576,6 +680,10 @@ class StorageAggregateFunctionsTests: XCTestCase {
     }
     
     func testAvg() throws {
+        struct AvgTest: Initializable {
+            var value = Double(0)
+            var unused = Double(0)
+        }
         try testCase(#function) {
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
