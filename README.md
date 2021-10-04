@@ -14,6 +14,7 @@ SQLiteORM-Swift is an ORM library for SQLite3 built with Swift 5
 * **Intuitive syntax**
 * **Comfortable interface - one call per single query**
 * **CRUD support**
+* **Aggregate functions support**
 * **Does not depend on `Codable` protocol**
 * **The only dependency** - SQLite3
 * **In memory database support** - provide `:memory:` or empty filename
@@ -128,6 +129,55 @@ print("allUsers (\(allUsers.count):")
 for user in allUsers {
     print(user)
 }
+```
+
+# Aggregate functions
+
+```swift
+//  SELECT AVG(id) FROM users
+let averageId = try storage.avg(\User.id)
+
+//  SELECT AVG(birth_date) FROM users
+let averageBirthDate = try storage.avg(\User.birthDate)
+
+//  SELECT COUNT(*) FROM users
+let usersCount = try storage.count(all: User.self)
+
+//  SELECT COUNT(id) FROM users
+let countId = try storage.count(\User.id)
+
+//  SELECT COUNT(image_url) FROM users
+let countImageUrl = try storage.count(\User.imageUrl)
+
+//  SELECT GROUP_CONCAT(id) FROM users
+let concatedUserId = try storage.groupConcat(\User.id)
+
+//  SELECT GROUP_CONCAT(id, '---') FROM users
+let concatedUserIdWithDashes = try storage.groupConcat(\User.id, separator: "---")
+
+//  SELECT MAX(id) FROM users
+if let maxId = try storage.max(\User.id) {
+    print("maxId = \(maxId)")
+} else {
+    print("maxId is nil")
+}
+
+//  SELECT MIN(id) FROM users
+if let minId = try storage.min(\User.id) {
+    print("minId = \(minId)")
+} else {
+    print("maxId is nil")
+}
+
+//  SELECT SUM(id) FROM users
+if let sumId = try storage.sum(\User.id) {
+    print("sumId = \(sumId)")
+} else {
+    print("sumId is nil")
+}
+
+//  SELECT TOTAL(id) FROM users
+let totalId = try storage.total(\User.id)
 ```
 
 # Migrations functionality
