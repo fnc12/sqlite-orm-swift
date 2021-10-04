@@ -6,6 +6,131 @@ class StorageAggregateFunctionsTests: XCTestCase {
         var value = Double(0)
     };
     
+    func testTotal() throws {
+        try testCase(#function, routine: {
+            struct TotalTest {
+                var value: Int = 0
+                var nullableValue: Int? = 0
+                var unknown = 0
+            }
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: "",
+                                      apiProvider: apiProvider,
+                                      tables: [Table<TotalTest>(name: "total_test",
+                                                                columns:
+                                                                    Column(name: "value", keyPath: \TotalTest.value),
+                                                                    Column(name: "null_value", keyPath: \TotalTest.nullableValue))])
+            try storage.syncSchema(preserve: false)
+            try section("error", routine: {
+                try section("error notMappedType", routine: {
+                    do {
+                        _ = try storage.total(\Unknown.value)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.typeIsNotMapped{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+                try section("error columnNotFound", routine: {
+                    do {
+                        _ = try storage.total(\TotalTest.unknown)
+                        XCTAssert(false)
+                    }catch SQLiteORM.Error.columnNotFound{
+                        XCTAssert(true)
+                    }catch{
+                        XCTAssert(false)
+                    }
+                })
+            })
+            try section("no error", routine: {
+                let db = storage.connection.dbMaybe!
+                var expectedResult: Double = 0
+                var result: Double = -1
+                var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("not nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = 0
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: TotalTest(value: 1))
+                        expectedResult = 1
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: TotalTest(value: 2))
+                        try storage.replace(object: TotalTest(value: 3))
+                        expectedResult = 5
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.total(\TotalTest.value)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+                try section("nullable field", routine: {
+                    try section("no rows", routine: {
+                        expectedResult = 0
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(null_value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("1 row", routine: {
+                        try storage.replace(object: TotalTest(value: 0, nullableValue: 3))
+                        expectedResult = 3
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(null_value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    try section("2 rows", routine: {
+                        try storage.replace(object: TotalTest(value: 0, nullableValue: 4))
+                        try storage.replace(object: TotalTest(value: 0, nullableValue: 6))
+                        expectedResult = 10
+                        expectedApiCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(db, "SELECT TOTAL(null_value) FROM total_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    result = try storage.total(\TotalTest.nullableValue)
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
+            })
+        })
+    }
+    
     func testSum() throws {
         try testCase(#function, routine: {
             struct SumTest {

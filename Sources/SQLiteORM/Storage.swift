@@ -614,6 +614,34 @@ extension Storage {
 }
 
 extension Storage {
+    public func total<T, R>(_ columnKeyPath: KeyPath<T, R>) throws -> Double {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        let table = anyTable as! Table<T>
+        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+            throw Error.columnNotFound
+        }
+        let sql = "SELECT TOTAL(\(column.name)) FROM \(table.name)"
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode = Int32(0)
+        var res: Double = 0
+        repeat {
+            resultCode = statement.step()
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                res = statement.columnDouble(index: 0)
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        }while resultCode != self.apiProvider.SQLITE_DONE
+        return res
+    }
+    
     public func sum<T, R>(_ columnKeyPath: KeyPath<T, R>) throws -> Double? {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
