@@ -82,7 +82,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     
     func sqlite3Open(_ filename: UnsafePointer<CChar>!, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!) -> Int32 {
         let filenameString = String(cString: filename)
-        let call = self.makeCall(with: .sqlite3Open(filenameString, ppDb))
+        let call = self.makeCall(with: .sqlite3Open(filenameString, .value(ppDb)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_open(filename, ppDb)
@@ -107,7 +107,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3Close(_ ppDb: OpaquePointer!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3Close(ppDb))
+        let call = self.makeCall(with: .sqlite3Close(.value(ppDb)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_close(ppDb)
@@ -117,7 +117,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3LastInsertRowid(_ ppDb: OpaquePointer!) -> SQLiteApiProvider.Int64 {
-        let call = self.makeCall(with: .sqlite3LastInsertRowid(ppDb))
+        let call = self.makeCall(with: .sqlite3LastInsertRowid(.value(ppDb)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_last_insert_rowid(ppDb)
@@ -127,7 +127,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3PrepareV2(_ db: OpaquePointer!, _ zSql: UnsafePointer<CChar>!, _ nByte: Int32, _ ppStmt: UnsafeMutablePointer<OpaquePointer?>!, _ pzTail: UnsafeMutablePointer<UnsafePointer<CChar>?>!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3PrepareV2(db, String(cString: zSql), nByte, .init(ppStmt!), pzTail))
+        let call = self.makeCall(with: .sqlite3PrepareV2(.value(db), String(cString: zSql), nByte, .init(ppStmt!), pzTail))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail)
@@ -217,7 +217,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
                          _ value: UnsafePointer<CChar>!,
                          _ len: Int32,
                          _ dtor: (@convention(c) (UnsafeMutableRawPointer?) -> Void)!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3BindText(pStmt, idx, value, len, dtor))
+        let call = self.makeCall(with: .sqlite3BindText(.value(pStmt), idx, String(cString: value), len, dtor))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_bind_text(pStmt, idx, value, len, dtor)

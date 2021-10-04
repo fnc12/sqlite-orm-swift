@@ -33,8 +33,7 @@ class StatementTests: XCTestCase {
         for (index, testCase) in testCases.enumerated() {
             XCTAssertEqual(self.apiProvider.calls, [])
             _ = self.statement.bindText(value: testCase.value, index: testCase.index)
-            let nsValue = NSString(string: testCase.value)
-            let expectedCallType = SQLiteApiProviderCallType.sqlite3BindText(self.pointer, Int32(testCase.index), nsValue.utf8String, -1,
+            let expectedCallType = SQLiteApiProviderCallType.sqlite3BindText(.value(self.pointer), Int32(testCase.index), testCase.value, -1,
                                                                              self.apiProvider.SQLITE_TRANSIENT)
             let expectedCalls = [SQLiteApiProviderMock.Call(id: index, callType: expectedCallType)]
             XCTAssertEqual(self.apiProvider.calls, expectedCalls)

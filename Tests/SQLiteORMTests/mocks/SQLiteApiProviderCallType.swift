@@ -2,11 +2,11 @@ import Foundation
 @testable import SQLiteORM
 
 enum SQLiteApiProviderCallType {
-    case sqlite3Open(_ filename: String, _ ppDb: UnsafeMutablePointer<OpaquePointer?>!)
+    case sqlite3Open(_ filename: String, _ ppDb: Ignorable<UnsafeMutablePointer<OpaquePointer?>>)
     case sqlite3Errmsg(_ ppDb: OpaquePointer!)
-    case sqlite3Close(_ ppDb: OpaquePointer!)
-    case sqlite3LastInsertRowid(_ ppDb: OpaquePointer!)
-    case sqlite3PrepareV2(_ db: OpaquePointer!,
+    case sqlite3Close(_ ppDb: Ignorable<OpaquePointer>)
+    case sqlite3LastInsertRowid(_ ppDb: Ignorable<OpaquePointer>)
+    case sqlite3PrepareV2(_ db: Ignorable<OpaquePointer>,
                           _ zSql: String,
                           _ nByte: Int32,
                           _ ppStmt: Ignorable<UnsafeMutablePointer<OpaquePointer?>>,
@@ -24,9 +24,9 @@ enum SQLiteApiProviderCallType {
     case sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32)
     case sqlite3ColumnInt(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
     case sqlite3ColumnDouble(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
-    case sqlite3BindText(_ pStmt: OpaquePointer!,
+    case sqlite3BindText(_ pStmt: Ignorable<OpaquePointer>,
                          _ idx: Int32,
-                         _ value: UnsafePointer<CChar>!,
+                         _ value: String,
                          _ len: Int32,
                          _ dtor: (@convention(c) (UnsafeMutableRawPointer?) -> Void)!)
     case sqlite3BindInt(_ pStmt: OpaquePointer!, _ idx: Int32, _ value: Int32)

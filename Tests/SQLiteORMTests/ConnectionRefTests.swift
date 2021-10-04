@@ -32,14 +32,9 @@ class ConnectionRefTests: XCTestCase {
         self.apiProvider.sqlite3PrepareV2StmtToAssign = stmt
         let statement = try connectionRef.prepare(sql: sql)
         XCTAssertEqual((statement as! StatementImpl).stmt, stmt)
-        XCTAssertEqual(self.apiProvider.calls.count, 1)
-        switch self.apiProvider.calls[0].callType {
-        case .sqlite3PrepareV2(let db, let sql, _, _, _):
-            XCTAssertEqual(db, self.db)
-            XCTAssertEqual(sql, "SELECT * FROM all_humans")
-        default:
-            XCTAssert(false)
-        }
+        XCTAssertEqual(self.apiProvider.calls, [
+            SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3PrepareV2(.value(self.db), "SELECT * FROM all_humans", -1, .ignore, nil)),
+        ])
     }
     
     func testPrepareWithSQLiteError() throws {
@@ -102,7 +97,7 @@ class ConnectionRefTests: XCTestCase {
         XCTAssertEqual(self.apiProvider.calls, [])
         let connectionRef = try ConnectionRef(connection: self.connectionHolderMock)
         _ = connectionRef.lastInsertRowid
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3LastInsertRowid(self.db))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3LastInsertRowid(.value(self.db)))])
         XCTAssertEqual(self.connectionHolderMock.calls, [ConnectionHolderMock.Call(id: 0, callType: .increment)])
     }
     
