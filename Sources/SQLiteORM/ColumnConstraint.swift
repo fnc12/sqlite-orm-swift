@@ -6,6 +6,45 @@ public enum ColumnConstraint {
     case unique(conflictClause: ConflictClause?)
 }
 
+extension ColumnConstraint: Serializable {
+    func serialize() -> String {
+        switch self {
+        case .primaryKey(let orderMaybe, let conflictClauseMaybe, let autoincrement):
+            var res = "PRIMARY KEY"
+            if let order = orderMaybe {
+                let orderString = order.serialize()
+                res += " "
+                res += orderString
+            }
+            if let conflictClause = conflictClauseMaybe {
+                let conflictClauseString = conflictClause.serialize()
+                res += " "
+                res += conflictClauseString
+            }
+            if autoincrement {
+                res += " AUTOINCREMENT"
+            }
+            return res
+        case .notNull(let conflictClauseMaybe):
+            var res = "NOT NULL"
+            if let conflictClause = conflictClauseMaybe {
+                let conflictClauseString = conflictClause.serialize()
+                res += " "
+                res += conflictClauseString
+            }
+            return res
+        case .unique(let conflictClauseMaybe):
+            var res = "UNIQUE"
+            if let conflictClause = conflictClauseMaybe {
+                let conflictClauseString = conflictClause.serialize()
+                res += " "
+                res += conflictClauseString
+            }
+            return res
+        }
+    }
+}
+
 extension ColumnConstraint: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {

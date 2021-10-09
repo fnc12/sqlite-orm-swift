@@ -173,7 +173,7 @@ extension SQLiteApiProviderMock: SQLiteApiProvider {
     }
     
     func sqlite3ColumnCount(_ pStmt: OpaquePointer!) -> Int32 {
-        let call = self.makeCall(with: .sqlite3ColumnCount(pStmt))
+        let call = self.makeCall(with: .sqlite3ColumnCount(.value(pStmt)))
         self.calls.append(call)
         if self.forwardsCalls {
             return sqlite3_column_count(pStmt)

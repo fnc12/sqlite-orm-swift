@@ -43,7 +43,7 @@ class SerializeTests: XCTestCase {
                      expected: "rating REAL"),
         ]
         for testCase in testCases {
-            let value = serialize(column: testCase.anyColumn)
+            let value = testCase.anyColumn.serialize()
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -58,7 +58,7 @@ class SerializeTests: XCTestCase {
             TestCase(order: .desc, expected: "DESC"),
         ]
         for testCase in testCases {
-            let value = serialize(order: testCase.order)
+            let value = testCase.order.serialize()
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -76,7 +76,7 @@ class SerializeTests: XCTestCase {
             TestCase(conflictClause: .replace, expected: "ON CONFLICT REPLACE"),
         ]
         for testCase in testCases {
-            let value = serialize(conflictClause: testCase.conflictClause)
+            let value = testCase.conflictClause.serialize()
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -110,7 +110,7 @@ class SerializeTests: XCTestCase {
                      expected: "NOT NULL ON CONFLICT REPLACE"),
         ]
         for testCase in testCases {
-            let result = serialize(columnConstraint: testCase.columnConstraint)
+            let result = testCase.columnConstraint.serialize()
             XCTAssertEqual(result, testCase.expected)
         }
     }

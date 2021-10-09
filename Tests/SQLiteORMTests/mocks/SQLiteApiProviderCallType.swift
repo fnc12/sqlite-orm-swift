@@ -18,7 +18,7 @@ enum SQLiteApiProviderCallType {
                      _ errmsg: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!)
     case sqlite3Finalize(_ pStmt: Ignorable<OpaquePointer>)
     case sqlite3Step(_ pStmt: Ignorable<OpaquePointer>)
-    case sqlite3ColumnCount(_ pStmt: OpaquePointer!)
+    case sqlite3ColumnCount(_ pStmt: Ignorable<OpaquePointer>)
     case sqlite3ColumnValue(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
     case sqlite3ColumnText(_ pStmt: Ignorable<OpaquePointer>, _ iCol: Int32)
     case sqlite3ColumnType(_ pStmt: OpaquePointer!, _ iCol: Int32)

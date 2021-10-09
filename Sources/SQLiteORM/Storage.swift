@@ -185,7 +185,7 @@ public class Storage: NSObject {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
         for (columnIndex, column) in columns.enumerated() {
-            let columnString = serialize(column: column)
+            let columnString = column.serialize()
             sql += "\(columnString)"
             if columnIndex < columnsCount - 1 {
                 sql += ", "
@@ -333,7 +333,7 @@ public class Storage: NSObject {
         return res
     }
     
-    public func getAll<T>() throws -> [T] where T: Initializable {
+    public func getAll<T>(_ constraints: SelectConstraintBuilder...) throws -> [T] where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -363,11 +363,11 @@ public class Storage: NSObject {
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        } while resultCode != apiProvider.SQLITE_DONE
+        } while resultCode != self.apiProvider.SQLITE_DONE
         return result
     }
     
-    public func delete<T>(object: T) throws {
+    public func delete<T>(_ object: T) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -404,7 +404,7 @@ public class Storage: NSObject {
         }
     }
     
-    public func update<T>(object: T) throws {
+    public func update<T>(_ object: T) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -520,7 +520,7 @@ public class Storage: NSObject {
         }
     }
     
-    public func insert<T>(object: T) throws -> Int64 {
+    public func insert<T>(_ object: T) throws -> Int64 {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -556,7 +556,7 @@ public class Storage: NSObject {
         return connectionRef.lastInsertRowid
     }
     
-    public func replace<T>(object: T) throws {
+    public func replace<T>(_ object: T) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }

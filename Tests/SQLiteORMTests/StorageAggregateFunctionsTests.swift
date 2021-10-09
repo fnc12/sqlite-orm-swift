@@ -61,7 +61,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: TotalTest(value: 1))
+                        try storage.replace(TotalTest(value: 1))
                         expectedResult = 1
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(value) FROM total_test", -1, .ignore, nil)),
@@ -72,8 +72,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: TotalTest(value: 2))
-                        try storage.replace(object: TotalTest(value: 3))
+                        try storage.replace(TotalTest(value: 2))
+                        try storage.replace(TotalTest(value: 3))
                         expectedResult = 5
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(value) FROM total_test", -1, .ignore, nil)),
@@ -100,7 +100,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: TotalTest(value: 0, nullableValue: 3))
+                        try storage.replace(TotalTest(value: 0, nullableValue: 3))
                         expectedResult = 3
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(null_value) FROM total_test", -1, .ignore, nil)),
@@ -111,8 +111,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: TotalTest(value: 0, nullableValue: 4))
-                        try storage.replace(object: TotalTest(value: 0, nullableValue: 6))
+                        try storage.replace(TotalTest(value: 0, nullableValue: 4))
+                        try storage.replace(TotalTest(value: 0, nullableValue: 6))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(null_value) FROM total_test", -1, .ignore, nil)),
@@ -187,7 +187,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: SumTest(value: 1))
+                        try storage.replace(SumTest(value: 1))
                         expectedResult = 1
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(value) FROM sum_test", -1, .ignore, nil)),
@@ -200,8 +200,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: SumTest(value: 2))
-                        try storage.replace(object: SumTest(value: 3))
+                        try storage.replace(SumTest(value: 2))
+                        try storage.replace(SumTest(value: 3))
                         expectedResult = 5
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(value) FROM sum_test", -1, .ignore, nil)),
@@ -231,7 +231,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: SumTest(value: 0, nullableValue: 3))
+                        try storage.replace(SumTest(value: 0, nullableValue: 3))
                         expectedResult = 3
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(null_value) FROM sum_test", -1, .ignore, nil)),
@@ -244,8 +244,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: SumTest(value: 0, nullableValue: 4))
-                        try storage.replace(object: SumTest(value: 0, nullableValue: 6))
+                        try storage.replace(SumTest(value: 0, nullableValue: 4))
+                        try storage.replace(SumTest(value: 0, nullableValue: 6))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(null_value) FROM sum_test", -1, .ignore, nil)),
@@ -322,7 +322,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: MinTest(value: 10))
+                        try storage.replace(MinTest(value: 10))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(value) FROM min_test", -1, .ignore, nil)),
@@ -335,8 +335,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: MinTest(value: 4))
-                        try storage.replace(object: MinTest(value: 6))
+                        try storage.replace(MinTest(value: 4))
+                        try storage.replace(MinTest(value: 6))
                         expectedResult = 4
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(value) FROM min_test", -1, .ignore, nil)),
@@ -366,7 +366,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: MinTest(value: 0, nullableValue: 10))
+                        try storage.replace(MinTest(value: 0, nullableValue: 10))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(null_value) FROM min_test", -1, .ignore, nil)),
@@ -379,8 +379,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: MinTest(value: 0, nullableValue: 4))
-                        try storage.replace(object: MinTest(value: 0, nullableValue: 6))
+                        try storage.replace(MinTest(value: 0, nullableValue: 4))
+                        try storage.replace(MinTest(value: 0, nullableValue: 6))
                         expectedResult = 4
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(null_value) FROM min_test", -1, .ignore, nil)),
@@ -457,7 +457,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: MaxTest(value: 10))
+                        try storage.replace(MaxTest(value: 10))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(value) FROM max_test", -1, .ignore, nil)),
@@ -470,8 +470,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: MaxTest(value: 4))
-                        try storage.replace(object: MaxTest(value: 6))
+                        try storage.replace(MaxTest(value: 4))
+                        try storage.replace(MaxTest(value: 6))
                         expectedResult = 6
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(value) FROM max_test", -1, .ignore, nil)),
@@ -501,7 +501,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(object: MaxTest(value: 0, nullableValue: 10))
+                        try storage.replace(MaxTest(value: 0, nullableValue: 10))
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(null_value) FROM max_test", -1, .ignore, nil)),
@@ -514,8 +514,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(object: MaxTest(value: 0, nullableValue: 4))
-                        try storage.replace(object: MaxTest(value: 0, nullableValue: 6))
+                        try storage.replace(MaxTest(value: 0, nullableValue: 4))
+                        try storage.replace(MaxTest(value: 0, nullableValue: 6))
                         expectedResult = 6
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(null_value) FROM max_test", -1, .ignore, nil)),
@@ -589,7 +589,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        try storage.replace(object: GroupConcatTest(value: 1))
+                        try storage.replace(GroupConcatTest(value: 1))
                         expectedResult = ["1"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
@@ -602,8 +602,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        try storage.replace(object: GroupConcatTest(value: 3))
-                        try storage.replace(object: GroupConcatTest(value: 5))
+                        try storage.replace(GroupConcatTest(value: 3))
+                        try storage.replace(GroupConcatTest(value: 5))
                         expectedResult = ["3,5", "5,3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(value) FROM group_concat_test", -1, .ignore, nil)),
@@ -631,7 +631,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        try storage.replace(object: GroupConcatTest(value: 3))
+                        try storage.replace(GroupConcatTest(value: 3))
                         expectedResult = ["3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(value, '-') FROM group_concat_test", -1, .ignore, nil)),
@@ -644,8 +644,8 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        try storage.replace(object: GroupConcatTest(value: 3))
-                        try storage.replace(object: GroupConcatTest(value: 5))
+                        try storage.replace(GroupConcatTest(value: 3))
+                        try storage.replace(GroupConcatTest(value: 5))
                         expectedResult = ["3-5", "5-3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(value, '-') FROM group_concat_test", -1, .ignore, nil)),
@@ -716,7 +716,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                 })
                 try section("one row with null", routine: {
-                    try storage.replace(object: CountTest(value: nil))
+                    try storage.replace(CountTest(value: nil))
                     expectedCount = 0
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
@@ -727,9 +727,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                 })
                 try section("three rows without null", routine: {
-                    try storage.replace(object: CountTest(value: 10))
-                    try storage.replace(object: CountTest(value: 20))
-                    try storage.replace(object: CountTest(value: 30))
+                    try storage.replace(CountTest(value: 10))
+                    try storage.replace(CountTest(value: 20))
+                    try storage.replace(CountTest(value: 30))
                     expectedCount = 3
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
@@ -784,9 +784,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                 })
                 try section("3 rows", routine: {
-                    try storage.replace(object: CountTest(value: 1))
-                    try storage.replace(object: CountTest(value: 2))
-                    try storage.replace(object: CountTest(value: 3))
+                    try storage.replace(CountTest(value: 1))
+                    try storage.replace(CountTest(value: 2))
+                    try storage.replace(CountTest(value: 3))
                     expectedCount = 3
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
@@ -855,9 +855,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     expectedResult = nil
                 }
                 try section("insert something", routine: {
-                    try storage.replace(object: AvgTest(value: 1))
-                    try storage.replace(object: AvgTest(value: 4))
-                    try storage.replace(object: AvgTest(value: 10))
+                    try storage.replace(AvgTest(value: 1))
+                    try storage.replace(AvgTest(value: 4))
+                    try storage.replace(AvgTest(value: 10))
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),

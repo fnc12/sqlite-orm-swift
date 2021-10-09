@@ -33,7 +33,6 @@ class StorageTests: XCTestCase {
     }
     
     func testFilename() throws {
-        self.apiProvider.forwardsCalls = true
         struct TestCase {
             let filename: String
         }
@@ -45,56 +44,146 @@ class StorageTests: XCTestCase {
             TestCase(filename: "company.db"),
         ]
         for testCase in testCases {
-            let storage = try Storage(filename: testCase.filename, apiProvider: self.apiProvider, tables: [])
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let storage = try Storage(filename: testCase.filename, apiProvider: apiProvider, tables: [])
             XCTAssertEqual(storage.filename, testCase.filename)
         }
     }
     
-    func testCtorFile() throws {
-        self.apiProvider.forwardsCalls = true
-        let storage = try Storage(filename: "db.sqlite",
-                                  apiProvider: apiProvider,
-                                  tables: [])
-        _ = storage
-        XCTAssertEqual(self.apiProvider.calls.count, 0)
+    func testCtorDtor() throws {
+        try testCase(#function, routine: {
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            var expectedCtorCalls = [SQLiteApiProviderMock.Call]()
+            var expectedDtorCalls = [SQLiteApiProviderMock.Call]()
+            var ctorCalls = [SQLiteApiProviderMock.Call]()
+            var dtorCalls = [SQLiteApiProviderMock.Call]()
+            var filename = ""
+            try section("file", routine: {
+                filename = "db.sqlite"
+                expectedCtorCalls = []
+                expectedDtorCalls = []
+            })
+            try section("memory", routine: {
+                try section("empty filename", routine: {
+                    filename = ""
+                })
+                try section(":memory: filename", routine: {
+                    filename = ":memory:"
+                })
+                expectedCtorCalls = [.init(id: 0, callType: .sqlite3Open(filename, .ignore))]
+                expectedDtorCalls = [.init(id: 0, callType: .sqlite3Close(.ignore))]
+            })
+            var storage: Storage? = try Storage(filename: filename,
+                                                apiProvider: apiProvider,
+                                                tables: [])
+            _ = storage
+            ctorCalls = apiProvider.calls
+            apiProvider.resetCalls()
+            storage = nil
+            dtorCalls = apiProvider.calls
+            XCTAssertEqual(expectedCtorCalls, ctorCalls)
+            XCTAssertEqual(expectedDtorCalls, dtorCalls)
+        })
     }
     
-    func testCtorDtorInMemory() throws {
-        self.apiProvider.forwardsCalls = true
-        var storage: Storage? = try Storage(filename: "",
-                                            apiProvider: self.apiProvider,
-                                            tables: [])
-        _ = storage
-        XCTAssertEqual(self.apiProvider.calls.count, 1)
-        switch self.apiProvider.calls[0].callType {
-        case .sqlite3Open(let filename, _):
-            XCTAssertEqual(filename, "")
-        default:
-            XCTAssert(false)
-        }
-        
-        storage = nil
-        XCTAssertEqual(self.apiProvider.calls.count, 2)
-        switch self.apiProvider.calls[1].callType {
-        case .sqlite3Close(_):
-            XCTAssert(true)
-        default:
-            XCTAssert(false)
-        }
-    }
-
-    func testGetAllThrowTypeIsNotMapped() throws {
-        try storage.syncSchema(preserve: true)
-        
-        do {
-            var visits: [Visit] = try storage.getAll()
-            XCTAssert(false)
-            visits.removeAll()
-        }catch SQLiteORM.Error.typeIsNotMapped {
-            XCTAssert(true)
-        }catch{
-            XCTAssert(false)
-        }
+    func testGetAll() throws {
+        try testCase(#function, routine: {
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let createStorage = { (filename: String) throws -> Storage in
+                let storage = try Storage(filename: filename,
+                                          apiProvider: apiProvider,
+                                          tables: [Table<User>(name: "users",
+                                                               columns:
+                                                                Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                               Column(name: "name", keyPath: \User.name, constraints: notNull()))])
+                try storage.syncSchema(preserve: false)
+                return storage
+            }
+            try section("error", routine: {
+                let storage = try createStorage("")
+                do {
+                    let visits: [Visit] = try storage.getAll()
+                    XCTAssert(false)
+                    _ = visits
+                }catch SQLiteORM.Error.typeIsNotMapped {
+                    XCTAssert(true)
+                }catch{
+                    XCTAssert(false)
+                }
+            })
+            try section("no error", routine: {
+                var inMemory = false
+                try section("file", routine: {
+                    inMemory = false
+                })
+                try section("memory", routine: {
+                    inMemory = true
+                })
+                let filename = inMemory ? "" : "db.sqlite"
+                if !inMemory {
+                    remove(filename)
+                }
+                let storage = try createStorage(filename)
+                var expectedCalls = [SQLiteApiProviderMock.Call]()
+                if inMemory {
+                    let db = storage.connection.dbMaybe!
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 3, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                }else{
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users", -1, .ignore, nil)),
+                        .init(id: 2, callType: .sqlite3Step(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 5, callType: .sqlite3Close(.ignore)),
+                    ]
+                }
+                apiProvider.resetCalls()
+                var users: [User] = try storage.getAll()
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+                XCTAssertEqual(users, [])
+                
+                try storage.replace(User(id: 3, name: "Ted"))
+                if inMemory {
+                    let db = storage.connection.dbMaybe!
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 4, callType: .sqlite3ColumnText(.ignore, 1)),
+                        .init(id: 5, callType: .sqlite3Step(.ignore)),
+                        .init(id: 6, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 7, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                }else{
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users", -1, .ignore, nil)),
+                        .init(id: 2, callType: .sqlite3Step(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 4, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 5, callType: .sqlite3ColumnText(.ignore, 1)),
+                        .init(id: 6, callType: .sqlite3Step(.ignore)),
+                        .init(id: 7, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 8, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 9, callType: .sqlite3Close(.ignore)),
+                    ]
+                }
+                apiProvider.resetCalls()
+                users = try storage.getAll()
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+                XCTAssertEqual(users, [User(id: 3, name: "Ted")])
+            })
+        })
     }
     
     func testGet() throws {
@@ -108,7 +197,7 @@ class StorageTests: XCTestCase {
         }
         try storage.syncSchema(preserve: true)
         
-        try storage.replace(object: User(id: 1, name: "Bebe Rexha"))
+        try storage.replace(User(id: 1, name: "Bebe Rexha"))
         let bebeRexhaMaybe: User? = try storage.get(id: 1)
         XCTAssertEqual(bebeRexhaMaybe, User(id: 1, name: "Bebe Rexha"))
         
@@ -121,12 +210,12 @@ class StorageTests: XCTestCase {
     func testUpdate() throws {
         try storage.syncSchema(preserve: true)
         var bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try storage.replace(object: bebeRexha)
+        try storage.replace(bebeRexha)
         var allUsers: [User] = try storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
         
         bebeRexha.name = "Ariana Grande"
-        try storage.update(object: bebeRexha)
+        try storage.update(bebeRexha)
         allUsers = try storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
     }
@@ -136,12 +225,12 @@ class StorageTests: XCTestCase {
         
         let bebeRexha = User(id: 1, name: "Bebe Rexha")
         let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try storage.replace(object: bebeRexha)
-        try storage.replace(object: arianaGrande)
+        try storage.replace(bebeRexha)
+        try storage.replace(arianaGrande)
         var allUsers: [User] = try storage.getAll()
         XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
         
-        try storage.delete(object: bebeRexha)
+        try storage.delete(bebeRexha)
         allUsers = try storage.getAll()
         XCTAssert(allUsers == [arianaGrande])
     }
@@ -163,13 +252,13 @@ class StorageTests: XCTestCase {
         XCTAssertTrue(allUsers.isEmpty)
         
         let bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try storage.replace(object: bebeRexha)
+        try storage.replace(bebeRexha)
         
         allUsers = try storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
         
         let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try storage.replace(object: arianaGrande)
+        try storage.replace(arianaGrande)
         
         allUsers = try storage.getAll()
         XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
@@ -204,7 +293,7 @@ class StorageTests: XCTestCase {
             
             var bebeRexha = User(id: 0, name: "Bebe Rexha")
             apiProvider.resetCalls()
-            let bebeRexhaId = try storage.insert(object: bebeRexha)
+            let bebeRexhaId = try storage.insert(bebeRexha)
             XCTAssertEqual(bebeRexhaId, 1)
             var expectedCalls = [SQLiteApiProviderMock.Call]()
             if !inMemory {
@@ -235,7 +324,7 @@ class StorageTests: XCTestCase {
             
             var arianaGrande = User(id: 0, name: "Ariana Grande")
             apiProvider.resetCalls()
-            let arianaGrandeId = try storage.insert(object: arianaGrande)
+            let arianaGrandeId = try storage.insert(arianaGrande)
             if !inMemory {
                 expectedCalls = [
                     .init(id: 0, callType: .sqlite3Open(filename, .ignore)),

@@ -132,7 +132,7 @@ class StatementTests: XCTestCase {
     func testColumnCount() {
         XCTAssertEqual(self.apiProvider.calls, [])
         _ = self.statement.columnCount()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ColumnCount(self.pointer))])
+        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ColumnCount(.value(self.pointer)))])
     }
     
     func testStep() {
