@@ -77,11 +77,11 @@ public class AnyColumn: NSObject {
 }
 
 extension AnyColumn: Serializable {
-    func serialize() -> String {
+    public func serialize(with schemaProvider: SchemaProvider) -> String {
         let typeString = self.sqliteTypeName
         var res = "\(self.name) \(typeString)"
         for constraint in self.constraints {
-            let constraintString = constraint.serialize()
+            let constraintString = constraint.serialize(with: schemaProvider)
             res += " "
             res += constraintString
         }

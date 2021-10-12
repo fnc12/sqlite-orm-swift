@@ -6,7 +6,7 @@ public enum Order {
 }
 
 extension Order: Serializable {
-    func serialize() -> String {
+    public func serialize(with schemaProvider: SchemaProvider) -> String {
         switch self {
         case .asc: return "ASC"
         case .desc: return "DESC"

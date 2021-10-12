@@ -17,6 +17,38 @@ class StatementTests: XCTestCase {
         self.apiProvider = nil
     }
     
+    func testStatement() throws {
+        try testCase(#function, routine: {
+            let pointer = OpaquePointer(bitPattern: 1)!
+            let apiProvider = SQLiteApiProviderMock()
+            var statement: StatementImpl? = StatementImpl(stmt: pointer, apiProvider: apiProvider)
+            XCTAssertEqual(apiProvider.calls, [])
+            
+            var expectedCalls = [SQLiteApiProviderMock.Call]()
+            try section("none", routine: {
+                expectedCalls = []
+            })
+            try section("step", routine: {
+                expectedCalls = [
+                    .init(id: 0, callType: .sqlite3Step(.value(pointer))),
+                ]
+                _ = statement!.step()
+            })
+            try section("columnCount", routine: {
+                expectedCalls = [
+                    .init(id: 0, callType: .sqlite3ColumnCount(.value(pointer))),
+                ]
+                _ = statement!.columnCount()
+            })
+            XCTAssertEqual(apiProvider.calls, expectedCalls)
+            
+            let stmt = statement!.stmt
+            apiProvider.resetCalls()
+            statement = nil
+            XCTAssertEqual(apiProvider.calls, [.init(id: 0, callType: .sqlite3Finalize(.value(stmt)))])
+        })
+    }
+    
     func testBindText() {
         struct TestCase {
             let value: String
@@ -127,26 +159,5 @@ class StatementTests: XCTestCase {
             XCTAssert((sqliteValue as! SQLiteValueImpl).apiProvider === self.apiProvider)
             self.apiProvider.calls.removeAll()
         }
-    }
-    
-    func testColumnCount() {
-        XCTAssertEqual(self.apiProvider.calls, [])
-        _ = self.statement.columnCount()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3ColumnCount(.value(self.pointer)))])
-    }
-    
-    func testStep() {
-        XCTAssertEqual(self.apiProvider.calls, [])
-        _ = self.statement.step()
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Step(.value(self.pointer)))])
-    }
-    
-    func testDeinit() {
-        var newStatement: Statement? = StatementImpl(stmt: self.pointer, apiProvider: self.apiProvider)
-        _ = newStatement    //  to erase warning
-        XCTAssertEqual(self.apiProvider.calls, [])
-        
-        newStatement = nil
-        XCTAssertEqual(self.apiProvider.calls, [SQLiteApiProviderMock.Call(id: 0, callType: .sqlite3Finalize(.value(self.pointer)))])
     }
 }

@@ -7,17 +7,17 @@ public enum ColumnConstraint {
 }
 
 extension ColumnConstraint: Serializable {
-    func serialize() -> String {
+    public func serialize(with schemaProvider: SchemaProvider) -> String {
         switch self {
         case .primaryKey(let orderMaybe, let conflictClauseMaybe, let autoincrement):
             var res = "PRIMARY KEY"
             if let order = orderMaybe {
-                let orderString = order.serialize()
+                let orderString = order.serialize(with: schemaProvider)
                 res += " "
                 res += orderString
             }
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize()
+                let conflictClauseString = conflictClause.serialize(with: schemaProvider)
                 res += " "
                 res += conflictClauseString
             }
@@ -28,7 +28,7 @@ extension ColumnConstraint: Serializable {
         case .notNull(let conflictClauseMaybe):
             var res = "NOT NULL"
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize()
+                let conflictClauseString = conflictClause.serialize(with: schemaProvider)
                 res += " "
                 res += conflictClauseString
             }
@@ -36,7 +36,7 @@ extension ColumnConstraint: Serializable {
         case .unique(let conflictClauseMaybe):
             var res = "UNIQUE"
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize()
+                let conflictClauseString = conflictClause.serialize(with: schemaProvider)
                 res += " "
                 res += conflictClauseString
             }

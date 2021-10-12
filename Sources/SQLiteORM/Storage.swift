@@ -4,6 +4,10 @@ public protocol Initializable {
     init()
 }
 
+public protocol SchemaProvider {
+    func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String
+}
+
 public class Storage: NSObject {
     private let tables: [AnyTable]
     private let inMemory: Bool
@@ -22,7 +26,10 @@ public class Storage: NSObject {
     }
     
     convenience init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
-        try self.init(filename: filename, apiProvider: apiProvider, connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider), tables: tables)
+        try self.init(filename: filename,
+                      apiProvider: apiProvider,
+                      connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider),
+                      tables: tables)
     }
     
     public convenience init(filename: String, tables: AnyTable...) throws {
@@ -185,7 +192,7 @@ public class Storage: NSObject {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
         for (columnIndex, column) in columns.enumerated() {
-            let columnString = column.serialize()
+            let columnString = column.serialize(with: self)
             sql += "\(columnString)"
             if columnIndex < columnsCount - 1 {
                 sql += ", "
@@ -333,11 +340,15 @@ public class Storage: NSObject {
         return res
     }
     
-    public func getAll<T>(_ constraints: SelectConstraintBuilder...) throws -> [T] where T: Initializable {
+    public func getAll<T>(_ constraints: SelectConstraint...) throws -> [T] where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
-        let sql = "SELECT * FROM \(anyTable.name)"
+        var sql = "SELECT * FROM \(anyTable.name)"
+        for constraint in constraints {
+            let constraintsString = try constraint.serialize(with: self)
+            sql += " \(constraintsString)"
+        }
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         let table = anyTable as! Table<T>
@@ -589,6 +600,18 @@ public class Storage: NSObject {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
+    }
+}
+
+extension Storage: SchemaProvider {
+    public func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        guard let column = anyTable.columns.first(where: { $0.keyPath == keyPath }) else {
+            throw Error.columnNotFound
+        }
+        return "\(anyTable.name).\(column.name)"
     }
 }
 

@@ -182,6 +182,60 @@ class StorageTests: XCTestCase {
                 users = try storage.getAll()
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
                 XCTAssertEqual(users, [User(id: 3, name: "Ted")])
+                
+                apiProvider.resetCalls()
+                if inMemory {
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 5", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 3, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                }else{
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 5", -1, .ignore, nil)),
+                        .init(id: 2, callType: .sqlite3Step(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 5, callType: .sqlite3Close(.ignore)),
+                    ]
+                }
+                users = try storage.getAll(where_(equal(lhs: \User.id, rhs: 5)))
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+                XCTAssertEqual(users, [])
+                
+                apiProvider.resetCalls()
+                if inMemory {
+                    let db = storage.connection.dbMaybe!
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users WHERE users.id == 3", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 4, callType: .sqlite3ColumnText(.ignore, 1)),
+                        .init(id: 5, callType: .sqlite3Step(.ignore)),
+                        .init(id: 6, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 7, callType: .sqlite3Finalize(.ignore)),
+                    ]
+                }else{
+                    expectedCalls = [
+                        .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 3", -1, .ignore, nil)),
+                        .init(id: 2, callType: .sqlite3Step(.ignore)),
+                        .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 4, callType: .sqlite3ColumnInt(.ignore, 0)),
+                        .init(id: 5, callType: .sqlite3ColumnText(.ignore, 1)),
+                        .init(id: 6, callType: .sqlite3Step(.ignore)),
+                        .init(id: 7, callType: .sqlite3ColumnCount(.ignore)),
+                        .init(id: 8, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 9, callType: .sqlite3Close(.ignore)),
+                    ]
+                }
+                apiProvider.resetCalls()
+                users = try storage.getAll(where_(equal(lhs: \User.id, rhs: 3)))
+                XCTAssertEqual(apiProvider.calls, expectedCalls)
+                XCTAssertEqual(users, [User(id: 3, name: "Ted")])
             })
         })
     }
