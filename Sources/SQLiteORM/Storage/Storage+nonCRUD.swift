@@ -18,7 +18,7 @@ extension Storage {
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
     }
-    
+
     public func getAll<T>(_ constraints: SelectConstraint...) throws -> [T] where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped

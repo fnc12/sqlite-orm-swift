@@ -26,7 +26,7 @@ extension Optional: ConstructableFromSQLiteValue where Wrapped: ConstructableFro
     public init(sqliteValue: SQLiteValue) {
         if sqliteValue.isNull {
             self = nil
-        }else{
+        } else {
             self = Wrapped(sqliteValue: sqliteValue)
         }
     }

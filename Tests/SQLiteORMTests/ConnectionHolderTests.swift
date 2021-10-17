@@ -5,15 +5,15 @@ class ConnectionHolderTests: XCTestCase {
     let dbPointer = OpaquePointer(bitPattern: 1)!
     let filename = ""
     var apiProvider: SQLiteApiProviderMock!
-    
+
     override func setUpWithError() throws {
         self.apiProvider = .init()
     }
-    
+
     override func tearDownWithError() throws {
         self.apiProvider = nil
     }
-    
+
     func testIncrement() throws {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
         self.apiProvider.sqlite3OpenDbToAssign = dbPointer
@@ -21,13 +21,13 @@ class ConnectionHolderTests: XCTestCase {
         try connectionHolder.increment()
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls.first!.callType {
-        case .sqlite3Open(_, _):
+        case .sqlite3Open:
             XCTAssert(true)
         default:
             XCTAssert(false)
         }
     }
-    
+
     func testIncrementWithSQLiteError() throws {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
         self.apiProvider.sqlite3OpenDbToAssign = dbPointer
@@ -35,9 +35,9 @@ class ConnectionHolderTests: XCTestCase {
         do {
             try connectionHolder.increment()
             XCTAssert(false)
-        }catch SQLiteORM.Error.sqliteError(let code, _) {
+        } catch SQLiteORM.Error.sqliteError(let code, _) {
             XCTAssertEqual(code, 1)
-        }catch{
+        } catch {
             XCTAssert(false)
         }
         XCTAssertEqual(self.apiProvider.calls.count, 1)
@@ -48,15 +48,15 @@ class ConnectionHolderTests: XCTestCase {
             XCTAssert(false)
         }
     }
-    
+
     func testIncrementWithDbNil() throws {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
         do {
             try connectionHolder.increment()
             XCTAssert(false)
-        }catch SQLiteORM.Error.databaseIsNull {
+        } catch SQLiteORM.Error.databaseIsNull {
             XCTAssert(true)
-        }catch{
+        } catch {
             XCTAssert(false)
         }
         XCTAssertEqual(self.apiProvider.calls.count, 1)
@@ -68,7 +68,7 @@ class ConnectionHolderTests: XCTestCase {
             XCTAssert(false)
         }
     }
-    
+
     func testErrorMessageWithDbNil() {
         let errorString = NSString(string: "error")
         self.apiProvider.sqlite3ErrmsgToReturn = errorString.utf8String

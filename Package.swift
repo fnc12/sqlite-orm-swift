@@ -9,7 +9,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "SQLiteORM",
-            targets: ["SQLiteORM"]),
+            targets: ["SQLiteORM"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,6 +23,6 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "SQLiteORMTests",
-            dependencies: ["SQLiteORM"]),
+            dependencies: ["SQLiteORM"])
     ]
 )

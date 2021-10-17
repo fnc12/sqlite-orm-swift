@@ -37,7 +37,7 @@ extension Storage {
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
     }
-    
+
     public func update<T>(_ object: T) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -98,7 +98,7 @@ extension Storage {
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
     }
-    
+
     public func get<T>(id: Bindable...) throws -> T? where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -153,7 +153,7 @@ extension Storage {
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
     }
-    
+
     public func insert<T>(_ object: T) throws -> Int64 {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -189,7 +189,7 @@ extension Storage {
         }
         return connectionRef.lastInsertRowid
     }
-    
+
     public func replace<T>(_ object: T) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped

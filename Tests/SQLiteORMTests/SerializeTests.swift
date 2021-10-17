@@ -11,13 +11,13 @@ class SchemaProviderStub: SchemaProvider {
 }
 
 class SerializeTests: XCTestCase {
-    
+
     struct User {
         var id = 0
         var name = ""
         var rating = 0.0
     }
-    
+
     func testBinaryOperator() throws {
         struct TestCase {
             let value: BinaryOperator
@@ -37,7 +37,7 @@ class SerializeTests: XCTestCase {
             TestCase(value: greaterOrEqual(lhs: 1, rhs: \User.id), expected: "1 >= users.id"),
             TestCase(value: lesserThan(lhs: 2, rhs: \User.id), expected: "2 < users.id"),
             TestCase(value: lesserOrEqual(lhs: 4, rhs: \User.id), expected: "4 <= users.id"),
-            
+
             //  String
             TestCase(value: equal(lhs: \User.name, rhs: "Nicki"), expected: "users.name == 'Nicki'"),
             TestCase(value: notEqual(lhs: \User.name, rhs: "Alvaro"), expected: "users.name != 'Alvaro'"),
@@ -50,7 +50,7 @@ class SerializeTests: XCTestCase {
             TestCase(value: greaterThan(lhs: "Ava Max", rhs: \User.name), expected: "'Ava Max' > users.name"),
             TestCase(value: greaterOrEqual(lhs: "Rita Ora", rhs: \User.name), expected: "'Rita Ora' >= users.name"),
             TestCase(value: lesserThan(lhs: "Kesha", rhs: \User.name), expected: "'Kesha' < users.name"),
-            TestCase(value: lesserOrEqual(lhs: "Oliver Heldens", rhs: \User.name), expected: "'Oliver Heldens' <= users.name"),
+            TestCase(value: lesserOrEqual(lhs: "Oliver Heldens", rhs: \User.name), expected: "'Oliver Heldens' <= users.name")
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
@@ -64,7 +64,7 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(string, testCase.expected)
         }
     }
-    
+
     func testBinaryOperatorType() {
         struct TestCase {
             let binaryOperatorType: BinaryOperatorType
@@ -76,14 +76,14 @@ class SerializeTests: XCTestCase {
             TestCase(binaryOperatorType: .lesserThan, expected: "<"),
             TestCase(binaryOperatorType: .lesserOrEqual, expected: "<="),
             TestCase(binaryOperatorType: .greaterThan, expected: ">"),
-            TestCase(binaryOperatorType: .greaterOrEqual, expected: ">="),
+            TestCase(binaryOperatorType: .greaterOrEqual, expected: ">=")
         ]
         for testCase in testCases {
             let description = testCase.binaryOperatorType.description
             XCTAssertEqual(description, testCase.expected)
         }
     }
-    
+
     func testAnyColumn() {
         struct TestCase {
             let anyColumn: AnyColumn
@@ -98,16 +98,16 @@ class SerializeTests: XCTestCase {
                      expected: "id INTEGER PRIMARY KEY AUTOINCREMENT"),
             TestCase(anyColumn: Column(name: "identifier", keyPath: \User.id, constraints: notNull()),
                      expected: "identifier INTEGER NOT NULL"),
-            
+
             TestCase(anyColumn: Column(name: "name", keyPath: \User.name),
                      expected: "name TEXT"),
             TestCase(anyColumn: Column(name: "first_name", keyPath: \User.name, constraints: notNull()),
                      expected: "first_name TEXT NOT NULL"),
             TestCase(anyColumn: Column(name: "name", keyPath: \User.name, constraints: unique()),
                      expected: "name TEXT UNIQUE"),
-            
+
             TestCase(anyColumn: Column(name: "rating", keyPath: \User.rating),
-                     expected: "rating REAL"),
+                     expected: "rating REAL")
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
@@ -123,7 +123,7 @@ class SerializeTests: XCTestCase {
         }
         let testCases = [
             TestCase(order: .asc, expected: "ASC"),
-            TestCase(order: .desc, expected: "DESC"),
+            TestCase(order: .desc, expected: "DESC")
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
@@ -131,7 +131,7 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(value, testCase.expected)
         }
     }
-    
+
     func testConflictClause() {
         struct TestCase {
             let conflictClause: ConflictClause
@@ -142,7 +142,7 @@ class SerializeTests: XCTestCase {
             TestCase(conflictClause: .abort, expected: "ON CONFLICT ABORT"),
             TestCase(conflictClause: .fail, expected: "ON CONFLICT FAIL"),
             TestCase(conflictClause: .ignore, expected: "ON CONFLICT IGNORE"),
-            TestCase(conflictClause: .replace, expected: "ON CONFLICT REPLACE"),
+            TestCase(conflictClause: .replace, expected: "ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
@@ -150,7 +150,7 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(value, testCase.expected)
         }
     }
-    
+
     func testColumnConstraint() {
         struct TestCase {
             let columnConstraint: ColumnConstraint
@@ -165,7 +165,7 @@ class SerializeTests: XCTestCase {
                      expected: "PRIMARY KEY ASC"),
             TestCase(columnConstraint: .primaryKey(order: .asc, conflictClause: nil, autoincrement: true),
                      expected: "PRIMARY KEY ASC AUTOINCREMENT"),
-            
+
             TestCase(columnConstraint: .notNull(conflictClause: nil),
                      expected: "NOT NULL"),
             TestCase(columnConstraint: .notNull(conflictClause: .rollback),
@@ -177,7 +177,7 @@ class SerializeTests: XCTestCase {
             TestCase(columnConstraint: .notNull(conflictClause: .ignore),
                      expected: "NOT NULL ON CONFLICT IGNORE"),
             TestCase(columnConstraint: .notNull(conflictClause: .replace),
-                     expected: "NOT NULL ON CONFLICT REPLACE"),
+                     expected: "NOT NULL ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()

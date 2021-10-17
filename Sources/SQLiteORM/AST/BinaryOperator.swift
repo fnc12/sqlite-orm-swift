@@ -4,7 +4,7 @@ public class BinaryOperator: Expression {
     var lhs: Expression
     var rhs: Expression
     var operatorType: BinaryOperatorType
-    
+
     init(lhs: Expression, rhs: Expression, operatorType: BinaryOperatorType) {
         self.lhs = lhs
         self.rhs = rhs

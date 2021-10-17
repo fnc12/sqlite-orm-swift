@@ -39,12 +39,12 @@ enum SQLiteApiProviderCallType {
 }
 
 extension SQLiteApiProviderCallType: Equatable {
-    
+
     static func compareDtors<T>(_ lhs: T!,
                                 _ rhs: T!) -> Bool {
         return (lhs == nil) == (rhs == nil)
     }
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.sqlite3ValueType(leftValue), .sqlite3ValueType(rightValue)):

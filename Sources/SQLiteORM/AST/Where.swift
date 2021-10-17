@@ -2,7 +2,7 @@ import Foundation
 
 public class Where: SelectConstraint {
     var expression: Expression
-    
+
     init(expression: Expression) {
         self.expression = expression
     }

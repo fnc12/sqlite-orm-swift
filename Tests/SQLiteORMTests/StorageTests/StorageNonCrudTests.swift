@@ -5,16 +5,16 @@ class StorageNonCrudTests: XCTestCase {
     struct User: Initializable, Equatable {
         var id = 0
         var name = ""
-        
+
         static func == (lhs: Self, rhs: Self) -> Bool {
             return lhs.id == rhs.id && lhs.name == rhs.name
         }
     }
-    
+
     struct Visit: Initializable {
         var id = 0
     }
-    
+
     func testGetAll() throws {
         try testCase(#function, routine: {
             let apiProvider = SQLiteApiProviderMock()
@@ -35,9 +35,9 @@ class StorageNonCrudTests: XCTestCase {
                     let visits: [Visit] = try storage.getAll()
                     XCTAssert(false)
                     _ = visits
-                }catch SQLiteORM.Error.typeIsNotMapped {
+                } catch SQLiteORM.Error.typeIsNotMapped {
                     XCTAssert(true)
-                }catch{
+                } catch {
                     XCTAssert(false)
                 }
             })
@@ -61,23 +61,23 @@ class StorageNonCrudTests: XCTestCase {
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
-                        .init(id: 3, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 3, callType: .sqlite3Finalize(.ignore))
                     ]
-                }else{
+                } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
                         .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users", -1, .ignore, nil)),
                         .init(id: 2, callType: .sqlite3Step(.ignore)),
                         .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 4, callType: .sqlite3Finalize(.ignore)),
-                        .init(id: 5, callType: .sqlite3Close(.ignore)),
+                        .init(id: 5, callType: .sqlite3Close(.ignore))
                     ]
                 }
                 apiProvider.resetCalls()
                 var users: [User] = try storage.getAll()
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
                 XCTAssertEqual(users, [])
-                
+
                 try storage.replace(User(id: 3, name: "Ted"))
                 if inMemory {
                     let db = storage.connection.dbMaybe!
@@ -89,9 +89,9 @@ class StorageNonCrudTests: XCTestCase {
                         .init(id: 4, callType: .sqlite3ColumnText(.ignore, 1)),
                         .init(id: 5, callType: .sqlite3Step(.ignore)),
                         .init(id: 6, callType: .sqlite3ColumnCount(.ignore)),
-                        .init(id: 7, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 7, callType: .sqlite3Finalize(.ignore))
                     ]
-                }else{
+                } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
                         .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users", -1, .ignore, nil)),
@@ -102,36 +102,36 @@ class StorageNonCrudTests: XCTestCase {
                         .init(id: 6, callType: .sqlite3Step(.ignore)),
                         .init(id: 7, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 8, callType: .sqlite3Finalize(.ignore)),
-                        .init(id: 9, callType: .sqlite3Close(.ignore)),
+                        .init(id: 9, callType: .sqlite3Close(.ignore))
                     ]
                 }
                 apiProvider.resetCalls()
                 users = try storage.getAll()
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
                 XCTAssertEqual(users, [User(id: 3, name: "Ted")])
-                
+
                 apiProvider.resetCalls()
                 if inMemory {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 5", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
-                        .init(id: 3, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 3, callType: .sqlite3Finalize(.ignore))
                     ]
-                }else{
+                } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
                         .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 5", -1, .ignore, nil)),
                         .init(id: 2, callType: .sqlite3Step(.ignore)),
                         .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 4, callType: .sqlite3Finalize(.ignore)),
-                        .init(id: 5, callType: .sqlite3Close(.ignore)),
+                        .init(id: 5, callType: .sqlite3Close(.ignore))
                     ]
                 }
                 users = try storage.getAll(where_(equal(lhs: \User.id, rhs: 5)))
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
                 XCTAssertEqual(users, [])
-                
+
                 apiProvider.resetCalls()
                 if inMemory {
                     let db = storage.connection.dbMaybe!
@@ -143,9 +143,9 @@ class StorageNonCrudTests: XCTestCase {
                         .init(id: 4, callType: .sqlite3ColumnText(.ignore, 1)),
                         .init(id: 5, callType: .sqlite3Step(.ignore)),
                         .init(id: 6, callType: .sqlite3ColumnCount(.ignore)),
-                        .init(id: 7, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 7, callType: .sqlite3Finalize(.ignore))
                     ]
-                }else{
+                } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
                         .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.id == 3", -1, .ignore, nil)),
@@ -156,7 +156,7 @@ class StorageNonCrudTests: XCTestCase {
                         .init(id: 6, callType: .sqlite3Step(.ignore)),
                         .init(id: 7, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 8, callType: .sqlite3Finalize(.ignore)),
-                        .init(id: 9, callType: .sqlite3Close(.ignore)),
+                        .init(id: 9, callType: .sqlite3Close(.ignore))
                     ]
                 }
                 apiProvider.resetCalls()
@@ -166,7 +166,7 @@ class StorageNonCrudTests: XCTestCase {
             })
         })
     }
-    
+
     func testDeleteAll() throws {
         try testCase(#function, routine: {
             let apiProvider = SQLiteApiProviderMock()
@@ -186,9 +186,9 @@ class StorageNonCrudTests: XCTestCase {
                 do {
                     try storage.delete(all: Visit.self)
                     XCTAssert(false)
-                }catch SQLiteORM.Error.typeIsNotMapped {
+                } catch SQLiteORM.Error.typeIsNotMapped {
                     XCTAssert(true)
-                }catch{
+                } catch {
                     XCTAssert(false)
                 }
             })
@@ -205,14 +205,14 @@ class StorageNonCrudTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users", -1, .ignore, nil)),
                             .init(id: 2, callType: .sqlite3Step(.ignore)),
                             .init(id: 3, callType: .sqlite3Finalize(.ignore)),
-                            .init(id: 4, callType: .sqlite3Close(.ignore)),
+                            .init(id: 4, callType: .sqlite3Close(.ignore))
                         ]
                     })
                     try section("memory", routine: {
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users", -1, .ignore, nil)),
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
-                            .init(id: 2, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 2, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     let storage = try createStorage(filename)
@@ -231,14 +231,14 @@ class StorageNonCrudTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE users.id < 10", -1, .ignore, nil)),
                             .init(id: 2, callType: .sqlite3Step(.ignore)),
                             .init(id: 3, callType: .sqlite3Finalize(.ignore)),
-                            .init(id: 4, callType: .sqlite3Close(.ignore)),
+                            .init(id: 4, callType: .sqlite3Close(.ignore))
                         ]
                     })
                     try section("memory", routine: {
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE users.id < 10", -1, .ignore, nil)),
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
-                            .init(id: 2, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 2, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     let storage = try createStorage(filename)

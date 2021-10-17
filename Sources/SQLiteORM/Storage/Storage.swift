@@ -13,7 +13,7 @@ public class Storage: NSObject {
     private let inMemory: Bool
     let connection: ConnectionHolder
     let apiProvider: SQLiteApiProvider
-    
+
     init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
         self.inMemory = filename.isEmpty || filename == ":memory:"
         self.tables = tables
@@ -24,33 +24,33 @@ public class Storage: NSObject {
             try self.connection.increment()
         }
     }
-    
+
     convenience init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
         try self.init(filename: filename,
                       apiProvider: apiProvider,
                       connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider),
                       tables: tables)
     }
-    
+
     public convenience init(filename: String, tables: AnyTable...) throws {
         try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
     }
-    
+
     deinit {
         if self.inMemory {
             self.connection.decrementUnsafe()
         }
     }
-    
+
     public var filename: String {
         return self.connection.filename
     }
-    
+
     public func tableExists(with name: String) throws -> Bool {
         let connectionRef = try ConnectionRef(connection: self.connection)
         return try self.tableExists(with: name, connectionRef: connectionRef)
     }
-    
+
     private func tableExists(with name: String, connectionRef: ConnectionRef) throws -> Bool {
         var res = false
         let sql = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '\(name)'"
@@ -71,7 +71,7 @@ public class Storage: NSObject {
         }while resultCode != apiProvider.SQLITE_DONE
         return res
     }
-    
+
     private func tableInfo(forTableWith name: String, connectionRef: ConnectionRef) throws -> [TableInfo] {
         let sql = "PRAGMA table_info('\(name)')"
         let statement = try connectionRef.prepare(sql: sql)
@@ -98,20 +98,20 @@ public class Storage: NSObject {
         }while resultCode != apiProvider.SQLITE_DONE
         return res
     }
-    
+
     static private func calculateRemoveAddColumns(columnsToAdd: inout [TableInfo],
                                                   storageTableInfo: inout [TableInfo],
                                                   dbTableInfo: inout [TableInfo]) -> Bool {
         var notEqual = false
-        
+
         //  iterate through storage columns
         var storageColumnInfoIndex = 0
         repeat {
-            
+
             //  get storage's column info
             let storageColumnInfo = storageTableInfo[storageColumnInfoIndex]
             let columnName = storageColumnInfo.name
-            
+
             //  search for a column in db eith the same name
             if let dbColumnInfo = dbTableInfo.first(where: { $0.name == columnName }) {
                 let columnsAreEqual = dbColumnInfo.name == storageColumnInfo.name
@@ -125,16 +125,16 @@ public class Storage: NSObject {
                 dbTableInfo.removeAll(where: { $0.name == columnName })
                 storageTableInfo.remove(at: storageColumnInfoIndex)
                 storageColumnInfoIndex -= 1
-            }else{
+            } else {
                 columnsToAdd.append(storageColumnInfo)
             }
-            
+
             storageColumnInfoIndex += 1
         }while storageColumnInfoIndex < storageTableInfo.count
-        
+
         return notEqual
     }
-    
+
     private func schemaStatus(for table: AnyTable, connectionRef: ConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
         var res = SyncSchemaResult.alredyInSync
         var gottaCreateTable = try !self.tableExists(with: table.name, connectionRef: connectionRef)
@@ -151,14 +151,14 @@ public class Storage: NSObject {
                     // extra table columns than storage columns
                     if !preserve {
                         gottaCreateTable = true
-                    }else{
+                    } else {
                         res = .oldColumnsRemoved
                     }
                 }
             }
             if gottaCreateTable {
                 res = .droppedAndRecreated
-            }else{
+            } else {
                 if !columnsToAdd.isEmpty {
                     // extra storage columns than table columns
                     for columnToAdd in columnsToAdd {
@@ -170,25 +170,25 @@ public class Storage: NSObject {
                     if !gottaCreateTable {
                         if res == .oldColumnsRemoved {
                             res = .newColumnsAddedAndOldColumnsRemoved
-                        }else{
+                        } else {
                             res = .newColumnsAdded
                         }
-                    }else{
+                    } else {
                         res = .droppedAndRecreated
                     }
-                }else{
+                } else {
                     if res != .oldColumnsRemoved {
                         res = .alredyInSync
                     }
                 }
             }
-        }else{
+        } else {
             res = .newTableCreated
         }
         return res
     }
-    
-    private func create(tableWith name: String, columns:[AnyColumn], connectionRef: ConnectionRef) throws {
+
+    private func create(tableWith name: String, columns: [AnyColumn], connectionRef: ConnectionRef) throws {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
         for (columnIndex, column) in columns.enumerated() {
@@ -201,7 +201,7 @@ public class Storage: NSObject {
         sql += ")"
         try connectionRef.exec(sql: sql)
     }
-    
+
     private func copy(table: AnyTable, name: String, connectionRef: ConnectionRef, columnsToIgnore: [TableInfo]) throws {
         var columnNames = [String]()
         for column in table.columns {   //  TODO: refactor to map and filter
@@ -228,19 +228,19 @@ public class Storage: NSObject {
         sql += " FROM '\(table.name)'"
         try connectionRef.exec(sql: sql)
     }
-    
+
     private func dropTableInternal(tableName: String, connectionRef: ConnectionRef) throws {
         let sql = "DROP TABLE '\(tableName)'"
         try connectionRef.exec(sql: sql)
     }
-    
+
     private func renameTable(connectionRef: ConnectionRef, oldName: String, newName: String) throws {
         let sql = "ALTER TABLE \(oldName) RENAME TO \(newName)"
         try connectionRef.exec(sql: sql)
     }
-    
+
     private func backup(_ table: AnyTable, connectionRef: ConnectionRef, columnsToIgnore: [TableInfo]) throws {
-        
+
         //  here we copy source table to another with a name with '_backup' suffix, but in case table with such
         //  a name already exists we append suffix 1, then 2, etc until we find a free name..
         var backupTableName = "\(table.name)_backup"
@@ -258,9 +258,9 @@ public class Storage: NSObject {
         try self.create(tableWith: backupTableName, columns: table.columns, connectionRef: connectionRef)
         try self.copy(table: table, name: backupTableName, connectionRef: connectionRef, columnsToIgnore: columnsToIgnore)
         try self.dropTableInternal(tableName: table.name, connectionRef: connectionRef)
-        try self.renameTable(connectionRef:connectionRef, oldName: backupTableName, newName: table.name)
+        try self.renameTable(connectionRef: connectionRef, oldName: backupTableName, newName: table.name)
     }
-    
+
     private func add(column tableInfo: TableInfo, table: AnyTable, connectionRef: ConnectionRef) throws {
         var sql = "ALTER TABLE \(table.name) ADD COLUMN \(tableInfo.name) \(tableInfo.type)"
         if tableInfo.pk == 1 {
@@ -274,7 +274,7 @@ public class Storage: NSObject {
         }
         try connectionRef.exec(sql: sql)
     }
-    
+
     private func sync(_ table: AnyTable, connectionRef: ConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
         var res = SyncSchemaResult.alredyInSync
         let schemaStatus = try self.schemaStatus(for: table, connectionRef: connectionRef, preserve: preserve)
@@ -282,41 +282,41 @@ public class Storage: NSObject {
             if schemaStatus == .newTableCreated {
                 try self.create(tableWith: table.name, columns: table.columns, connectionRef: connectionRef)
                 res = .newTableCreated
-            }else{
+            } else {
                 if schemaStatus == .oldColumnsRemoved || schemaStatus == .newColumnsAdded || schemaStatus == .newColumnsAddedAndOldColumnsRemoved {
-                    
+
                     //  get table info provided in `make_table` call..
                     var storageTableInfo = table.tableInfo
-                    
+
                     //  now get current table info from db using `PRAGMA table_info` query..
                     var dbTableInfo = try self.tableInfo(forTableWith: table.name, connectionRef: connectionRef)
-                    
+
                     //  this array will contain pointers to columns that gotta be added..
                     var columnsToAdd = [TableInfo]()
-                    
+
                     _ = Storage.calculateRemoveAddColumns(columnsToAdd: &columnsToAdd, storageTableInfo: &storageTableInfo, dbTableInfo: &dbTableInfo)
-                    
+
                     if schemaStatus == .oldColumnsRemoved {
-                        
+
                         //  extra table columns than storage columns
                         try self.backup(table, connectionRef: connectionRef, columnsToIgnore: [])
                         res = .oldColumnsRemoved
                     }
-                    
+
                     if schemaStatus == .newColumnsAdded {
                         for columnToAdd in columnsToAdd {
                             try self.add(column: columnToAdd, table: table, connectionRef: connectionRef)
                         }
                         res = .newColumnsAdded
                     }
-                    
+
                     if schemaStatus == .newColumnsAddedAndOldColumnsRemoved {
-                        
+
                         // remove extra columns
                         try self.backup(table, connectionRef: connectionRef, columnsToIgnore: columnsToAdd)
                         res = .newColumnsAddedAndOldColumnsRemoved
                     }
-                }else if schemaStatus == .droppedAndRecreated {
+                } else if schemaStatus == .droppedAndRecreated {
                     try self.dropTableInternal(tableName: table.name, connectionRef: connectionRef)
                     try self.create(tableWith: table.name, columns: table.columns, connectionRef: connectionRef)
                     res = .droppedAndRecreated
@@ -325,18 +325,18 @@ public class Storage: NSObject {
         }
         return res
     }
-    
+
     @discardableResult
-    public func syncSchema(preserve: Bool) throws -> [String : SyncSchemaResult] {
+    public func syncSchema(preserve: Bool) throws -> [String: SyncSchemaResult] {
         let connectionRef = try ConnectionRef(connection: self.connection)
-        
-        var res = [String : SyncSchemaResult]()
+
+        var res = [String: SyncSchemaResult]()
         res.reserveCapacity(self.tables.count)
         for table in self.tables {
             let tableSyncResult = try self.sync(table, connectionRef: connectionRef, preserve: preserve)
             res[table.name] = tableSyncResult
         }
-        
+
         return res
     }
 }

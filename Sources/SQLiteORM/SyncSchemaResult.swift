@@ -1,32 +1,32 @@
 import Foundation
 
 public enum SyncSchemaResult {
-    
+
     /**
      *  created new table, table with the same tablename did not exist
      */
     case newTableCreated
-    
+
     /**
      *  table schema is the same as storage, nothing to be done
      */
     case alredyInSync
-    
+
     /**
      *  removed excess columns in table (than storage) without dropping a table
      */
     case oldColumnsRemoved
-    
+
     /**
      *  lacking columns in table (than storage) added without dropping a table
      */
     case newColumnsAdded
-    
+
     /**
      *  both old_columns_removed and new_columns_added
      */
     case newColumnsAddedAndOldColumnsRemoved
-    
+
     /**
      *  old table is dropped and new is recreated. Reasons :
      *      1. delete excess columns in the table than storage if preseve = false
@@ -38,7 +38,7 @@ public enum SyncSchemaResult {
 }
 
 extension SyncSchemaResult: CustomStringConvertible {
-    
+
     public var description: String {
         switch self {
         case .newTableCreated: return "new table created"

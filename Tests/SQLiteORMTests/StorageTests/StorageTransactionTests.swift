@@ -2,12 +2,12 @@ import XCTest
 @testable import SQLiteORM
 
 class StorageTransactionTests: XCTestCase {
-    
+
     func testTransactions() throws {
         struct User: Initializable, Equatable {
             var id = 0
             var name = ""
-            
+
             static func == (lhs: Self, rhs: Self) -> Bool {
                 return lhs.id == rhs.id && lhs.name == rhs.name
             }

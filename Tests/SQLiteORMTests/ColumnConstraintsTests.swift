@@ -11,12 +11,12 @@ class ColumnConstraintsTests: XCTestCase {
         let testCases = [
             TestCase(constraintBuilder: primaryKey(),
                      constraint: .primaryKey(order: nil, conflictClause: nil, autoincrement: false)),
-            
+
             TestCase(constraintBuilder: primaryKey().asc(),
                      constraint: .primaryKey(order: .asc, conflictClause: nil, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().desc(),
                      constraint: .primaryKey(order: .desc, conflictClause: nil, autoincrement: false)),
-            
+
             TestCase(constraintBuilder: primaryKey().onConflict().rollback(),
                      constraint: .primaryKey(order: nil, conflictClause: .rollback, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().onConflict().abort(),
@@ -27,7 +27,7 @@ class ColumnConstraintsTests: XCTestCase {
                      constraint: .primaryKey(order: nil, conflictClause: .ignore, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().onConflict().replace(),
                      constraint: .primaryKey(order: nil, conflictClause: .replace, autoincrement: false)),
-            
+
             TestCase(constraintBuilder: primaryKey().asc().onConflict().rollback(),
                      constraint: .primaryKey(order: .asc, conflictClause: .rollback, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().asc().onConflict().abort(),
@@ -38,7 +38,7 @@ class ColumnConstraintsTests: XCTestCase {
                      constraint: .primaryKey(order: .asc, conflictClause: .ignore, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().asc().onConflict().replace(),
                      constraint: .primaryKey(order: .asc, conflictClause: .replace, autoincrement: false)),
-            
+
             TestCase(constraintBuilder: primaryKey().desc().onConflict().rollback(),
                      constraint: .primaryKey(order: .desc, conflictClause: .rollback, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().desc().onConflict().abort(),
@@ -49,15 +49,15 @@ class ColumnConstraintsTests: XCTestCase {
                      constraint: .primaryKey(order: .desc, conflictClause: .ignore, autoincrement: false)),
             TestCase(constraintBuilder: primaryKey().desc().onConflict().replace(),
                      constraint: .primaryKey(order: .desc, conflictClause: .replace, autoincrement: false)),
-            
+
             TestCase(constraintBuilder: primaryKey().autoincrement(),
                      constraint: .primaryKey(order: nil, conflictClause: nil, autoincrement: true)),
-            
+
             TestCase(constraintBuilder: primaryKey().asc().autoincrement(),
                      constraint: .primaryKey(order: .asc, conflictClause: nil, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().desc().autoincrement(),
                      constraint: .primaryKey(order: .desc, conflictClause: nil, autoincrement: true)),
-            
+
             TestCase(constraintBuilder: primaryKey().onConflict().rollback().autoincrement(),
                      constraint: .primaryKey(order: nil, conflictClause: .rollback, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().onConflict().abort().autoincrement(),
@@ -68,7 +68,7 @@ class ColumnConstraintsTests: XCTestCase {
                      constraint: .primaryKey(order: nil, conflictClause: .ignore, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().onConflict().replace().autoincrement(),
                      constraint: .primaryKey(order: nil, conflictClause: .replace, autoincrement: true)),
-            
+
             TestCase(constraintBuilder: primaryKey().asc().onConflict().rollback().autoincrement(),
                      constraint: .primaryKey(order: .asc, conflictClause: .rollback, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().asc().onConflict().abort().autoincrement(),
@@ -79,7 +79,7 @@ class ColumnConstraintsTests: XCTestCase {
                      constraint: .primaryKey(order: .asc, conflictClause: .ignore, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().asc().onConflict().replace().autoincrement(),
                      constraint: .primaryKey(order: .asc, conflictClause: .replace, autoincrement: true)),
-            
+
             TestCase(constraintBuilder: primaryKey().desc().onConflict().rollback().autoincrement(),
                      constraint: .primaryKey(order: .desc, conflictClause: .rollback, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().desc().onConflict().abort().autoincrement(),
@@ -89,7 +89,7 @@ class ColumnConstraintsTests: XCTestCase {
             TestCase(constraintBuilder: primaryKey().desc().onConflict().ignore().autoincrement(),
                      constraint: .primaryKey(order: .desc, conflictClause: .ignore, autoincrement: true)),
             TestCase(constraintBuilder: primaryKey().desc().onConflict().replace().autoincrement(),
-                     constraint: .primaryKey(order: .desc, conflictClause: .replace, autoincrement: true)),
+                     constraint: .primaryKey(order: .desc, conflictClause: .replace, autoincrement: true))
         ]
         for testCase in testCases {
             let value = testCase.constraintBuilder.constraint

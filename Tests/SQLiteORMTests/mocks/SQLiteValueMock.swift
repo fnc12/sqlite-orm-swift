@@ -11,5 +11,5 @@ class SQLiteValueMock: NSObject {
 }
 
 extension SQLiteValueMock: SQLiteValue {
-    
+
 }

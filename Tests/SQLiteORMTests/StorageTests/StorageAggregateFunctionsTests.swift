@@ -4,8 +4,8 @@ import XCTest
 class StorageAggregateFunctionsTests: XCTestCase {
     struct Unknown {
         var value = Double(0)
-    };
-    
+    }
+
     func testTotal() throws {
         try testCase(#function, routine: {
             struct TotalTest {
@@ -27,9 +27,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.total(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -37,9 +37,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.total(\TotalTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -57,7 +57,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -68,7 +68,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -80,7 +80,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -96,7 +96,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -107,7 +107,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -119,7 +119,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3Step(.ignore)),
-                            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -130,7 +130,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testSum() throws {
         try testCase(#function, routine: {
             struct SumTest {
@@ -152,9 +152,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.sum(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -162,9 +162,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.sum(\SumTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -183,7 +183,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -196,7 +196,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -210,7 +210,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -227,7 +227,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -240,7 +240,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -254,7 +254,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -265,7 +265,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testMin() throws {
         try testCase(#function, routine: {
             struct MinTest {
@@ -287,9 +287,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.min(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -297,9 +297,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.min(\MinTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -318,7 +318,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -331,7 +331,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -345,7 +345,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -362,7 +362,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -375,7 +375,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -389,7 +389,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -400,7 +400,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testMax() throws {
         try testCase(#function, routine: {
             struct MaxTest {
@@ -422,9 +422,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.max(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -432,9 +432,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.max(\MaxTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -453,7 +453,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -466,7 +466,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -480,7 +480,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -497,7 +497,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("1 row", routine: {
@@ -510,7 +510,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("2 rows", routine: {
@@ -524,7 +524,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueInt(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -535,7 +535,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testGroupConcat() throws {
         try testCase(#function, routine: {
             struct GroupConcatTest {
@@ -554,9 +554,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.count(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -564,9 +564,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.count(\GroupConcatTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -585,7 +585,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("one row", routine: {
@@ -598,7 +598,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueText(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("two rows", routine: {
@@ -612,7 +612,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueText(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -627,7 +627,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3Step(.ignore)),
-                            .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("one row", routine: {
@@ -640,7 +640,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueText(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     try section("two rows", routine: {
@@ -654,7 +654,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                             .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                             .init(id: 4, callType: .sqlite3ValueText(.ignore)),
                             .init(id: 5, callType: .sqlite3Step(.ignore)),
-                            .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
                         ]
                     })
                     apiProvider.resetCalls()
@@ -665,7 +665,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testCount() throws {
         struct CountTest: Initializable {
             var value: Double?
@@ -684,9 +684,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.count(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -694,9 +694,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.count(\CountTest.unknown)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 })
@@ -712,7 +712,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                 })
                 try section("one row with null", routine: {
@@ -723,7 +723,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                 })
                 try section("three rows without null", routine: {
@@ -736,7 +736,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                 })
                 apiProvider.resetCalls()
@@ -746,7 +746,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testCountAll() throws {
         struct CountTest: Initializable {
             var value = Double(0)
@@ -763,9 +763,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 do {
                     _ = try storage.count(all: Unknown.self)
                     XCTAssert(false)
-                }catch SQLiteORM.Error.typeIsNotMapped{
+                } catch SQLiteORM.Error.typeIsNotMapped {
                     XCTAssert(true)
-                }catch{
+                } catch {
                     XCTAssert(false)
                 }
             })
@@ -780,7 +780,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                 })
                 try section("3 rows", routine: {
@@ -793,7 +793,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                 })
                 apiProvider.resetCalls()
@@ -803,7 +803,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             })
         })
     }
-    
+
     func testAvg() throws {
         struct AvgTest: Initializable {
             var value = Double(0)
@@ -822,9 +822,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.avg(\AvgTest.unused)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.columnNotFound{
+                    } catch SQLiteORM.Error.columnNotFound {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 }
@@ -832,9 +832,9 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     do {
                         _ = try storage.avg(\Unknown.value)
                         XCTAssert(false)
-                    }catch SQLiteORM.Error.typeIsNotMapped{
+                    } catch SQLiteORM.Error.typeIsNotMapped {
                         XCTAssert(true)
-                    }catch{
+                    } catch {
                         XCTAssert(false)
                     }
                 }
@@ -842,7 +842,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             try section("no error") {
                 let db = storage.connection.dbMaybe!
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
-                var expectedResult: Double? = nil
+                var expectedResult: Double?
                 try section("insert nothing") {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
@@ -850,7 +850,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                         .init(id: 4, callType: .sqlite3Step(.ignore)),
-                        .init(id: 5, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     expectedResult = nil
                 }
@@ -865,7 +865,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
                         .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
                         .init(id: 5, callType: .sqlite3Step(.ignore)),
-                        .init(id: 6, callType: .sqlite3Finalize(.ignore)),
+                        .init(id: 6, callType: .sqlite3Finalize(.ignore))
                     ]
                     expectedResult = Double(1 + 4 + 10) / 3
                 })

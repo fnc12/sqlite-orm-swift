@@ -2,29 +2,29 @@ import Foundation
 
 class ConnectionRef: NSObject {
     let connection: ConnectionHolder
-    
+
     init(connection: ConnectionHolder) throws {
         self.connection = connection
         super.init()
         try self.connection.increment()
     }
-    
+
     deinit {
         self.connection.decrementUnsafe()
     }
-    
+
     var db: OpaquePointer? {
         return self.connection.dbMaybe
     }
-    
+
     var lastInsertRowid: Int64 {
         return self.connection.apiProvider.sqlite3LastInsertRowid(self.db)
     }
-    
+
     var errorMessage: String {
         return self.connection.errorMessage
     }
-    
+
     func prepare(sql: String) throws -> Statement & ColumnBinder {
         guard let db = self.db else {
             throw Error.databaseIsNull
@@ -41,7 +41,7 @@ class ConnectionRef: NSObject {
         }
         return StatementImpl(stmt: stmt, apiProvider: self.connection.apiProvider)
     }
-    
+
     func exec(sql: String) throws {
         guard let db = self.db else {
             throw Error.databaseIsNull

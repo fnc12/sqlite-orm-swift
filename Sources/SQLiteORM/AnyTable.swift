@@ -5,20 +5,20 @@ import Foundation
 public class AnyTable: NSObject {
     let name: String
     let columns: [AnyColumn]
-    
+
     /// Constructor that must be called from subclass constructor.
     public init(name: String, columns: AnyColumn...) {
         self.name = name
         self.columns = columns
         super.init()
     }
-    
+
     /// Getter for type mapped to this table. Got to be overridden inside subclass
     var type: Any.Type {
         return Void.self
     }
-    
-    func forEachNonPrimaryKeyColumn(closure: (_ column: AnyColumn, _ index: Int) -> ()) {
+
+    func forEachNonPrimaryKeyColumn(closure: (_ column: AnyColumn, _ index: Int) -> Void) {
         var index = 0
         for column in self.columns {
             if !column.isPrimaryKey {
@@ -27,7 +27,7 @@ public class AnyTable: NSObject {
             }
         }
     }
-    
+
     var nonPrimaryKeyColumnNamesCount: Int {
         var res = 0
         for column in self.columns {
@@ -37,7 +37,7 @@ public class AnyTable: NSObject {
         }
         return res
     }
-    
+
     var primaryKeyColumnNames: [String] {
         var res = [String]()
         for column in self.columns {
@@ -47,7 +47,7 @@ public class AnyTable: NSObject {
         }
         return res
     }
-    
+
     var tableInfo: [TableInfo] {
         var res = [TableInfo]()
         res.reserveCapacity(self.columns.count)

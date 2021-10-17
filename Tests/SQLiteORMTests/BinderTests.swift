@@ -2,7 +2,7 @@ import XCTest
 @testable import SQLiteORM
 
 class BinderTests: XCTestCase {
-    
+
     func testBinder() throws {
         try testCase(#function) {
             let columnBinderMock = ColumnBinderMock()

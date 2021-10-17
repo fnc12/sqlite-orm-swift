@@ -6,7 +6,7 @@ class ConnectionHolderMock: Mock<ConnectionHolderCallType> {
     var apiProvider: SQLiteApiProvider
     var filename: String
     var errorMessage: String = ""
-    
+
     init(dbMaybe: OpaquePointer?, apiProvider: SQLiteApiProvider, filename: String) {
         self.dbMaybe = dbMaybe
         self.apiProvider = apiProvider
@@ -21,18 +21,18 @@ enum ConnectionHolderCallType: Equatable {
     case decrement
 }
 
-extension ConnectionHolderMock: ConnectionHolder {    
-    
+extension ConnectionHolderMock: ConnectionHolder {
+
     func increment() throws {
         let call = self.makeCall(with: .increment)
         self.calls.append(call)
     }
-    
+
     func decrementUnsafe() {
         let call = self.makeCall(with: .decrementUnsafe)
         self.calls.append(call)
     }
-    
+
     func decrement() throws {
         let call = self.makeCall(with: .decrement)
         self.calls.append(call)

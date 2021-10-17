@@ -9,32 +9,32 @@ class SectionIteration {
     var isRunning = false
     var cachedLeavesCount = 0
     var didRunThisTime = false
-    
+
     init(name: String, parent: SectionIteration?) {
         self.name = name
         self.parent = parent
     }
-    
+
     func findTheFarestRunningChild() -> SectionIteration? {
         func findTheFarestRunningChild(_ target: SectionIteration) -> SectionIteration? {
             if target.children.isEmpty {
                 return target
-            }else{
+            } else {
                 if let runningChild = target.children.first(where: { $0.isRunning }) {
                     return findTheFarestRunningChild(runningChild)
-                }else{
+                } else {
                     return target
                 }
             }
         }
-        
+
         if self.isRunning {
             return findTheFarestRunningChild(self)
-        }else{
+        } else {
             return nil
         }
     }
-    
+
     static var root: SectionIteration?
 }
 
@@ -44,24 +44,24 @@ enum TestError: Error {
     case noRunningSectionFound
 }
 
-func testCase(_ name: String, routine: @escaping (() throws -> ())) throws {
+func testCase(_ name: String, routine: @escaping (() throws -> Void)) throws {
     guard nil == SectionIteration.root else {
         throw TestError.testCaseInsideTestCaseIsProhibited
     }
     let root = SectionIteration(name: name, parent: nil)
     SectionIteration.root = root
-    
+
     //  run for the first time
     root.isRunning = true
     try routine()
     root.isRunning = false
     root.runCount += 1
-    
+
     func countLeaves(node: SectionIteration) -> Int {
         var res = 0
         if node.children.isEmpty {
             res = 1
-        }else{
+        } else {
             for child in node.children {
                 let childLeavesCount = countLeaves(node: child)
                 child.cachedLeavesCount = childLeavesCount
@@ -70,12 +70,12 @@ func testCase(_ name: String, routine: @escaping (() throws -> ())) throws {
         }
         return res
     }
-    
+
     func resetDidRunFlag(node: SectionIteration) {
         node.didRunThisTime = false
         node.children.forEach(resetDidRunFlag)
     }
-    
+
     //  run 2..<leavesCount times
     while root.runCount < countLeaves(node: root) {
         resetDidRunFlag(node: root)
@@ -84,11 +84,11 @@ func testCase(_ name: String, routine: @escaping (() throws -> ())) throws {
         root.isRunning = false
         root.runCount += 1
     }
-    
+
     SectionIteration.root = nil
 }
 
-func section(_ name: String, routine: @escaping (() throws -> ())) throws {
+func section(_ name: String, routine: @escaping (() throws -> Void)) throws {
     guard nil != SectionIteration.root else {
         throw TestError.sectionIsNotLocatedInsideTestCase
     }
@@ -103,7 +103,7 @@ func section(_ name: String, routine: @escaping (() throws -> ())) throws {
             theFarestRunningChild.children.last!.isRunning = false
             theFarestRunningChild.children.last!.runCount += 1
         }
-    }else{
+    } else {
         let thisSectionIteration: SectionIteration
         if let foundSectionIteration = theFarestRunningChild.children.first(where: { $0.name == name }) {
             thisSectionIteration = foundSectionIteration
@@ -117,7 +117,7 @@ func section(_ name: String, routine: @escaping (() throws -> ())) throws {
                     thisSectionIteration.runCount += 1
                 }
             }
-        }else{
+        } else {
             thisSectionIteration = .init(name: name, parent: theFarestRunningChild)
             theFarestRunningChild.children.append(thisSectionIteration)
             let hasDidRunThisTimeChildren = thisSectionIteration.parent!.children.contains(where: { $0.didRunThisTime })
@@ -133,7 +133,7 @@ func section(_ name: String, routine: @escaping (() throws -> ())) throws {
 }
 
 class SectionsTest: XCTestCase {
-    
+
     func test3Levels3_3Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -216,7 +216,7 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section22CallsCount, 1)
         XCTAssertEqual(testCaseCallsCount, 9)
     }
-    
+
     func test2Levels2_2Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -263,7 +263,7 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section0CallsCount, 2)
         XCTAssertEqual(testCaseCallsCount, 4)
     }
-    
+
     func test2Levels1_2Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -292,7 +292,7 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section00CallsCount, 1)
         XCTAssertEqual(section01CallsCount, 1)
     }
-    
+
     func test2Levels1Section() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -315,8 +315,8 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section0CallsCount, 1)
         XCTAssertEqual(section00CallsCount, 1)
     }
-    
-    func test1Level4Sections() throws{
+
+    func test1Level4Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
         var section1CallsCount = 0
@@ -350,7 +350,7 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section3CallsCount, 1)
         XCTAssertEqual(text, "01020304")
     }
-    
+
     func test1Level3Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -379,7 +379,7 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section2CallsCount, 1)
         XCTAssertEqual(text, "010203")
     }
-    
+
     func test1Level2Sections() throws {
         var testCaseCallsCount = 0
         var section0CallsCount = 0
@@ -403,4 +403,3 @@ class SectionsTest: XCTestCase {
         XCTAssertEqual(section1CallsCount, 1)
     }
 }
-

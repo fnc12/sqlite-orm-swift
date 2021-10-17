@@ -28,7 +28,7 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
+
     public func sum<T, R>(_ columnKeyPath: KeyPath<T, R>) throws -> Double? {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -59,7 +59,7 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
+
     func minInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>) throws -> R? where R: ConstructableFromSQLiteValue {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -90,15 +90,15 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
-    public func min<T, F>(_ columnKeyPath: KeyPath<T, Optional<F>>) throws -> F? where F: ConstructableFromSQLiteValue {
+
+    public func min<T, F>(_ columnKeyPath: KeyPath<T, F?>) throws -> F? where F: ConstructableFromSQLiteValue {
         return try self.minInternal(columnKeyPath)
     }
-    
+
     public func min<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
         return try self.minInternal(columnKeyPath)
     }
-    
+
     func maxInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>) throws -> R? where R: ConstructableFromSQLiteValue {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -129,15 +129,15 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
-    public func max<T, F>(_ columnKeyPath: KeyPath<T, Optional<F>>) throws -> F? where F: ConstructableFromSQLiteValue {
+
+    public func max<T, F>(_ columnKeyPath: KeyPath<T, F?>) throws -> F? where F: ConstructableFromSQLiteValue {
         return try self.maxInternal(columnKeyPath)
     }
-    
+
     public func max<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> F? where F: ConstructableFromSQLiteValue {
         return try self.maxInternal(columnKeyPath)
     }
-    
+
     func groupConcatInternal<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String?) throws -> String? {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -149,7 +149,7 @@ extension Storage {
         let sql: String
         if nil == separator {
             sql = "SELECT GROUP_CONCAT(\(column.name)) FROM \(table.name)"
-        }else{
+        } else {
             sql = "SELECT GROUP_CONCAT(\(column.name), '\(separator!)') FROM \(table.name)"
         }
         let connectionRef = try ConnectionRef(connection: self.connection)
@@ -173,15 +173,15 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
+
     public func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String) throws -> String? {
         return try self.groupConcatInternal(columnKeyPath, separator: separator)
     }
-    
+
     public func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> String? {
         return try self.groupConcatInternal(columnKeyPath, separator: nil)
     }
-    
+
     public func count<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> Int {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
@@ -209,8 +209,8 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
-    public func count<T>(all of:T.Type) throws -> Int {
+
+    public func count<T>(all of: T.Type) throws -> Int {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -234,7 +234,7 @@ extension Storage {
         }while resultCode != self.apiProvider.SQLITE_DONE
         return res
     }
-    
+
     public func avg<T, F>(_ columnKeyPath: KeyPath<T, F>) throws -> Double? {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
