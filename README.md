@@ -21,7 +21,7 @@ SQLiteORM-Swift is an ORM library for SQLite3 built with Swift 5
 * **Transactions support**
 * **Migrations functionality**
 
-`SQLiteOrm` library allows to create easy data model mappings to your database schema. It is built to manage (CRUD) objects with a primary key and without it. It also allows you to specify table names and column names explicitly no matter how your classes actually named. And it does not depend on `Codable` protocol. Take a look at example:
+`SQLiteORM` library allows to create easy data model mappings to your database schema. It is built to manage (CRUD) objects with a primary key and without it. It also allows you to specify table names and column names explicitly no matter how your classes actually named. And it does not depend on `Codable` protocol. Take a look at example:
 
 ```swift
 import SQLiteORM
