@@ -35,7 +35,7 @@ struct User : Initializable {
     var typeId = 0
 }
 
-struct UserType: Initializable {
+struct UserType : Initializable {
     var id = 0
     var name = ""
 }
