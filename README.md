@@ -35,7 +35,7 @@ struct User : Initializable {
     var typeId = 0
 }
 
-struct UserType: Initializable {
+struct UserType : Initializable {
     var id = 0
     var name = ""
 }
@@ -102,7 +102,7 @@ Next let's get our user by id.
 ```swift
 if let user1: User = try storage.get(id: 1) {
     print("user = \(user1.firstName) \(user1.lastName)")
-}else{
+} else {
     print("user with id 1 does not exist")
 }
 ```
