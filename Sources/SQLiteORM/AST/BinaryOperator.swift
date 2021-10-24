@@ -13,9 +13,9 @@ public class BinaryOperator: Expression {
 }
 
 extension BinaryOperator: Serializable {
-    public func serialize(with schemaProvider: SchemaProvider) throws -> String {
-        let leftString = try self.lhs.serialize(with: schemaProvider)
-        let rightString = try self.rhs.serialize(with: schemaProvider)
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        let leftString = try self.lhs.serialize(with: serializationContext)
+        let rightString = try self.rhs.serialize(with: serializationContext)
         return "\(leftString) \(self.operatorType) \(rightString)"
     }
 }
@@ -42,4 +42,8 @@ public func greaterThan(lhs: Expression, rhs: Expression) -> BinaryOperator {
 
 public func greaterOrEqual(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .greaterOrEqual)
+}
+
+public func assign(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .assign)
 }

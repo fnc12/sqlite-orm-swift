@@ -1,13 +1,31 @@
 import Foundation
 
 extension Storage {
+    public func update<T>(all of: T.Type, _ set: AssignList, _ constraints: SelectConstraint...) throws {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            throw Error.typeIsNotMapped
+        }
+        var sql = "UPDATE \(anyTable.name) \(try set.serialize(with: .init(schemaProvider: self)))"
+        for constraint in constraints {
+            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
+            sql += " \(constraintsString)"
+        }
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        let resultCode = statement.step()
+        guard apiProvider.SQLITE_DONE == resultCode else {
+            let errorString = connectionRef.errorMessage
+            throw Error.sqliteError(code: resultCode, text: errorString)
+        }
+    }
+
     public func delete<T>(all of: T.Type, _ constraints: SelectConstraint...) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         var sql = "DELETE FROM \(anyTable.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: self)
+            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
         let connectionRef = try ConnectionRef(connection: self.connection)
@@ -25,7 +43,7 @@ extension Storage {
         }
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: self)
+            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
         let connectionRef = try ConnectionRef(connection: self.connection)

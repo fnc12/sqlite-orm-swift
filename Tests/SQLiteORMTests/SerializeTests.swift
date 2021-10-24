@@ -2,9 +2,15 @@ import XCTest
 @testable import SQLiteORM
 
 class SchemaProviderStub: SchemaProvider {
+
     enum Error: Swift.Error {
         case error
     }
+
+    func columnName<T, F>(keyPath: KeyPath<T, F>) throws -> String {
+        throw Self.Error.error
+    }
+
     func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String {
         throw Self.Error.error
     }
@@ -16,6 +22,58 @@ class SerializeTests: XCTestCase {
         var id = 0
         var name = ""
         var rating = 0.0
+    }
+
+    func testKeyPath() throws {
+        try testCase(#function, routine: {
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            var serializationContext = SerializationContext(schemaProvider: storage)
+            var string = ""
+            var expected = ""
+            try section("id", routine: {
+                let keyPath = \User.id
+                try section("with table name", routine: {
+                    serializationContext = serializationContext.byIncludingTableName()
+                    expected = "users.id"
+                })
+                try section("without table name", routine: {
+                    serializationContext = serializationContext.bySkippingTableName()
+                    expected = "id"
+                })
+                string = try keyPath.serialize(with: serializationContext)
+            })
+            try section("name", routine: {
+                let keyPath = \User.name
+                try section("with table name", routine: {
+                    serializationContext = serializationContext.byIncludingTableName()
+                    expected = "users.name"
+                })
+                try section("without table name", routine: {
+                    serializationContext = serializationContext.bySkippingTableName()
+                    expected = "name"
+                })
+                string = try keyPath.serialize(with: serializationContext)
+            })
+            try section("rating", routine: {
+                let keyPath = \User.rating
+                try section("with table name", routine: {
+                    serializationContext = serializationContext.byIncludingTableName()
+                    expected = "users.rating"
+                })
+                try section("without table name", routine: {
+                    serializationContext = serializationContext.bySkippingTableName()
+                    expected = "rating"
+                })
+                string = try keyPath.serialize(with: serializationContext)
+            })
+
+            XCTAssertEqual(string, expected)
+        })
     }
 
     func testBinaryOperator() throws {
@@ -60,7 +118,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             try storage.syncSchema(preserve: false)
-            let string = try testCase.value.serialize(with: storage)
+            let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
             XCTAssertEqual(string, testCase.expected)
         }
     }
@@ -111,7 +169,7 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.anyColumn.serialize(with: schemaProviderStub)
+            let value = testCase.anyColumn.serialize(with: .init(schemaProvider: schemaProviderStub))
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -127,7 +185,7 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.order.serialize(with: schemaProviderStub)
+            let value = testCase.order.serialize(with: .init(schemaProvider: schemaProviderStub))
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -146,7 +204,7 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.conflictClause.serialize(with: schemaProviderStub)
+            let value = testCase.conflictClause.serialize(with: .init(schemaProvider: schemaProviderStub))
             XCTAssertEqual(value, testCase.expected)
         }
     }
@@ -181,7 +239,7 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let schemaProviderStub = SchemaProviderStub()
-            let result = testCase.columnConstraint.serialize(with: schemaProviderStub)
+            let result = testCase.columnConstraint.serialize(with: .init(schemaProvider: schemaProviderStub))
             XCTAssertEqual(result, testCase.expected)
         }
     }

@@ -15,6 +15,52 @@ class StorageNonCrudTests: XCTestCase {
         var id = 0
     }
 
+    func testUpdateAll() throws {
+        struct Employee {
+            var id = 0
+            var firstname = ""
+            var lastname = ""
+            var title = ""
+            var email = ""
+        }
+        try testCase(#function, routine: {
+            let apiProvider = SQLiteApiProviderMock()
+            apiProvider.forwardsCalls = true
+            let filename = "update_all.sqlite"
+            remove(filename)
+            let storage = try Storage(filename: filename,
+                                      apiProvider: apiProvider,
+                                      tables: [Table<Employee>(name: "employees",
+                                                               columns:
+                                                                Column(name: "id", keyPath: \Employee.id, constraints: primaryKey()),
+                                                                Column(name: "firstname", keyPath: \Employee.firstname),
+                                                                Column(name: "lastname", keyPath: \Employee.lastname),
+                                                                Column(name: "title", keyPath: \Employee.title),
+                                                                Column(name: "email", keyPath: \Employee.email))])
+            try storage.syncSchema(preserve: false)
+            try storage.replace(Employee(id: 1, firstname: "Andrew", lastname: "Adams", title: "General Manager", email: "andrew@chinookcorp.com"))
+            try storage.replace(Employee(id: 2, firstname: "Nancy", lastname: "Edwards", title: "Sales Manager", email: "nancy@chinookcorp.com"))
+            try storage.replace(Employee(id: 3, firstname: "Jane", lastname: "Peacock", title: "Sales Support Agent", email: "jane@chinookcorp.com"))
+            try storage.replace(Employee(id: 4, firstname: "Margaret", lastname: "Park", title: "Sales Support Agent", email: "margaret@chinookcorp.com"))
+            try storage.replace(Employee(id: 5, firstname: "Steve", lastname: "Johnson", title: "Sales Support Agent", email: "steve@chinookcorp.com"))
+            try storage.replace(Employee(id: 6, firstname: "Michael", lastname: "Mitchell", title: "IT Manager", email: "michael@chinookcorp.com"))
+            try storage.replace(Employee(id: 7, firstname: "Robert", lastname: "King", title: "IT Staff", email: "robert@chinookcorp.com"))
+            try storage.replace(Employee(id: 8, firstname: "Laura", lastname: "Callahan", title: "IT Staff", email: "laura@chinookcorp.com"))
+
+            apiProvider.resetCalls()
+            try storage.update(all: Employee.self,
+                               set(assign(\Employee.lastname, "Smith")),
+                               where_(equal(lhs: \Employee.id, rhs: 3)))
+            XCTAssertEqual(apiProvider.calls, [
+                .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "UPDATE employees SET lastname = 'Smith' WHERE employees.id == 3", -1, .ignore, nil)),
+                .init(id: 2, callType: .sqlite3Step(.ignore)),
+                .init(id: 3, callType: .sqlite3Finalize(.ignore)),
+                .init(id: 4, callType: .sqlite3Close(.ignore))
+            ])
+        })
+    }
+
     func testGetAll() throws {
         try testCase(#function, routine: {
             let apiProvider = SQLiteApiProviderMock()

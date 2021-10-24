@@ -9,8 +9,8 @@ public class Where: SelectConstraint {
 }
 
 extension Where: Serializable {
-    public func serialize(with schemaProvider: SchemaProvider) throws -> String {
-        let expressionString = try self.expression.serialize(with: schemaProvider)
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        let expressionString = try self.expression.serialize(with: serializationContext)
         return "WHERE \(expressionString)"
     }
 }

@@ -4,10 +4,6 @@ public protocol Initializable {
     init()
 }
 
-public protocol SchemaProvider {
-    func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String
-}
-
 public class Storage: NSObject {
     let tables: [AnyTable]
     private let inMemory: Bool
@@ -192,7 +188,7 @@ public class Storage: NSObject {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
         for (columnIndex, column) in columns.enumerated() {
-            let columnString = column.serialize(with: self)
+            let columnString = column.serialize(with: .init(schemaProvider: self))
             sql += "\(columnString)"
             if columnIndex < columnsCount - 1 {
                 sql += ", "

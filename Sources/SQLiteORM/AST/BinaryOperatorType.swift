@@ -11,6 +11,7 @@ enum BinaryOperatorType {
     case lesserOrEqual
     case greaterThan
     case greaterOrEqual
+    case assign
 }
 
 extension BinaryOperatorType: CustomStringConvertible {
@@ -22,6 +23,7 @@ extension BinaryOperatorType: CustomStringConvertible {
         case .greaterThan: return ">"
         case .lesserOrEqual: return "<="
         case .greaterOrEqual: return ">="
+        case .assign: return "="
         }
     }
 }
