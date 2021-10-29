@@ -49,6 +49,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult: Double = 0
                 var result: Double = -1
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("with constraints", routine: {
+                    expectedResult = 0
+                    expectedApiCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(value) FROM total_test WHERE total_test.value < 10", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3Step(.ignore)),
+                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                    ]
+                    apiProvider.resetCalls()
+                    result = try storage.total(\TotalTest.value, where_(lesserThan(lhs: \TotalTest.value, rhs: 10)))
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
                 try section("not nullable field", routine: {
                     try section("no rows", routine: {
                         expectedResult = 0
@@ -174,6 +188,21 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult: Double?
                 var result: Double?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("with constraints", routine: {
+                    expectedResult = nil
+                    expectedApiCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(value) FROM sum_test WHERE sum_test.value > 10", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                        .init(id: 4, callType: .sqlite3Step(.ignore)),
+                        .init(id: 5, callType: .sqlite3Finalize(.ignore))
+                    ]
+                    apiProvider.resetCalls()
+                    result = try storage.sum(\SumTest.value, where_(greaterThan(lhs: \SumTest.value, rhs: 10)))
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
                 try section("not nullable field", routine: {
                     try section("no rows", routine: {
                         expectedResult = nil
@@ -309,6 +338,21 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("with constraints", routine: {
+                    expectedResult = nil
+                    expectedApiCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(value) FROM min_test WHERE min_test.value <= 10", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                        .init(id: 4, callType: .sqlite3Step(.ignore)),
+                        .init(id: 5, callType: .sqlite3Finalize(.ignore))
+                    ]
+                    apiProvider.resetCalls()
+                    result = try storage.min(\MinTest.value, where_(lesserOrEqual(lhs: \MinTest.value, rhs: 10)))
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
                 try section("not nullable field", routine: {
                     try section("no rows", routine: {
                         expectedResult = nil
@@ -444,6 +488,21 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("with constraints", routine: {
+                    expectedResult = nil
+                    expectedApiCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(value) FROM max_test WHERE max_test.value >= 10", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                        .init(id: 4, callType: .sqlite3Step(.ignore)),
+                        .init(id: 5, callType: .sqlite3Finalize(.ignore))
+                    ]
+                    apiProvider.resetCalls()
+                    result = try storage.max(\MaxTest.value, where_(greaterOrEqual(lhs: \MaxTest.value, rhs: 10)))
+                    XCTAssertEqual(result, expectedResult)
+                    XCTAssertEqual(apiProvider.calls, expectedApiCalls)
+                })
                 try section("not nullable field", routine: {
                     try section("no rows", routine: {
                         expectedResult = nil
@@ -576,6 +635,19 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedResult = [String?]()
                 var result: String?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
+                try section("with constraints", routine: {
+                    expectedResult = [nil]
+                    expectedApiCalls = [
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(value) FROM group_concat_test WHERE group_concat_test.value == 10", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3Step(.ignore)),
+                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                        .init(id: 4, callType: .sqlite3Step(.ignore)),
+                        .init(id: 5, callType: .sqlite3Finalize(.ignore))
+                    ]
+                    apiProvider.resetCalls()
+                    result = try storage.groupConcat(\GroupConcatTest.value, where_(equal(lhs: \GroupConcatTest.value, rhs: 10)))
+                })
                 try section("1 argument", routine: {
                     try section("no rows", routine: {
                         expectedResult = [nil]
@@ -705,42 +777,57 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 let db = storage.connection.dbMaybe!
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
-                try section("no rows", routine: {
+                var count = 0
+                try section("with constraints", routine: {
                     expectedCount = 0
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test WHERE count_test.value != 10", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
                         .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
+                    apiProvider.resetCalls()
+                    count = try storage.count(\CountTest.value, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
                 })
-                try section("one row with null", routine: {
-                    try storage.replace(CountTest(value: nil))
-                    expectedCount = 0
-                    expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
-                    ]
+                try section("without constraints", routine: {
+                    try section("no rows", routine: {
+                        expectedCount = 0
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                        ]
+                    })
+                    try section("one row with null", routine: {
+                        try storage.replace(CountTest(value: nil))
+                        expectedCount = 0
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                        ]
+                    })
+                    try section("three rows without null", routine: {
+                        try storage.replace(CountTest(value: 10))
+                        try storage.replace(CountTest(value: 20))
+                        try storage.replace(CountTest(value: 30))
+                        expectedCount = 3
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    count = try storage.count(\CountTest.value)
                 })
-                try section("three rows without null", routine: {
-                    try storage.replace(CountTest(value: 10))
-                    try storage.replace(CountTest(value: 20))
-                    try storage.replace(CountTest(value: 30))
-                    expectedCount = 3
-                    expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(value) FROM count_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
-                    ]
-                })
-                apiProvider.resetCalls()
-                let count = try storage.count(\CountTest.value)
                 XCTAssertEqual(count, expectedCount)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
             })
@@ -773,31 +860,46 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 let db = storage.connection.dbMaybe!
-                try section("no rows", routine: {
+                var count = 0
+                try section("with constraints", routine: {
                     expectedCount = 0
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test WHERE count_test.value != 10", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
                         .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
+                    apiProvider.resetCalls()
+                    count = try storage.count(all: CountTest.self, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
                 })
-                try section("3 rows", routine: {
-                    try storage.replace(CountTest(value: 1))
-                    try storage.replace(CountTest(value: 2))
-                    try storage.replace(CountTest(value: 3))
-                    expectedCount = 3
-                    expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3Step(.ignore)),
-                        .init(id: 4, callType: .sqlite3Finalize(.ignore))
-                    ]
+                try section("without constraints", routine: {
+                    try section("no rows", routine: {
+                        expectedCount = 0
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                        ]
+                    })
+                    try section("3 rows", routine: {
+                        try storage.replace(CountTest(value: 1))
+                        try storage.replace(CountTest(value: 2))
+                        try storage.replace(CountTest(value: 3))
+                        expectedCount = 3
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3Step(.ignore)),
+                            .init(id: 4, callType: .sqlite3Finalize(.ignore))
+                        ]
+                    })
+                    apiProvider.resetCalls()
+                    count = try storage.count(all: CountTest.self)
                 })
-                apiProvider.resetCalls()
-                let count = try storage.count(all: CountTest.self)
                 XCTAssertEqual(count, expectedCount)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
             })
@@ -843,9 +945,10 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 let db = storage.connection.dbMaybe!
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 var expectedResult: Double?
-                try section("insert nothing") {
+                var avgValue: Double?
+                try section("with constraints", routine: {
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test WHERE avg_test.value < 10", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
@@ -853,24 +956,39 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     expectedResult = nil
-                }
-                try section("insert something", routine: {
-                    try storage.replace(AvgTest(value: 1))
-                    try storage.replace(AvgTest(value: 4))
-                    try storage.replace(AvgTest(value: 10))
-                    expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
-                        .init(id: 1, callType: .sqlite3Step(.ignore)),
-                        .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
-                        .init(id: 3, callType: .sqlite3ValueType(.ignore)),
-                        .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
-                        .init(id: 5, callType: .sqlite3Step(.ignore)),
-                        .init(id: 6, callType: .sqlite3Finalize(.ignore))
-                    ]
-                    expectedResult = Double(1 + 4 + 10) / 3
+                    apiProvider.resetCalls()
+                    avgValue = try storage.avg(\AvgTest.value, where_(lesserThan(lhs: \AvgTest.value, rhs: 10)))
                 })
-                apiProvider.resetCalls()
-                let avgValue = try storage.avg(\AvgTest.value)
+                try section("without constraints", routine: {
+                    try section("insert nothing") {
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3Step(.ignore)),
+                            .init(id: 5, callType: .sqlite3Finalize(.ignore))
+                        ]
+                        expectedResult = nil
+                    }
+                    try section("insert something", routine: {
+                        try storage.replace(AvgTest(value: 1))
+                        try storage.replace(AvgTest(value: 4))
+                        try storage.replace(AvgTest(value: 10))
+                        expectedCalls = [
+                            .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(value) FROM avg_test", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3Step(.ignore)),
+                            .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
+                            .init(id: 3, callType: .sqlite3ValueType(.ignore)),
+                            .init(id: 4, callType: .sqlite3ValueDouble(.ignore)),
+                            .init(id: 5, callType: .sqlite3Step(.ignore)),
+                            .init(id: 6, callType: .sqlite3Finalize(.ignore))
+                        ]
+                        expectedResult = Double(1 + 4 + 10) / 3
+                    })
+                    apiProvider.resetCalls()
+                    avgValue = try storage.avg(\AvgTest.value)
+                })
                 XCTAssertEqual(avgValue, expectedResult)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
             }
