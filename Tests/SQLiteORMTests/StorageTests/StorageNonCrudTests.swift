@@ -48,9 +48,16 @@ class StorageNonCrudTests: XCTestCase {
             try storage.replace(Employee(id: 8, firstname: "Laura", lastname: "Callahan", title: "IT Staff", email: "laura@chinookcorp.com"))
 
             apiProvider.resetCalls()
-            try storage.update(all: Employee.self,
-                               set(assign(\Employee.lastname, "Smith")),
-                               where_(equal(lhs: \Employee.id, rhs: 3)))
+            try section("function", routine: {
+                try storage.update(all: Employee.self,
+                                   set(assign(\Employee.lastname, "Smith")),
+                                   where_(equal(lhs: \Employee.id, rhs: 3)))
+            })
+            try section("operator", routine: {
+                try storage.update(all: Employee.self,
+                                   set(\Employee.lastname &= "Smith"),
+                                   where_(\Employee.id == 3))
+            })
             XCTAssertEqual(apiProvider.calls, [
                 .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
                 .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "UPDATE employees SET lastname = 'Smith' WHERE employees.id == 3", -1, .ignore, nil)),

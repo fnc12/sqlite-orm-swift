@@ -59,7 +59,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    result = try storage.total(\TotalTest.value, where_(lesserThan(lhs: \TotalTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        result = try storage.total(\TotalTest.value, where_(lesserThan(lhs: \TotalTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        result = try storage.total(\TotalTest.value, where_(\TotalTest.value < 10))
+                    })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -199,7 +204,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    result = try storage.sum(\SumTest.value, where_(greaterThan(lhs: \SumTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        result = try storage.sum(\SumTest.value, where_(greaterThan(lhs: \SumTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        result = try storage.sum(\SumTest.value, where_(\SumTest.value > 10))
+                    })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -349,7 +359,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    result = try storage.min(\MinTest.value, where_(lesserOrEqual(lhs: \MinTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        result = try storage.min(\MinTest.value, where_(lesserOrEqual(lhs: \MinTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        result = try storage.min(\MinTest.value, where_(\MinTest.value <= 10))
+                    })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -499,7 +514,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    result = try storage.max(\MaxTest.value, where_(greaterOrEqual(lhs: \MaxTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        result = try storage.max(\MaxTest.value, where_(greaterOrEqual(lhs: \MaxTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        result = try storage.max(\MaxTest.value, where_(\MaxTest.value >= 10))
+                    })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -646,7 +666,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 5, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    result = try storage.groupConcat(\GroupConcatTest.value, where_(equal(lhs: \GroupConcatTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        result = try storage.groupConcat(\GroupConcatTest.value, where_(equal(lhs: \GroupConcatTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        result = try storage.groupConcat(\GroupConcatTest.value, where_(\GroupConcatTest.value == 10))
+                    })
                 })
                 try section("1 argument", routine: {
                     try section("no rows", routine: {
@@ -788,7 +813,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    count = try storage.count(\CountTest.value, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        count = try storage.count(\CountTest.value, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        count = try storage.count(\CountTest.value, where_(\CountTest.value != 10))
+                    })
                 })
                 try section("without constraints", routine: {
                     try section("no rows", routine: {
@@ -871,7 +901,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         .init(id: 4, callType: .sqlite3Finalize(.ignore))
                     ]
                     apiProvider.resetCalls()
-                    count = try storage.count(all: CountTest.self, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        count = try storage.count(all: CountTest.self, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        count = try storage.count(all: CountTest.self, where_(\CountTest.value != 10))
+                    })
                 })
                 try section("without constraints", routine: {
                     try section("no rows", routine: {
@@ -957,7 +992,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     expectedResult = nil
                     apiProvider.resetCalls()
-                    avgValue = try storage.avg(\AvgTest.value, where_(lesserThan(lhs: \AvgTest.value, rhs: 10)))
+                    try section("function", routine: {
+                        avgValue = try storage.avg(\AvgTest.value, where_(lesserThan(lhs: \AvgTest.value, rhs: 10)))
+                    })
+                    try section("operator", routine: {
+                        avgValue = try storage.avg(\AvgTest.value, where_(\AvgTest.value < 10))
+                    })
                 })
                 try section("without constraints", routine: {
                     try section("insert nothing") {

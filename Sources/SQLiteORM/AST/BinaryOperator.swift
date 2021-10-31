@@ -24,7 +24,15 @@ public func equal(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .equal)
 }
 
+public func ==(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .equal)
+}
+
 public func notEqual(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .notEqual)
+}
+
+public func !=(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .notEqual)
 }
 
@@ -32,7 +40,15 @@ public func lesserThan(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .lesserThan)
 }
 
+public func <(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .lesserThan)
+}
+
 public func lesserOrEqual(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .lesserOrEqual)
+}
+
+public func <=(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .lesserOrEqual)
 }
 
@@ -40,10 +56,22 @@ public func greaterThan(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .greaterThan)
 }
 
+public func >(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .greaterThan)
+}
+
 public func greaterOrEqual(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .greaterOrEqual)
 }
 
+public func >=(lhs: Expression, rhs: Expression) -> BinaryOperator {
+    return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .greaterOrEqual)
+}
+
 public func assign(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .assign)
+}
+
+public func &=(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
     return .init(lhs: lhs, rhs: rhs, operatorType: .assign)
 }
