@@ -4,6 +4,16 @@ public protocol Expression: Serializable {
 
 }
 
+extension Expression {
+    func and(_ rhs: Expression) -> BinaryOperator {
+        return SQLiteORM.and(self, rhs)
+    }
+
+    func or(_ rhs: Expression) -> BinaryOperator {
+        return SQLiteORM.or(self, rhs)
+    }
+}
+
 extension Int: Expression {
 
 }

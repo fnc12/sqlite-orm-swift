@@ -107,6 +107,41 @@ class SerializeTests: XCTestCase {
             TestCase(value: lesserOrEqual(lhs: 4, rhs: \User.id), expected: "4 <= users.id"),
             TestCase(value: 4 <= \User.id, expected: "4 <= users.id"),
 
+            TestCase(value: conc(\User.id, "Skillet"), expected: "users.id || 'Skillet'"),
+            TestCase(value: SQLiteORM.add(\User.id, 5), expected: "users.id + 5"),
+            TestCase(value: \User.id + 5, expected: "users.id + 5"),
+            TestCase(value: sub(\User.id, 5), expected: "users.id - 5"),
+            TestCase(value: \User.id - 5, expected: "users.id - 5"),
+            TestCase(value: mul(\User.id, 5), expected: "users.id * 5"),
+            TestCase(value: \User.id * 5, expected: "users.id * 5"),
+            TestCase(value: div(\User.id, 5), expected: "users.id / 5"),
+            TestCase(value: \User.id / 5, expected: "users.id / 5"),
+            TestCase(value: mod(\User.id, 5), expected: "users.id % 5"),
+            TestCase(value: \User.id % 5, expected: "users.id % 5"),
+            TestCase(value: and(\User.id, 5), expected: "users.id AND 5"),
+            TestCase(value: \User.id && 5, expected: "users.id AND 5"),
+            TestCase(value: (\User.id).and(5), expected: "users.id AND 5"),
+            TestCase(value: or(\User.id, 5), expected: "users.id OR 5"),
+            TestCase(value: \User.id || 5, expected: "users.id OR 5"),
+            TestCase(value: (\User.id).or(5), expected: "users.id OR 5"),
+
+            TestCase(value: conc("Skillet", \User.id), expected: "'Skillet' || users.id"),
+            TestCase(value: SQLiteORM.add(5, \User.id), expected: "5 + users.id"),
+            TestCase(value: 5 + \User.id, expected: "5 + users.id"),
+            TestCase(value: sub(5, \User.id), expected: "5 - users.id"),
+            TestCase(value: 5 - \User.id, expected: "5 - users.id"),
+            TestCase(value: mul(5, \User.id), expected: "5 * users.id"),
+            TestCase(value: 5 * \User.id, expected: "5 * users.id"),
+            TestCase(value: div(5, \User.id), expected: "5 / users.id"),
+            TestCase(value: 5 / \User.id, expected: "5 / users.id"),
+            TestCase(value: mod(5, \User.id), expected: "5 % users.id"),
+            TestCase(value: 5 % \User.id, expected: "5 % users.id"),
+            TestCase(value: and(5, \User.id), expected: "5 AND users.id"),
+            TestCase(value: 5 && \User.id, expected: "5 AND users.id"),
+            TestCase(value: 5.and(\User.id), expected: "5 AND users.id"),
+            TestCase(value: or(5, \User.id), expected: "5 OR users.id"),
+            TestCase(value: 5.or(\User.id), expected: "5 OR users.id"),
+
             //  String
             TestCase(value: equal(lhs: \User.name, rhs: "Nicki"), expected: "users.name == 'Nicki'"),
             TestCase(value: \User.name == "Nicki", expected: "users.name == 'Nicki'"),
@@ -131,7 +166,8 @@ class SerializeTests: XCTestCase {
             TestCase(value: lesserThan(lhs: "Kesha", rhs: \User.name), expected: "'Kesha' < users.name"),
             TestCase(value: "Kesha" < \User.name, expected: "'Kesha' < users.name"),
             TestCase(value: lesserOrEqual(lhs: "Oliver Heldens", rhs: \User.name), expected: "'Oliver Heldens' <= users.name"),
-            TestCase(value: "Oliver Heldens" <= \User.name, expected: "'Oliver Heldens' <= users.name")
+            TestCase(value: "Oliver Heldens" <= \User.name, expected: "'Oliver Heldens' <= users.name"),
+            TestCase(value: conc("Skillet", \User.name), expected: "'Skillet' || users.name")
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
@@ -152,12 +188,20 @@ class SerializeTests: XCTestCase {
             let expected: String
         }
         let testCases = [
+            TestCase(binaryOperatorType: .add, expected: "+"),
+            TestCase(binaryOperatorType: .sub, expected: "-"),
+            TestCase(binaryOperatorType: .mul, expected: "*"),
+            TestCase(binaryOperatorType: .div, expected: "/"),
+            TestCase(binaryOperatorType: .mod, expected: "%"),
             TestCase(binaryOperatorType: .equal, expected: "=="),
             TestCase(binaryOperatorType: .notEqual, expected: "!="),
             TestCase(binaryOperatorType: .lesserThan, expected: "<"),
             TestCase(binaryOperatorType: .lesserOrEqual, expected: "<="),
             TestCase(binaryOperatorType: .greaterThan, expected: ">"),
-            TestCase(binaryOperatorType: .greaterOrEqual, expected: ">=")
+            TestCase(binaryOperatorType: .greaterOrEqual, expected: ">="),
+            TestCase(binaryOperatorType: .conc, expected: "||"),
+            TestCase(binaryOperatorType: .and, expected: "AND"),
+            TestCase(binaryOperatorType: .or, expected: "OR")
         ]
         for testCase in testCases {
             let description = testCase.binaryOperatorType.description

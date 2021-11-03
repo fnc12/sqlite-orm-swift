@@ -75,3 +75,63 @@ public func assign(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
 public func &=(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
     return .init(lhs: lhs, rhs: rhs, operatorType: .assign)
 }
+
+public func conc(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .conc)
+}
+
+public func add(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .add)
+}
+
+public func +(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .add)
+}
+
+public func sub(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .sub)
+}
+
+public func -(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .sub)
+}
+
+public func mul(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .mul)
+}
+
+public func *(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .mul)
+}
+
+public func div(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .div)
+}
+
+public func /(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .div)
+}
+
+public func mod(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .mod)
+}
+
+public func %(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .mod)
+}
+
+public func and(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .and)
+}
+
+public func &&(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .and)
+}
+
+public func or(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .or)
+}
+
+public func ||(_ lhs: Expression, _ rhs: Expression) -> BinaryOperator {
+    return .init(lhs: lhs, rhs: rhs, operatorType: .or)
+}
