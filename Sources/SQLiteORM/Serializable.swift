@@ -31,3 +31,15 @@ extension KeyPath: Serializable {
         }
     }
 }
+
+extension Float: Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        return self.description
+    }
+}
+
+extension Double: Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        return self.description
+    }
+}

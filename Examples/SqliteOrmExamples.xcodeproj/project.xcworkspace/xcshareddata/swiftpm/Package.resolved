@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SQLiteORM",
+        "repositoryURL": "https://github.com/fnc12/sqlite-orm-swift",
+        "state": {
+          "branch": "master",
+          "revision": "831bb61992de90a4ef3cff17a26770069077f7f0",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
