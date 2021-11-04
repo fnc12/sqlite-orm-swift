@@ -180,6 +180,29 @@ if let sumId = try storage.sum(\User.id) {
 let totalId = try storage.total(\User.id)
 ```
 
+# Where conditions
+
+You also can select objects with custom where conditions with `==`, `!=`, `>`, `>=`, `<`, `<=`.
+
+For example: let's select users with id lesser than 10:
+```swift
+//  SELECT * FROM users WHERE id < 10
+let idLesserThan10: [User] = try storage.getAll(where_(\User.id < 10))
+print("idLesserThan10 count = \(idLesserThan10.count)")
+for user in idLesserThan10 {
+    print("\(user)")
+}
+```
+Or select all users who's first name is not equal "John":
+```swift
+//  SELECT * FROM users WHERE first_name != 'John'
+let notJohn: [User] = try storage.getAll(where_(\User.firstName != "John"))
+print("notJohn count = \(notJohn.count)")
+for user in idLesserThan10 {
+    print("\(user)")
+}
+```
+
 # Migrations functionality
 
 There are no explicit `up` and `down` functions that are used to be used in migrations. Instead `SQLiteORM` offers `syncSchema` function that takes responsibility of comparing actual db file schema with one you specified in `Storage` init call and if something is not equal it alters or drops/creates schema.
