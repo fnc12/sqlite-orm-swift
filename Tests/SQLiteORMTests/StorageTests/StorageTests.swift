@@ -31,6 +31,40 @@ class StorageTests: XCTestCase {
         self.apiProvider = nil
         self.storage = nil
     }
+    
+    func testIterate() throws {
+        try testCase(#function, routine: {
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                           Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                           Column(name: "name", keyPath: \User.name, constraints: notNull())))
+            try storage.syncSchema(preserve: false)
+            
+            var expected = [User]()
+            var users = [User]()
+            try section("empty", routine: {
+                //..
+            })
+            try section("one user", routine: {
+                let user = User(id: 1, name: "The Weeknd")
+                expected.append(user)
+                try storage.replace(user)
+            })
+            try section("two user", routine: {
+                let user1 = User(id: 1, name: "The Weeknd")
+                let user2 = User(id: 2, name: "Post Malone")
+                expected.append(user1)
+                expected.append(user2)
+                try storage.replace(user1)
+                try storage.replace(user2)
+            })
+            for user in storage.iterate(all: User.self) {
+                users.append(user)
+            }
+            XCTAssert(compareUnordered(users, expected))
+        })
+    }
 
     func testFilename() throws {
         struct TestCase {
