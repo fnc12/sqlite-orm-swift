@@ -1,7 +1,7 @@
 import Foundation
 import SQLiteORM
 
-struct Employee : Initializable {
+struct Employee: Initializable {
     var id = 0
     var name = ""
     var age = 0
@@ -47,3 +47,9 @@ try storage.update(all: Employee.self,
                    set(\Employee.address &= "Texas",
                         \Employee.salary &= 20000.00),
                    where_(\Employee.age < 30))
+
+//  show 'COMPANY' table contents one more time
+for employee: Employee in try storage.getAll() {
+    print("\(employee)")
+}
+print("")

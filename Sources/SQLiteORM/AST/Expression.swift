@@ -31,9 +31,9 @@ extension KeyPath: Expression {
 }
 
 extension Float: Expression {
-    
+
 }
 
 extension Double: Expression {
-    
+
 }

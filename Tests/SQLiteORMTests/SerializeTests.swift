@@ -76,6 +76,34 @@ class SerializeTests: XCTestCase {
         })
     }
 
+    func testUnaryOperator() throws {
+        struct TestCase {
+            let value: UnaryOperator
+            let expected: String
+        }
+        let testCases = [
+            TestCase(value: binaryNot(expression: \User.id), expected: "~ users.id"),
+            TestCase(value: ~\User.id, expected: "~ users.id"),
+            TestCase(value: plus(expression: \User.id), expected: "+ users.id"),
+            TestCase(value: +\User.id, expected: "+ users.id"),
+            TestCase(value: minus(expression: \User.id), expected: "- users.id"),
+            TestCase(value: -\User.id, expected: "- users.id"),
+            TestCase(value: not(expression: \User.id), expected: "NOT users.id"),
+            TestCase(value: !\User.id, expected: "NOT users.id")
+        ]
+        for testCase in testCases {
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            try storage.syncSchema(preserve: false)
+            let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
+            XCTAssertEqual(string, testCase.expected)
+        }
+    }
+
     func testBinaryOperator() throws {
         struct TestCase {
             let value: BinaryOperator
@@ -179,6 +207,23 @@ class SerializeTests: XCTestCase {
             try storage.syncSchema(preserve: false)
             let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
             XCTAssertEqual(string, testCase.expected)
+        }
+    }
+
+    func testUnaryOperatorType() throws {
+        struct TestCase {
+            let unaryOperatorType: UnaryOperatorType
+            let expected: String
+        }
+        let testCases = [
+            TestCase(unaryOperatorType: .not, expected: "NOT"),
+            TestCase(unaryOperatorType: .minus, expected: "-"),
+            TestCase(unaryOperatorType: .plus, expected: "+"),
+            TestCase(unaryOperatorType: .tilda, expected: "~")
+        ]
+        for testCase in testCases {
+            let description = testCase.unaryOperatorType.description
+            XCTAssertEqual(description, testCase.expected)
         }
     }
 
