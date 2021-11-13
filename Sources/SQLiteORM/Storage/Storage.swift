@@ -41,8 +41,8 @@ public class Storage: NSObject {
     public var filename: String {
         return self.connection.filename
     }
-    
-    func iterate<T>(all of: T.Type, _ constraints: SelectConstraint...) -> View<T> {
+
+    public func iterate<T>(all of: T.Type, _ constraints: SelectConstraint...) -> View<T> {
         let anyTable = self.tables.first(where: { $0.type == T.self })!
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {

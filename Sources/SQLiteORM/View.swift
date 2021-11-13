@@ -13,7 +13,7 @@ public struct ViewIterator<T: Initializable> {
 
 extension ViewIterator: IteratorProtocol {
     public typealias Element = T
-    
+
     public func next() -> T? {
         let resultCode = self.view.statement.step()
         switch resultCode {
@@ -23,7 +23,7 @@ extension ViewIterator: IteratorProtocol {
                 let columnValuePointer = self.view.statement.columnValuePointer(with: columnIndex)
                 do {
                     try anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
-                }catch{
+                } catch {
                     return nil
                 }
             }
@@ -34,11 +34,11 @@ extension ViewIterator: IteratorProtocol {
             return nil
         }
     }
-    
+
 }
 
 extension View: Sequence {
-    
+
     public func makeIterator() -> ViewIterator<T> {
         return .init(view: self)
     }

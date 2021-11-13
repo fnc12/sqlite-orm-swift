@@ -49,7 +49,7 @@ try storage.update(all: Employee.self,
                    where_(\Employee.age < 30))
 
 //  show 'COMPANY' table contents one more time
-for employee: Employee in try storage.getAll() {
+for employee in storage.iterate(all: Employee.self) {
     print("\(employee)")
 }
 print("")

@@ -1,7 +1,7 @@
 import Foundation
 
 extension Storage {
-    
+
     public func tableExists(with name: String) throws -> Bool {
         let connectionRef = try ConnectionRef(connection: self.connection)
         return try self.tableExists(with: name, connectionRef: connectionRef)
@@ -54,7 +54,7 @@ extension Storage {
         }while resultCode != apiProvider.SQLITE_DONE
         return res
     }
-    
+
     static private func calculateRemoveAddColumns(columnsToAdd: inout [TableInfo],
                                                   storageTableInfo: inout [TableInfo],
                                                   dbTableInfo: inout [TableInfo]) -> Bool {

@@ -31,7 +31,7 @@ class StorageTests: XCTestCase {
         self.apiProvider = nil
         self.storage = nil
     }
-    
+
     func testIterate() throws {
         try testCase(#function, routine: {
             let storage = try Storage(filename: "",
@@ -40,11 +40,11 @@ class StorageTests: XCTestCase {
                                                            Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
                                                            Column(name: "name", keyPath: \User.name, constraints: notNull())))
             try storage.syncSchema(preserve: false)
-            
+
             var expected = [User]()
             var users = [User]()
             try section("empty", routine: {
-                //..
+                // ..
             })
             try section("one user", routine: {
                 let user = User(id: 1, name: "The Weeknd")
