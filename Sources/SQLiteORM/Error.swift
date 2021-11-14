@@ -13,4 +13,5 @@ public enum Error: Swift.Error {
     case invalidBuilder
     case unableToGetObjectWithoutPrimaryKeys
     case unableToDeleteObjectWithoutPrimaryKeys
+    case unknownError
 }

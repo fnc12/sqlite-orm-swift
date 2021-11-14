@@ -32,7 +32,7 @@ class StorageTests: XCTestCase {
         self.storage = nil
     }
 
-    func testIterate() throws {
+    func testEnumerated() throws {
         try testCase(#function, routine: {
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
@@ -43,25 +43,29 @@ class StorageTests: XCTestCase {
 
             var expected = [User]()
             var users = [User]()
-            try section("empty", routine: {
-                // ..
+            
+            let user1 = User(id: 1, name: "The Weeknd")
+            let user2 = User(id: 2, name: "Post Malone")
+            expected.append(user1)
+            expected.append(user2)
+            try storage.replace(user1)
+            try storage.replace(user2)
+            
+            try section("enumerated", routine: {
+                for userResult in storage.enumerated(User.self) {
+                    switch userResult {
+                    case .success(let user):
+                        users.append(user)
+                    case .failure(let error):
+                        throw error
+                    }
+                }
             })
-            try section("one user", routine: {
-                let user = User(id: 1, name: "The Weeknd")
-                expected.append(user)
-                try storage.replace(user)
+            try section("forEach", routine: {
+                try storage.forEach(User.self) {
+                    users.append($0)
+                }
             })
-            try section("two user", routine: {
-                let user1 = User(id: 1, name: "The Weeknd")
-                let user2 = User(id: 2, name: "Post Malone")
-                expected.append(user1)
-                expected.append(user2)
-                try storage.replace(user1)
-                try storage.replace(user2)
-            })
-            for user in storage.iterate(all: User.self) {
-                users.append(user)
-            }
             XCTAssert(compareUnordered(users, expected))
         })
     }

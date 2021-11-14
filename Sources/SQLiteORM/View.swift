@@ -12,9 +12,9 @@ public struct ViewIterator<T: Initializable> {
 }
 
 extension ViewIterator: IteratorProtocol {
-    public typealias Element = T
+    public typealias Element = Result<T, Error>
 
-    public func next() -> T? {
+    public func next() -> Element? {
         let resultCode = self.view.statement.step()
         switch resultCode {
         case self.view.apiProvider.SQLITE_ROW:
@@ -23,15 +23,18 @@ extension ViewIterator: IteratorProtocol {
                 let columnValuePointer = self.view.statement.columnValuePointer(with: columnIndex)
                 do {
                     try anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
+                } catch let error as Error {
+                    return .failure(error)
                 } catch {
-                    return nil
+                    return .failure(Error.unknownError)
                 }
             }
-            return object
+            return .success(object)
         case self.view.apiProvider.SQLITE_DONE:
             return nil
         default:
-            return nil
+            let errorString = self.view.connectionRef.errorMessage
+            return .failure(Error.sqliteError(code: resultCode, text: errorString))
         }
     }
 
