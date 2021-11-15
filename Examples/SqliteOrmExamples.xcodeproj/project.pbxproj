@@ -7,11 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E9BA4CF9274135B900E2BC2F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BA4CF8274135B900E2BC2F /* main.swift */; };
+		E9BA4CFF274246D200E2BC2F /* SQLiteORM in Frameworks */ = {isa = PBXBuildFile; productRef = E9BA4CFE274246D200E2BC2F /* SQLiteORM */; };
 		E9DB57842732F48D00EE5B90 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DB57832732F48D00EE5B90 /* main.swift */; };
 		E9DB578E2732F75900EE5B90 /* SQLiteORM in Frameworks */ = {isa = PBXBuildFile; productRef = E9DB578D2732F75900EE5B90 /* SQLiteORM */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E9BA4CF4274135B900E2BC2F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		E9DB577E2732F48D00EE5B90 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -24,11 +35,21 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E9DB57802732F48D00EE5B90 /* SqliteOrmExamples */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SqliteOrmExamples; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9BA4CF6274135B900E2BC2F /* keyValue */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = keyValue; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9BA4CF8274135B900E2BC2F /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		E9DB57802732F48D00EE5B90 /* update */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = update; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9DB57832732F48D00EE5B90 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E9BA4CF3274135B900E2BC2F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9BA4CFF274246D200E2BC2F /* SQLiteORM in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E9DB577D2732F48D00EE5B90 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -40,36 +61,74 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E9BA4CF7274135B900E2BC2F /* keyValue */ = {
+			isa = PBXGroup;
+			children = (
+				E9BA4CF8274135B900E2BC2F /* main.swift */,
+			);
+			path = keyValue;
+			sourceTree = "<group>";
+		};
+		E9BA4CFD274246D200E2BC2F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E9DB57772732F48D00EE5B90 = {
 			isa = PBXGroup;
 			children = (
-				E9DB57822732F48D00EE5B90 /* SqliteOrmExamples */,
+				E9DB57822732F48D00EE5B90 /* update */,
+				E9BA4CF7274135B900E2BC2F /* keyValue */,
 				E9DB57812732F48D00EE5B90 /* Products */,
+				E9BA4CFD274246D200E2BC2F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		E9DB57812732F48D00EE5B90 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E9DB57802732F48D00EE5B90 /* SqliteOrmExamples */,
+				E9DB57802732F48D00EE5B90 /* update */,
+				E9BA4CF6274135B900E2BC2F /* keyValue */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E9DB57822732F48D00EE5B90 /* SqliteOrmExamples */ = {
+		E9DB57822732F48D00EE5B90 /* update */ = {
 			isa = PBXGroup;
 			children = (
 				E9DB57832732F48D00EE5B90 /* main.swift */,
 			);
-			path = SqliteOrmExamples;
+			path = update;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E9DB577F2732F48D00EE5B90 /* SqliteOrmExamples */ = {
+		E9BA4CF5274135B900E2BC2F /* keyValue */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E9DB57872732F48D00EE5B90 /* Build configuration list for PBXNativeTarget "SqliteOrmExamples" */;
+			buildConfigurationList = E9BA4CFA274135B900E2BC2F /* Build configuration list for PBXNativeTarget "keyValue" */;
+			buildPhases = (
+				E9BA4CF2274135B900E2BC2F /* Sources */,
+				E9BA4CF3274135B900E2BC2F /* Frameworks */,
+				E9BA4CF4274135B900E2BC2F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = keyValue;
+			packageProductDependencies = (
+				E9BA4CFE274246D200E2BC2F /* SQLiteORM */,
+			);
+			productName = keyValue;
+			productReference = E9BA4CF6274135B900E2BC2F /* keyValue */;
+			productType = "com.apple.product-type.tool";
+		};
+		E9DB577F2732F48D00EE5B90 /* update */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9DB57872732F48D00EE5B90 /* Build configuration list for PBXNativeTarget "update" */;
 			buildPhases = (
 				E9DB577C2732F48D00EE5B90 /* Sources */,
 				E9DB577D2732F48D00EE5B90 /* Frameworks */,
@@ -79,12 +138,12 @@
 			);
 			dependencies = (
 			);
-			name = SqliteOrmExamples;
+			name = update;
 			packageProductDependencies = (
 				E9DB578D2732F75900EE5B90 /* SQLiteORM */,
 			);
 			productName = SqliteOrmExamples;
-			productReference = E9DB57802732F48D00EE5B90 /* SqliteOrmExamples */;
+			productReference = E9DB57802732F48D00EE5B90 /* update */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -94,9 +153,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1300;
+				LastSwiftUpdateCheck = 1310;
 				LastUpgradeCheck = 1300;
 				TargetAttributes = {
+					E9BA4CF5274135B900E2BC2F = {
+						CreatedOnToolsVersion = 13.1;
+					};
 					E9DB577F2732F48D00EE5B90 = {
 						CreatedOnToolsVersion = 13.0;
 					};
@@ -118,12 +180,21 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E9DB577F2732F48D00EE5B90 /* SqliteOrmExamples */,
+				E9DB577F2732F48D00EE5B90 /* update */,
+				E9BA4CF5274135B900E2BC2F /* keyValue */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E9BA4CF2274135B900E2BC2F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9BA4CF9274135B900E2BC2F /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E9DB577C2732F48D00EE5B90 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -135,6 +206,30 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		E9BA4CFB274135B900E2BC2F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QDTPG5DB79;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.6;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E9BA4CFC274135B900E2BC2F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QDTPG5DB79;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.6;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		E9DB57852732F48D00EE5B90 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -275,6 +370,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E9BA4CFA274135B900E2BC2F /* Build configuration list for PBXNativeTarget "keyValue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9BA4CFB274135B900E2BC2F /* Debug */,
+				E9BA4CFC274135B900E2BC2F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E9DB577B2732F48D00EE5B90 /* Build configuration list for PBXProject "SqliteOrmExamples" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -284,7 +388,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E9DB57872732F48D00EE5B90 /* Build configuration list for PBXNativeTarget "SqliteOrmExamples" */ = {
+		E9DB57872732F48D00EE5B90 /* Build configuration list for PBXNativeTarget "update" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E9DB57882732F48D00EE5B90 /* Debug */,
@@ -307,6 +411,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E9BA4CFE274246D200E2BC2F /* SQLiteORM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E9DB578C2732F75900EE5B90 /* XCRemoteSwiftPackageReference "sqlite-orm-swift" */;
+			productName = SQLiteORM;
+		};
 		E9DB578D2732F75900EE5B90 /* SQLiteORM */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E9DB578C2732F75900EE5B90 /* XCRemoteSwiftPackageReference "sqlite-orm-swift" */;
