@@ -22,6 +22,12 @@ extension String: ConstructableFromSQLiteValue {
     }
 }
 
+extension Bool: ConstructableFromSQLiteValue {
+    public init(sqliteValue: SQLiteValue) {
+        self = sqliteValue.integer != 0
+    }
+}
+
 extension Optional: ConstructableFromSQLiteValue where Wrapped: ConstructableFromSQLiteValue {
     public init(sqliteValue: SQLiteValue) {
         if sqliteValue.isNull {
