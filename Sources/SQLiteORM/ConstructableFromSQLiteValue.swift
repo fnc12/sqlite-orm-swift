@@ -10,6 +10,24 @@ extension Int: ConstructableFromSQLiteValue {
     }
 }
 
+extension UInt: ConstructableFromSQLiteValue {
+    public init(sqliteValue: SQLiteValue) {
+        self = Self(sqliteValue.integer)
+    }
+}
+
+extension Int64: ConstructableFromSQLiteValue {
+    public init(sqliteValue: SQLiteValue) {
+        self = Self(sqliteValue.integer)
+    }
+}
+
+extension UInt64: ConstructableFromSQLiteValue {
+    public init(sqliteValue: SQLiteValue) {
+        self = Self(sqliteValue.integer)
+    }
+}
+
 extension Double: ConstructableFromSQLiteValue {
     public init(sqliteValue: SQLiteValue) {
         self = sqliteValue.double
