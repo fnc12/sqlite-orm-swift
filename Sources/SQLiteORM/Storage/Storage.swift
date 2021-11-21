@@ -4,7 +4,7 @@ public protocol Initializable {
     init()
 }
 
-open class Storage: NSObject {
+public class Storage: NSObject {
     let tables: [AnyTable]
     private let inMemory: Bool
     let connection: ConnectionHolder
