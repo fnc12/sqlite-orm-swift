@@ -18,6 +18,18 @@ extension Int: Expression {
 
 }
 
+extension UInt: Expression {
+
+}
+
+extension Int64: Expression {
+
+}
+
+extension UInt64: Expression {
+
+}
+
 extension Bool: Expression {
 
 }

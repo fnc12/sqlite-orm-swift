@@ -10,6 +10,24 @@ extension Int: Serializable {
     }
 }
 
+extension UInt: Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        return self.description
+    }
+}
+
+extension Int64: Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        return self.description
+    }
+}
+
+extension UInt64: Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        return self.description
+    }
+}
+
 extension Bool: Serializable {
     public func serialize(with serializationContext: SerializationContext) throws -> String {
         return self ? "1" : "0"
