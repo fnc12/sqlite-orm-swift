@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E9DB577F2732F48D00EE5B90"
-               BuildableName = "SqliteOrmExamples"
+               BuildableName = "update"
                BlueprintName = "update"
                ReferencedContainer = "container:SqliteOrmExamples.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E9DB577F2732F48D00EE5B90"
-            BuildableName = "SqliteOrmExamples"
+            BuildableName = "update"
             BlueprintName = "update"
             ReferencedContainer = "container:SqliteOrmExamples.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E9DB577F2732F48D00EE5B90"
-            BuildableName = "SqliteOrmExamples"
+            BuildableName = "update"
             BlueprintName = "update"
             ReferencedContainer = "container:SqliteOrmExamples.xcodeproj">
          </BuildableReference>

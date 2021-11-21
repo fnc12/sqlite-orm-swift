@@ -26,6 +26,26 @@ extension UInt: Bindable {
     }
 }
 
+extension Int64: Bindable {
+    public func bind(to binder: Binder) -> Int32 {
+        return binder.bindInt(value: Int(self))
+    }
+
+    public static func sqliteTypeName() -> String {
+        return "INTEGER"
+    }
+}
+
+extension UInt64: Bindable {
+    public func bind(to binder: Binder) -> Int32 {
+        return binder.bindInt(value: Int(self))
+    }
+
+    public static func sqliteTypeName() -> String {
+        return "INTEGER"
+    }
+}
+
 extension Bool: Bindable {
     public func bind(to binder: Binder) -> Int32 {
         return binder.bindInt(value: self ? 1 : 0)
