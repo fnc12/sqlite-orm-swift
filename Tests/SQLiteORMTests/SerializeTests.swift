@@ -210,7 +210,7 @@ class SerializeTests: XCTestCase {
         }
     }
 
-    func testUnaryOperatorType() throws {
+    func testUnaryOperatorType() {
         struct TestCase {
             let unaryOperatorType: UnaryOperatorType
             let expected: String
@@ -224,6 +224,48 @@ class SerializeTests: XCTestCase {
         for testCase in testCases {
             let description = testCase.unaryOperatorType.description
             XCTAssertEqual(description, testCase.expected)
+        }
+    }
+    
+    func testOrderBy() throws {
+        struct TestCase {
+            let expression: ASTOrderBy
+            let expected: String
+        }
+        let testCases = [
+            TestCase(expression: orderBy(\User.name), expected: "ORDER BY users.name"),
+            TestCase(expression: orderBy(\User.id), expected: "ORDER BY users.id"),
+        ]
+        for testCase in testCases {
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            let string = try testCase.expression.serialize(with: .init(schemaProvider: storage))
+            XCTAssertEqual(string, testCase.expected)
+        }
+    }
+    
+    func testWhere() throws {
+        struct TestCase {
+            let expression: ASTWhere
+            let expected: String
+        }
+        let testCases = [
+            TestCase(expression: where_(true), expected: "WHERE 1"),
+            TestCase(expression: where_(\User.id > 5), expected: "WHERE users.id > 5"),
+        ]
+        for testCase in testCases {
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            let string = try testCase.expression.serialize(with: .init(schemaProvider: storage))
+            XCTAssertEqual(string, testCase.expected)
         }
     }
 

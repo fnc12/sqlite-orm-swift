@@ -1,6 +1,6 @@
 import Foundation
 
-public class ASTWhere: SelectConstraint {
+public class ASTOrderBy: SelectConstraint {
     var expression: Expression
 
     init(expression: Expression) {
@@ -8,13 +8,13 @@ public class ASTWhere: SelectConstraint {
     }
 }
 
-extension ASTWhere: Serializable {
+extension ASTOrderBy: Serializable {
     public func serialize(with serializationContext: SerializationContext) throws -> String {
         let expressionString = try self.expression.serialize(with: serializationContext)
-        return "WHERE \(expressionString)"
+        return "ORDER BY \(expressionString)"
     }
 }
 
-public func where_(_ expression: Expression) -> ASTWhere {
+public func orderBy(_ expression: Expression) -> ASTOrderBy {
     return .init(expression: expression)
 }
