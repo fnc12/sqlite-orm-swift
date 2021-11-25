@@ -1,5 +1,5 @@
 import Foundation
 
-public protocol SelectConstraint: Serializable {
+public protocol SelectConstraint: Expression {
 
 }

@@ -14,6 +14,10 @@ class SchemaProviderStub: SchemaProvider {
     func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String {
         throw Self.Error.error
     }
+    
+    func tableName<T>(type: T.Type) throws -> String {
+        throw Self.Error.error
+    }
 }
 
 class SerializeTests: XCTestCase {

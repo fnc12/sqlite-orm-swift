@@ -20,6 +20,13 @@ extension BinaryOperator: Serializable {
     }
 }
 
+extension BinaryOperator: AstIteratable {
+    public func iterateAst(routine: (Expression) -> ()) {
+        self.lhs.iterateAst(routine: routine)
+        self.rhs.iterateAst(routine: routine)
+    }
+}
+
 public func equal(lhs: Expression, rhs: Expression) -> BinaryOperator {
     return BinaryOperator(lhs: lhs, rhs: rhs, operatorType: .equal)
 }

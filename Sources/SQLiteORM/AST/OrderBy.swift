@@ -15,6 +15,12 @@ extension ASTOrderBy: Serializable {
     }
 }
 
+extension ASTOrderBy: AstIteratable {
+    public func iterateAst(routine: (Expression) -> ()) {
+        self.expression.iterateAst(routine: routine)
+    }
+}
+
 public func orderBy(_ expression: Expression) -> ASTOrderBy {
     return .init(expression: expression)
 }

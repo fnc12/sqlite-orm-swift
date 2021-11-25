@@ -37,7 +37,6 @@ extension ViewIterator: IteratorProtocol {
             return .failure(Error.sqliteError(code: resultCode, text: errorString))
         }
     }
-
 }
 
 extension View: Sequence {

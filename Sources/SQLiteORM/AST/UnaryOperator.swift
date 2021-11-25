@@ -11,9 +11,14 @@ public class UnaryOperator: Expression {
 }
 
 extension UnaryOperator: Serializable {
-
     public func serialize(with serializationContext: SerializationContext) throws -> String {
         return try "\(self.operatorType.description) \(self.expression.serialize(with: serializationContext))"
+    }
+}
+
+extension UnaryOperator: AstIteratable {
+    public func iterateAst(routine: (Expression) -> ()) {
+        self.expression.iterateAst(routine: routine)
     }
 }
 

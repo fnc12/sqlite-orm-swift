@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Expression: Serializable {
+public protocol Expression: Serializable, AstIteratable {
 
 }
 

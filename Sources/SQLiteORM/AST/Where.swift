@@ -15,6 +15,12 @@ extension ASTWhere: Serializable {
     }
 }
 
+extension ASTWhere: AstIteratable {
+    public func iterateAst(routine: (Expression) -> ()) {
+        self.expression.iterateAst(routine: routine)
+    }
+}
+
 public func where_(_ expression: Expression) -> ASTWhere {
     return .init(expression: expression)
 }
