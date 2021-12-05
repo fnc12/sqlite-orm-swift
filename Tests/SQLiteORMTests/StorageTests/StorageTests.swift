@@ -24,11 +24,9 @@ class StorageTests: XCTestCase {
                                                        columns:
                                                         Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
                                                         Column(name: "name", keyPath: \User.name, constraints: notNull())))
-        self.apiProvider = .init()
     }
 
     override func tearDownWithError() throws {
-        self.apiProvider = nil
         self.storage = nil
     }
 
@@ -68,6 +66,18 @@ class StorageTests: XCTestCase {
             })
             XCTAssert(compareUnordered(users, expected))
         })
+    }
+    
+    func testColumnNameWithReservedKeyword() throws {
+        struct Object: Initializable {
+            var id = 0
+            var order = 0
+        }
+        let storage = try Storage(filename: "", tables: Table<Object>(name: "objects",
+                                                                      columns:
+                                                                        Column(name: "id", keyPath: \Object.id),
+                                                                        Column(name: "order", keyPath: \Object.order)))
+        try storage.syncSchema(preserve: true)
     }
 
     func testFilename() throws {
@@ -128,79 +138,121 @@ class StorageTests: XCTestCase {
 
     func testGet() throws {
         do {
-            let _: User? = try storage.get(id: 1)
+            let _: User? = try self.storage.get(id: 1)
             XCTAssert(false)
         } catch SQLiteORM.Error.sqliteError(_, _) {
             XCTAssert(true)
         } catch {
             XCTAssert(false)
         }
-        try storage.syncSchema(preserve: true)
+        try self.storage.syncSchema(preserve: true)
 
-        try storage.replace(User(id: 1, name: "Bebe Rexha"))
+        try self.storage.replace(User(id: 1, name: "Bebe Rexha"))
         let bebeRexhaMaybe: User? = try storage.get(id: 1)
         XCTAssertEqual(bebeRexhaMaybe, User(id: 1, name: "Bebe Rexha"))
 
         for id in 2..<10 {
-            let user: User? = try storage.get(id: id)
+            let user: User? = try self.storage.get(id: id)
             XCTAssert(user == nil)
         }
     }
 
     func testUpdate() throws {
-        try storage.syncSchema(preserve: true)
+        try self.storage.syncSchema(preserve: true)
         var bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try storage.replace(bebeRexha)
+        try self.storage.replace(bebeRexha)
         var allUsers: [User] = try storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
 
         bebeRexha.name = "Ariana Grande"
-        try storage.update(bebeRexha)
-        allUsers = try storage.getAll()
+        try self.storage.update(bebeRexha)
+        allUsers = try self.storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
     }
 
     func testDelete() throws {
-        try storage.syncSchema(preserve: true)
+        try self.storage.syncSchema(preserve: true)
 
         let bebeRexha = User(id: 1, name: "Bebe Rexha")
         let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try storage.replace(bebeRexha)
-        try storage.replace(arianaGrande)
-        var allUsers: [User] = try storage.getAll()
+        try self.storage.replace(bebeRexha)
+        try self.storage.replace(arianaGrande)
+        var allUsers: [User] = try self.storage.getAll()
         XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
 
-        try storage.delete(bebeRexha)
-        allUsers = try storage.getAll()
+        try self.storage.delete(bebeRexha)
+        allUsers = try self.storage.getAll()
         XCTAssert(allUsers == [arianaGrande])
     }
 
     func testTableExists() throws {
+        let apiProvider = SQLiteApiProviderMock()
+        apiProvider.forwardsCalls = true
+        let storage = try Storage(filename: "",
+                                  apiProvider: apiProvider,
+                                  tables: [Table<User>(name: "users",
+                                                       columns:
+                                                        Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                        Column(name: "name", keyPath: \User.name, constraints: notNull()))])
+        apiProvider.resetCalls()
         XCTAssertFalse(try storage.tableExists(with: "users"))
+        XCTAssertEqual(apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name = \'users\'", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
+        
+        apiProvider.resetCalls()
         XCTAssertFalse(try storage.tableExists(with: "visits"))
+        XCTAssertEqual(apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name = \'visits\'", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
 
         try storage.syncSchema(preserve: true)
-
+        
+        apiProvider.resetCalls()
         XCTAssertTrue(try storage.tableExists(with: "users"))
+        XCTAssertEqual(apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name = \'users\'", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
+        
+        apiProvider.resetCalls()
         XCTAssertFalse(try storage.tableExists(with: "visits"))
+        XCTAssertEqual(apiProvider.calls, [
+            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name = \'visits\'", -1, .ignore, nil)),
+            .init(id: 1, callType: .sqlite3Step(.ignore)),
+            .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
+            .init(id: 3, callType: .sqlite3Step(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+        ])
     }
 
     func testReplace() throws {
-        try storage.syncSchema(preserve: true)
+        try self.storage.syncSchema(preserve: true)
 
-        var allUsers: [User] = try storage.getAll()
+        var allUsers: [User] = try self.storage.getAll()
         XCTAssertTrue(allUsers.isEmpty)
 
         let bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try storage.replace(bebeRexha)
+        try self.storage.replace(bebeRexha)
 
-        allUsers = try storage.getAll()
+        allUsers = try self.storage.getAll()
         XCTAssertEqual(allUsers, [bebeRexha])
 
         let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try storage.replace(arianaGrande)
+        try self.storage.replace(arianaGrande)
 
-        allUsers = try storage.getAll()
+        allUsers = try self.storage.getAll()
         XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
     }
 }

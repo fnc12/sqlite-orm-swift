@@ -110,7 +110,7 @@ extension Storage {
         var sql = "SELECT "
         let columnsCount = anyTable.columns.count
         for (columnIndex, column) in anyTable.columns.enumerated() {
-            sql += column.name
+            sql += "\"\(column.name)\""
             if columnIndex < columnsCount - 1 {
                 sql += ", "
             }
@@ -161,7 +161,7 @@ extension Storage {
         var sql = "INSERT INTO \(anyTable.name) ("
         let nonPrimaryKeyColumnNamesCount = anyTable.nonPrimaryKeyColumnNamesCount
         anyTable.forEachNonPrimaryKeyColumn { column, columnIndex in
-            sql += column.name
+            sql += "\"\(column.name)\""
             if columnIndex < nonPrimaryKeyColumnNamesCount - 1 {
                 sql += ", "
             }
@@ -197,7 +197,7 @@ extension Storage {
         var sql = "REPLACE INTO \(anyTable.name) ("
         let columnsCount = anyTable.columns.count
         for (columnIndex, column) in anyTable.columns.enumerated() {
-            sql += column.name
+            sql += "\"\(column.name)\""
             if columnIndex < columnsCount - 1 {
                 sql += ", "
             }

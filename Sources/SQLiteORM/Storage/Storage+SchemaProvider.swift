@@ -19,7 +19,7 @@ extension Storage: SchemaProvider {
         guard let column = anyTable.columns.first(where: { $0.keyPath == keyPath }) else {
             throw Error.columnNotFound
         }
-        return "\(anyTable.name).\(column.name)"
+        return "\(anyTable.name).\"\(column.name)\""    //  TODO: move double quotes to 'serialize' function
     }
     
     public func tableName<T>(type: T.Type) throws -> String {

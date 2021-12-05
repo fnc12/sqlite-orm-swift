@@ -43,7 +43,7 @@ extension String: Serializable {
 extension KeyPath: Serializable {
     public func serialize(with serializationContext: SerializationContext) throws -> String {
         if serializationContext.skipTableName {
-            return try serializationContext.schemaProvider.columnName(keyPath: self)
+            return "\"\(try serializationContext.schemaProvider.columnName(keyPath: self))\""
         } else {
             return try serializationContext.schemaProvider.columnNameWithTable(keyPath: self)
         }

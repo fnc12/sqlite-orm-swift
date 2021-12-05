@@ -46,7 +46,7 @@ class StorageCrudTests: XCTestCase {
             if !inMemory {
                 expectedCalls = [
                     .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                    .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "INSERT INTO users (name) VALUES (?)", -1, .ignore, nil)),
+                    .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 2, callType: .sqlite3BindText(.ignore, 1, "Bebe Rexha", -1, apiProvider.SQLITE_TRANSIENT)),
                     .init(id: 3, callType: .sqlite3Step(.ignore)),
                     .init(id: 4, callType: .sqlite3LastInsertRowid(.ignore)),
@@ -56,7 +56,7 @@ class StorageCrudTests: XCTestCase {
             } else {
                 let db = storage.connection.dbMaybe!
                 expectedCalls = [
-                    .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (name) VALUES (?)", -1, .ignore, nil)),
+                    .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 1, callType: .sqlite3BindText(.ignore, 1, "Bebe Rexha", -1, apiProvider.SQLITE_TRANSIENT)),
                     .init(id: 2, callType: .sqlite3Step(.ignore)),
                     .init(id: 3, callType: .sqlite3LastInsertRowid(.ignore)),
@@ -75,7 +75,7 @@ class StorageCrudTests: XCTestCase {
             if !inMemory {
                 expectedCalls = [
                     .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                    .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "INSERT INTO users (name) VALUES (?)", -1, .ignore, nil)),
+                    .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 2, callType: .sqlite3BindText(.ignore, 1, "Ariana Grande", -1, apiProvider.SQLITE_TRANSIENT)),
                     .init(id: 3, callType: .sqlite3Step(.ignore)),
                     .init(id: 4, callType: .sqlite3LastInsertRowid(.ignore)),
@@ -85,7 +85,7 @@ class StorageCrudTests: XCTestCase {
             } else {
                 let db = storage.connection.dbMaybe!
                 expectedCalls = [
-                    .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (name) VALUES (?)", -1, .ignore, nil)),
+                    .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 1, callType: .sqlite3BindText(.ignore, 1, "Ariana Grande", -1, apiProvider.SQLITE_TRANSIENT)),
                     .init(id: 2, callType: .sqlite3Step(.ignore)),
                     .init(id: 3, callType: .sqlite3LastInsertRowid(.ignore)),

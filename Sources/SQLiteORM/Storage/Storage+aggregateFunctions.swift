@@ -9,7 +9,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT TOTAL(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT TOTAL(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
@@ -41,7 +41,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT SUM(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT SUM(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
@@ -76,7 +76,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT MIN(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT MIN(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
@@ -119,7 +119,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT MAX(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT MAX(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
@@ -164,9 +164,9 @@ extension Storage {
         }
         var sql = ""
         if nil == separator {
-            sql = "SELECT GROUP_CONCAT(\(column.name)) FROM \(table.name)"
+            sql = "SELECT GROUP_CONCAT(\"\(column.name)\") FROM \(table.name)"
         } else {
-            sql = "SELECT GROUP_CONCAT(\(column.name), '\(separator!)') FROM \(table.name)"
+            sql = "SELECT GROUP_CONCAT(\"\(column.name)\", '\(separator!)') FROM \(table.name)"
         }
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
@@ -210,7 +210,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT COUNT(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT COUNT(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
@@ -271,7 +271,7 @@ extension Storage {
         guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
             throw Error.columnNotFound
         }
-        var sql = "SELECT AVG(\(column.name)) FROM \(table.name)"
+        var sql = "SELECT AVG(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"

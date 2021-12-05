@@ -169,14 +169,14 @@ extension Storage {
         let columnNamesCount = columnNames.count
         var sql = "INSERT INTO \(name) ("
         for (columnNameIndex, columnName) in columnNames.enumerated() {
-            sql += columnName
+            sql += "\"\(columnName)\""
             if columnNameIndex < columnNamesCount - 1 {
                 sql += ", "
             }
         }
         sql += ") SELECT "
         for (columnNameIndex, columnName) in columnNames.enumerated() {
-            sql += columnName
+            sql += "\"\(columnName)\""
             if columnNameIndex < columnNamesCount - 1 {
                 sql += ", "
             }
