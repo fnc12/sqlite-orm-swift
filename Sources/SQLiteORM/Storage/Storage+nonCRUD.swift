@@ -1,7 +1,7 @@
 import Foundation
 
 extension Storage {
-    public func select<R>(_ expression: Expression, _ constraints: SelectConstraint...) throws -> [R] where R : ConstructableFromSQLiteValue {
+    public func select<R>(_ expression: Expression, _ constraints: SelectConstraint...) throws -> [R] where R: ConstructableFromSQLiteValue {
         let serializationContext = SerializationContext(schemaProvider: self)
         let columnText = try expression.serialize(with: serializationContext)
         var sql = "SELECT \(columnText)"
@@ -32,7 +32,7 @@ extension Storage {
         } while resultCode != self.apiProvider.SQLITE_DONE
         return result
     }
-    
+
     public func update<T>(all of: T.Type, _ set: AssignList, _ constraints: SelectConstraint...) throws {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped

@@ -21,7 +21,7 @@ extension BinaryOperator: Serializable {
 }
 
 extension BinaryOperator: AstIteratable {
-    public func iterateAst(routine: (Expression) -> ()) {
+    public func iterateAst(routine: (Expression) -> Void) {
         self.lhs.iterateAst(routine: routine)
         self.rhs.iterateAst(routine: routine)
     }

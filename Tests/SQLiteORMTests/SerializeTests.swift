@@ -14,7 +14,7 @@ class SchemaProviderStub: SchemaProvider {
     func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String {
         throw Self.Error.error
     }
-    
+
     func tableName<T>(type: T.Type) throws -> String {
         throw Self.Error.error
     }
@@ -105,6 +105,23 @@ class SerializeTests: XCTestCase {
             try storage.syncSchema(preserve: false)
             let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
             XCTAssertEqual(string, testCase.expected)
+        }
+    }
+
+    func testLimit() throws {
+        struct TestCase {
+            let value: ASTLimit
+            let expected: String
+        }
+        let testCases = [
+            TestCase(value: limit(5), expected: "LIMIT 5"),
+            .init(value: limit(10, 4), expected: "LIMIT 10, 4"),
+            .init(value: limit(3, offset: 10), expected: "LIMIT 3 OFFSET 10")
+        ]
+        for testCase in testCases {
+            let schemaProviderStub = SchemaProviderStub()
+            let value = try testCase.value.serialize(with: .init(schemaProvider: schemaProviderStub))
+            XCTAssertEqual(value, testCase.expected)
         }
     }
 
@@ -230,7 +247,7 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(description, testCase.expected)
         }
     }
-    
+
     func testOrderBy() throws {
         struct TestCase {
             let expression: ASTOrderBy
@@ -238,7 +255,7 @@ class SerializeTests: XCTestCase {
         }
         let testCases = [
             TestCase(expression: orderBy(\User.name), expected: "ORDER BY users.\"name\""),
-            TestCase(expression: orderBy(\User.id), expected: "ORDER BY users.\"id\""),
+            TestCase(expression: orderBy(\User.id), expected: "ORDER BY users.\"id\"")
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
@@ -251,7 +268,7 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(string, testCase.expected)
         }
     }
-    
+
     func testWhere() throws {
         struct TestCase {
             let expression: ASTWhere
@@ -259,7 +276,7 @@ class SerializeTests: XCTestCase {
         }
         let testCases = [
             TestCase(expression: where_(true), expected: "WHERE 1"),
-            TestCase(expression: where_(\User.id > 5), expected: "WHERE users.\"id\" > 5"),
+            TestCase(expression: where_(\User.id > 5), expected: "WHERE users.\"id\" > 5")
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",

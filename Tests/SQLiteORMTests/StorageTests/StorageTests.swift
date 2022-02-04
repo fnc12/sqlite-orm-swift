@@ -41,14 +41,14 @@ class StorageTests: XCTestCase {
 
             var expected = [User]()
             var users = [User]()
-            
+
             let user1 = User(id: 1, name: "The Weeknd")
             let user2 = User(id: 2, name: "Post Malone")
             expected.append(user1)
             expected.append(user2)
             try storage.replace(user1)
             try storage.replace(user2)
-            
+
             try section("enumerated", routine: {
                 for userResult in storage.enumerated(User.self) {
                     switch userResult {
@@ -67,7 +67,7 @@ class StorageTests: XCTestCase {
             XCTAssert(compareUnordered(users, expected))
         })
     }
-    
+
     func testColumnNameWithReservedKeyword() throws {
         struct Object: Initializable {
             var id = 0
@@ -201,9 +201,9 @@ class StorageTests: XCTestCase {
             .init(id: 1, callType: .sqlite3Step(.ignore)),
             .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
             .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore))
         ])
-        
+
         apiProvider.resetCalls()
         XCTAssertFalse(try storage.tableExists(with: "visits"))
         XCTAssertEqual(apiProvider.calls, [
@@ -211,11 +211,11 @@ class StorageTests: XCTestCase {
             .init(id: 1, callType: .sqlite3Step(.ignore)),
             .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
             .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore))
         ])
 
         try storage.syncSchema(preserve: true)
-        
+
         apiProvider.resetCalls()
         XCTAssertTrue(try storage.tableExists(with: "users"))
         XCTAssertEqual(apiProvider.calls, [
@@ -223,9 +223,9 @@ class StorageTests: XCTestCase {
             .init(id: 1, callType: .sqlite3Step(.ignore)),
             .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
             .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore))
         ])
-        
+
         apiProvider.resetCalls()
         XCTAssertFalse(try storage.tableExists(with: "visits"))
         XCTAssertEqual(apiProvider.calls, [
@@ -233,7 +233,7 @@ class StorageTests: XCTestCase {
             .init(id: 1, callType: .sqlite3Step(.ignore)),
             .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
             .init(id: 3, callType: .sqlite3Step(.ignore)),
-            .init(id: 4, callType: .sqlite3Finalize(.ignore)),
+            .init(id: 4, callType: .sqlite3Finalize(.ignore))
         ])
     }
 

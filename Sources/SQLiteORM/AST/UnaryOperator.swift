@@ -17,7 +17,7 @@ extension UnaryOperator: Serializable {
 }
 
 extension UnaryOperator: AstIteratable {
-    public func iterateAst(routine: (Expression) -> ()) {
+    public func iterateAst(routine: (Expression) -> Void) {
         self.expression.iterateAst(routine: routine)
     }
 }

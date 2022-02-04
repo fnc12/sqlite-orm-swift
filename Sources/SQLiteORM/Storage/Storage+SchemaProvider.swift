@@ -21,7 +21,7 @@ extension Storage: SchemaProvider {
         }
         return "\(anyTable.name).\"\(column.name)\""    //  TODO: move double quotes to 'serialize' function
     }
-    
+
     public func tableName<T>(type: T.Type) throws -> String {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped

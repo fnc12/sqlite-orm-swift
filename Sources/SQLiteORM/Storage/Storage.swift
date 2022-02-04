@@ -41,8 +41,8 @@ public class Storage: NSObject {
     public var filename: String {
         return self.connection.filename
     }
-    
-    public func forEach<T>(_ all: T.Type, _ constraints: SelectConstraint..., callback: (_ object: T) -> ()) throws where T: Initializable {
+
+    public func forEach<T>(_ all: T.Type, _ constraints: SelectConstraint..., callback: (_ object: T) -> Void) throws where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }

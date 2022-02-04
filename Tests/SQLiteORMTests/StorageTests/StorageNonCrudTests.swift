@@ -14,7 +14,7 @@ class StorageNonCrudTests: XCTestCase {
     struct Visit: Initializable {
         var id = 0
     }
-    
+
     func testSelect() throws {
         struct Employee {
             var id = 0
@@ -81,7 +81,7 @@ class StorageNonCrudTests: XCTestCase {
                 .init(id: 26, callType: .sqlite3Step(.ignore)),
                 .init(id: 27, callType: .sqlite3ColumnCount(.ignore)),
                 .init(id: 28, callType: .sqlite3Finalize(.ignore)),
-                .init(id: 29, callType: .sqlite3Close(.ignore)),
+                .init(id: 29, callType: .sqlite3Close(.ignore))
             ])
         })
     }

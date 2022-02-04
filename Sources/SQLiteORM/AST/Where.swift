@@ -16,7 +16,7 @@ extension ASTWhere: Serializable {
 }
 
 extension ASTWhere: AstIteratable {
-    public func iterateAst(routine: (Expression) -> ()) {
+    public func iterateAst(routine: (Expression) -> Void) {
         self.expression.iterateAst(routine: routine)
     }
 }

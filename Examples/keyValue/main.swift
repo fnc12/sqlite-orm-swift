@@ -1,7 +1,7 @@
 import Foundation
 import SQLiteORM
 
-struct KeyValue : Initializable {
+struct KeyValue: Initializable {
     var key: String = ""
     var value: String = ""
 }
@@ -20,7 +20,7 @@ func set(value: String, for key: String) throws {
 func getValue(for key: String) throws -> String? {
     if let keyValue: KeyValue = try storage.get(id: key) {
         return keyValue.value
-    }else{
+    } else {
         return nil
     }
 }

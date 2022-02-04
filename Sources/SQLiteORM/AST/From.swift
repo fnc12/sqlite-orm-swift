@@ -2,7 +2,7 @@ import Foundation
 
 public class ASTFrom<T>: SelectConstraint {
     var type: T.Type
-    
+
     init(type: T.Type) {
         self.type = type
     }
@@ -20,7 +20,7 @@ extension ASTFrom: Serializable {
 }
 
 extension ASTFrom: AstIteratable {
-    public func iterateAst(routine: (Expression) -> ()) {
-        //..
+    public func iterateAst(routine: (Expression) -> Void) {
+        // ..
     }
 }
