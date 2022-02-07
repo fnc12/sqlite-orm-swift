@@ -255,7 +255,26 @@ class SerializeTests: XCTestCase {
         }
         let testCases = [
             TestCase(expression: orderBy(\User.name), expected: "ORDER BY users.\"name\""),
-            TestCase(expression: orderBy(\User.id), expected: "ORDER BY users.\"id\"")
+            TestCase(expression: orderBy(\User.id), expected: "ORDER BY users.\"id\""),
+            .init(expression: orderBy(\User.id).asc(), expected: "ORDER BY users.\"id\" ASC"),
+            .init(expression: orderBy(\User.id).desc(), expected: "ORDER BY users.\"id\" DESC"),
+            .init(expression: orderBy(\User.id).asc().nullsFirst(), expected: "ORDER BY users.\"id\" ASC NULLS FIRST"),
+            .init(expression: orderBy(\User.id).asc().nullsLast(), expected: "ORDER BY users.\"id\" ASC NULLS LAST"),
+            .init(expression: orderBy(\User.id).desc().nullsFirst(), expected: "ORDER BY users.\"id\" DESC NULLS FIRST"),
+            .init(expression: orderBy(\User.id).desc().nullsLast(), expected: "ORDER BY users.\"id\" DESC NULLS LAST"),
+            .init(expression: orderBy(\User.id).nullsFirst(), expected: "ORDER BY users.\"id\" NULLS FIRST"),
+            .init(expression: orderBy(\User.id).nullsLast(), expected: "ORDER BY users.\"id\" NULLS LAST"),
+
+            .init(expression: orderBy(\User.name).collate("binary"), expected: "ORDER BY users.\"name\" COLLATE binary"),
+            .init(expression: orderBy(\User.id).collate("binary"), expected: "ORDER BY users.\"id\" COLLATE binary"),
+            .init(expression: orderBy(\User.id).collate("binary").asc(), expected: "ORDER BY users.\"id\" COLLATE binary ASC"),
+            .init(expression: orderBy(\User.id).collate("binary").desc(), expected: "ORDER BY users.\"id\" COLLATE binary DESC"),
+            .init(expression: orderBy(\User.id).collate("binary").asc().nullsFirst(), expected: "ORDER BY users.\"id\" COLLATE binary ASC NULLS FIRST"),
+            .init(expression: orderBy(\User.id).collate("binary").asc().nullsLast(), expected: "ORDER BY users.\"id\" COLLATE binary ASC NULLS LAST"),
+            .init(expression: orderBy(\User.id).collate("binary").desc().nullsFirst(), expected: "ORDER BY users.\"id\" COLLATE binary DESC NULLS FIRST"),
+            .init(expression: orderBy(\User.id).collate("binary").desc().nullsLast(), expected: "ORDER BY users.\"id\" COLLATE binary DESC NULLS LAST"),
+            .init(expression: orderBy(\User.id).collate("binary").nullsFirst(), expected: "ORDER BY users.\"id\" COLLATE binary NULLS FIRST"),
+            .init(expression: orderBy(\User.id).collate("binary").nullsLast(), expected: "ORDER BY users.\"id\" COLLATE binary NULLS LAST")
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
