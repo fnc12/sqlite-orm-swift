@@ -1,6 +1,38 @@
 import Foundation
 
 extension Storage {
+    public func select<R1, R2> (_ expression1: Expression, _ expression2: Expression, _ constraints: SelectConstraint...) throws -> [(R1, R2)] where R1: ConstructableFromSQLiteValue, R2: ConstructableFromSQLiteValue {
+        let serializationContext = SerializationContext(schemaProvider: self)
+        let columnText1 = try expression1.serialize(with: serializationContext)
+        let columnText2 = try expression2.serialize(with: serializationContext)
+        var sql = "SELECT \(columnText1), \(columnText2)"
+        for constraint in constraints {
+            let constraintsString = try constraint.serialize(with: serializationContext)
+            sql += " \(constraintsString)"
+        }
+        let connectionRef = try ConnectionRef(connection: self.connection)
+        let statement = try connectionRef.prepare(sql: sql)
+        var result = [(R1, R2)]()
+        var resultCode: Int32 = 0
+        repeat {
+            resultCode = statement.step()
+            let columnsCount = statement.columnCount()
+            guard columnsCount == 2 else {
+                throw Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount), storageColumnsCount: 2)
+            }
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                result.append((R1(sqliteValue: statement.columnValuePointer(with: 0)), R2(sqliteValue: statement.columnValuePointer(with: 1))))
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        } while resultCode != self.apiProvider.SQLITE_DONE
+        return result
+    }
+
     public func select<R>(_ expression: Expression, _ constraints: SelectConstraint...) throws -> [R] where R: ConstructableFromSQLiteValue {
         let serializationContext = SerializationContext(schemaProvider: self)
         let columnText = try expression.serialize(with: serializationContext)
