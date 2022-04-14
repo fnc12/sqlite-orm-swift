@@ -48,7 +48,7 @@ class StorageNonCrudTests: XCTestCase {
             try storage.replace(Employee(id: 8, firstname: "Laura", lastname: "Callahan", title: "IT Staff", email: "laura@chinookcorp.com"))
 
             apiProvider.resetCalls()
-            try section("one row", routine: {
+            try section("one column", routine: {
                 let ids: [Int] = try storage.select(\Employee.id, from(Employee.self))
                 let expected: [Int] = Array(1...8)
                 XCTAssert(compareUnordered(ids, expected))
@@ -85,7 +85,7 @@ class StorageNonCrudTests: XCTestCase {
                     .init(id: 29, callType: .sqlite3Close(.ignore))
                 ])
             })
-            try section("two rows", routine: {
+            try section("two columns", routine: {
                 let rows: [(Int, String)] = try storage.select(\Employee.id, \Employee.firstname, from(Employee.self))
                 let expected: [(Int, String)] = [
                     (1, "Andrew"),

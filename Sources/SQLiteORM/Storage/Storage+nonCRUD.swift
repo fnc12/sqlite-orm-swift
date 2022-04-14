@@ -1,6 +1,27 @@
 import Foundation
 
 extension Storage {
+    private func selectInternal(_ sql: String, connectionRef: ConnectionRef, columnsCount: Int, append: (_ statement: Statement & ColumnBinder) -> ()) throws {
+        let statement = try connectionRef.prepare(sql: sql)
+        var resultCode: Int32 = 0
+        repeat {
+            resultCode = statement.step()
+            let statementColumnsCount = statement.columnCount()
+            guard statementColumnsCount == columnsCount else {
+                throw Error.columnsCountMismatch(statementColumnsCount: Int(statementColumnsCount), storageColumnsCount: columnsCount)
+            }
+            switch resultCode {
+            case self.apiProvider.SQLITE_ROW:
+                append(statement)
+            case self.apiProvider.SQLITE_DONE:
+                break
+            default:
+                let errorString = connectionRef.errorMessage
+                throw Error.sqliteError(code: resultCode, text: errorString)
+            }
+        } while resultCode != self.apiProvider.SQLITE_DONE
+    }
+    
     public func select<R1, R2> (_ expression1: Expression, _ expression2: Expression, _ constraints: SelectConstraint...) throws -> [(R1, R2)] where R1: ConstructableFromSQLiteValue, R2: ConstructableFromSQLiteValue {
         let serializationContext = SerializationContext(schemaProvider: self)
         let columnText1 = try expression1.serialize(with: serializationContext)
@@ -11,25 +32,10 @@ extension Storage {
             sql += " \(constraintsString)"
         }
         let connectionRef = try ConnectionRef(connection: self.connection)
-        let statement = try connectionRef.prepare(sql: sql)
         var result = [(R1, R2)]()
-        var resultCode: Int32 = 0
-        repeat {
-            resultCode = statement.step()
-            let columnsCount = statement.columnCount()
-            guard columnsCount == 2 else {
-                throw Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount), storageColumnsCount: 2)
-            }
-            switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
-                result.append((R1(sqliteValue: statement.columnValuePointer(with: 0)), R2(sqliteValue: statement.columnValuePointer(with: 1))))
-            case self.apiProvider.SQLITE_DONE:
-                break
-            default:
-                let errorString = connectionRef.errorMessage
-                throw Error.sqliteError(code: resultCode, text: errorString)
-            }
-        } while resultCode != self.apiProvider.SQLITE_DONE
+        try self.selectInternal(sql, connectionRef: connectionRef, columnsCount: 2, append: { statement in
+            result.append((R1(sqliteValue: statement.columnValuePointer(with: 0)), R2(sqliteValue: statement.columnValuePointer(with: 1))))
+        })
         return result
     }
 
@@ -42,26 +48,10 @@ extension Storage {
             sql += " \(constraintsString)"
         }
         let connectionRef = try ConnectionRef(connection: self.connection)
-        let statement = try connectionRef.prepare(sql: sql)
         var result = [R]()
-        var resultCode: Int32 = 0
-        repeat {
-            resultCode = statement.step()
-            let columnsCount = statement.columnCount()
-            guard columnsCount == 1 else {
-                throw Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount), storageColumnsCount: 1)
-            }
-            switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
-                let columnValuePointer = statement.columnValuePointer(with: 0)
-                result.append(.init(sqliteValue: columnValuePointer))
-            case self.apiProvider.SQLITE_DONE:
-                break
-            default:
-                let errorString = connectionRef.errorMessage
-                throw Error.sqliteError(code: resultCode, text: errorString)
-            }
-        } while resultCode != self.apiProvider.SQLITE_DONE
+        try self.selectInternal(sql, connectionRef: connectionRef, columnsCount: 1, append: { statement in
+            result.append(.init(sqliteValue: statement.columnValuePointer(with: 0)))
+        })
         return result
     }
 
