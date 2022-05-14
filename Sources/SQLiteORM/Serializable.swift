@@ -61,3 +61,13 @@ extension Double: Serializable {
         return self.description
     }
 }
+
+extension Optional: Serializable where Wrapped : Serializable {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
+        switch self {
+        case .none: return "NULL"
+        case .some(let value):
+            return try value.serialize(with: serializationContext)
+        }
+    }
+}

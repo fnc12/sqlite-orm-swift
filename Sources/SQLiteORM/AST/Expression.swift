@@ -49,3 +49,7 @@ extension Float: Expression {
 extension Double: Expression {
 
 }
+
+extension Optional: Expression where Wrapped : Expression {
+    
+}

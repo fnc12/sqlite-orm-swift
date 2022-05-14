@@ -57,3 +57,14 @@ extension Double: AstIteratable {
         routine(self)
     }
 }
+
+extension Optional: AstIteratable where Wrapped : AstIteratable {
+    public func iterateAst(routine: (Expression) -> Void) {
+        switch self {
+        case .none:
+            break
+        case .some(let value):
+            value.iterateAst(routine: routine)
+        }
+    }
+}

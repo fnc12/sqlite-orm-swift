@@ -402,6 +402,71 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(value, testCase.expected)
         }
     }
+    
+    func testCoreFunctions() throws {
+        struct TestCase {
+            let builtInFunction: BuiltInFunction
+            let expected: String
+        }
+        let testCases = [
+            TestCase(builtInFunction: SQLiteORM.abs(-5), expected: "ABS(-5)"),
+            TestCase(builtInFunction: changes(), expected: "CHANGES()"),
+            TestCase(builtInFunction: char(32, 10, 32), expected: "CHAR(32, 10, 32)"),
+            TestCase(builtInFunction: coalesce(Optional<Int>.none, 5, "hi"), expected: "COALESCE(NULL, 5, 'hi')"),
+            TestCase(builtInFunction: format("%d", 5), expected: "FORMAT('%d', 5)"),
+            TestCase(builtInFunction: SQLiteORM.glob("name", "*e"), expected: "GLOB('name', '*e')"),
+            TestCase(builtInFunction: hex(50), expected: "HEX(50)"),
+            TestCase(builtInFunction: ifnull(5, "hi"), expected: "IFNULL(5, 'hi')"),
+            TestCase(builtInFunction: iif(true, 5, 2), expected: "IIF(1, 5, 2)"),
+            TestCase(builtInFunction: instr("a", "abc"), expected: "INSTR('a', 'abc')"),
+            TestCase(builtInFunction: lastInsertRowid(), expected: "LAST_INSERT_ROWID()"),
+            TestCase(builtInFunction: length("ototo"), expected: "LENGTH('ototo')"),
+            TestCase(builtInFunction: like("ototo", "*o"), expected: "LIKE('ototo', '*o')"),
+            TestCase(builtInFunction: like("ototo", "*o", "b"), expected: "LIKE('ototo', '*o', 'b')"),
+            TestCase(builtInFunction: likelihood("hi", 0.65), expected: "LIKELIHOOD('hi', 0.65)"),
+            TestCase(builtInFunction: likely(0.5), expected: "LIKELY(0.5)"),
+            TestCase(builtInFunction: loadExtension("my_lib"), expected: "LOAD_EXTENSION('my_lib')"),
+            TestCase(builtInFunction: loadExtension("my_lib", "main"), expected: "LOAD_EXTENSION('my_lib', 'main')"),
+            TestCase(builtInFunction: lower("HI"), expected: "LOWER('HI')"),
+            TestCase(builtInFunction: ltrim("HI"), expected: "LTRIM('HI')"),
+            TestCase(builtInFunction: ltrim("HI", " "), expected: "LTRIM('HI', ' ')"),
+            TestCase(builtInFunction: SQLiteORM.max(6, 2, 4), expected: "MAX(6, 2, 4)"),
+            TestCase(builtInFunction: SQLiteORM.min(-4, 2), expected: "MIN(-4, 2)"),
+            TestCase(builtInFunction: nullif(4, "hi"), expected: "NULLIF(4, 'hi')"),
+            TestCase(builtInFunction: SQLiteORM.printf("%s", "hi"), expected: "PRINTF('%s', 'hi')"),
+            TestCase(builtInFunction: SQLiteORM.random(), expected: "RANDOM()"),
+            TestCase(builtInFunction: randomblob(10), expected: "RANDOMBLOB(10)"),
+            TestCase(builtInFunction: replace("X Zibit", "X", "i"), expected: "REPLACE('X Zibit', 'X', 'i')"),
+            TestCase(builtInFunction: SQLiteORM.round(5.5), expected: "ROUND(5.5)"),
+            TestCase(builtInFunction: SQLiteORM.round(5.5, 0.4), expected: "ROUND(5.5, 0.4)"),
+            TestCase(builtInFunction: SQLiteORM.rtrim("size  "), expected: "RTRIM('size  ')"),
+            TestCase(builtInFunction: SQLiteORM.rtrim("size  ", " "), expected: "RTRIM('size  ', ' ')"),
+            TestCase(builtInFunction: sign(-1), expected: "SIGN(-1)"),
+            TestCase(builtInFunction: soundex(5), expected: "SOUNDEX(5)"),
+            TestCase(builtInFunction: sqliteCompileOptionGet("OPTION"), expected: "SQLITE_COMPILEOPTION_GET('OPTION')"),
+            TestCase(builtInFunction: sqliteCompileOptionUsed("OPTION"), expected: "SQLITE_COMPILEOPTION_USED('OPTION')"),
+            TestCase(builtInFunction: sqliteOffset(6), expected: "SQLITE_OFFSET(6)"),
+            TestCase(builtInFunction: sqliteSourceId(), expected: "SQLITE_SOURCE_ID()"),
+            TestCase(builtInFunction: sqliteVersion(), expected: "SQLITE_VERSION()"),
+            TestCase(builtInFunction: substr("ototo", 5, 2), expected: "SUBSTR('ototo', 5, 2)"),
+            TestCase(builtInFunction: substr("ototo", 4), expected: "SUBSTR('ototo', 4)"),
+            TestCase(builtInFunction: substring("ototo", 5, 2), expected: "SUBSTRING('ototo', 5, 2)"),
+            TestCase(builtInFunction: substring("ototo", 4), expected: "SUBSTRING('ototo', 4)"),
+            TestCase(builtInFunction: totalChanges(), expected: "TOTAL_CHANGES()"),
+            TestCase(builtInFunction: trim("hi"), expected: "TRIM('hi')"),
+            TestCase(builtInFunction: trim("hi", "-"), expected: "TRIM('hi', '-')"),
+            TestCase(builtInFunction: typeof(10), expected: "TYPEOF(10)"),
+            TestCase(builtInFunction: unicode("C"), expected: "UNICODE('C')"),
+            TestCase(builtInFunction: unlikely("hi"), expected: "UNLIKELY('hi')"),
+            TestCase(builtInFunction: upper("ototo"), expected: "UPPER('ototo')"),
+            TestCase(builtInFunction: zeroblob(10), expected: "ZEROBLOB(10)"),
+        ]
+        for testCase in testCases {
+            let schemaProviderStub = SchemaProviderStub()
+            let result = try testCase.builtInFunction.serialize(with: .init(schemaProvider: schemaProviderStub))
+            XCTAssertEqual(result, testCase.expected)
+        }
+    }
 
     func testColumnConstraint() {
         struct TestCase {
