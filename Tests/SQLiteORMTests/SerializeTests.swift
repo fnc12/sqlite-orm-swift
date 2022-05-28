@@ -502,5 +502,20 @@ class SerializeTests: XCTestCase {
             XCTAssertEqual(result, testCase.expected)
         }
     }
+    
+    func testLike() throws {
+        struct User {
+            var id = 0
+            var name = ""
+        }
+        let storage = try Storage(filename: "",
+                                  tables: Table<User>(name: "users",
+                                                      columns:
+                                                        Column(name: "id", keyPath: \User.id),
+                                                        Column(name: "name", keyPath: \User.name)))
+        let expression = (\User.name).like("a%")
+        let string = try expression.serialize(with: .init(schemaProvider: storage))
+        XCTAssertEqual(string, "users.\"name\" LIKE 'a%'")
+    }
 
 }

@@ -14,6 +14,12 @@ extension Expression {
     }
 }
 
+extension Expression {
+    func like(_ rhs: Expression) -> ASTLike {
+        return .init(lhs: self, rhs: rhs)
+    }
+}
+
 extension Int: Expression {
 
 }
