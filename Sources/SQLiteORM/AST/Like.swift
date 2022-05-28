@@ -1,6 +1,6 @@
 import Foundation
 
-class ASTLike {
+public class ASTLike {
     var lhs: Expression
     var rhs: Expression
     
@@ -11,7 +11,7 @@ class ASTLike {
 }
 
 extension ASTLike: Serializable {
-    func serialize(with serializationContext: SerializationContext) throws -> String {
+    public func serialize(with serializationContext: SerializationContext) throws -> String {
         let leftString = try self.lhs.serialize(with: serializationContext)
         let rightString = try self.rhs.serialize(with: serializationContext)
         return "\(leftString) LIKE \(rightString)"
@@ -23,7 +23,7 @@ extension ASTLike: Expression {
 }
 
 extension ASTLike: AstIteratable {
-    func iterateAst(routine: (Expression) -> Void) {
+    public func iterateAst(routine: (Expression) -> Void) {
         self.lhs.iterateAst(routine: routine)
         self.rhs.iterateAst(routine: routine)
     }

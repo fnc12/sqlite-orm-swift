@@ -5,17 +5,17 @@ public protocol Expression: Serializable, AstIteratable {
 }
 
 extension Expression {
-    func and(_ rhs: Expression) -> BinaryOperator {
+    public func and(_ rhs: Expression) -> BinaryOperator {
         return SQLiteORM.and(self, rhs)
     }
 
-    func or(_ rhs: Expression) -> BinaryOperator {
+    public func or(_ rhs: Expression) -> BinaryOperator {
         return SQLiteORM.or(self, rhs)
     }
 }
 
 extension Expression {
-    func like(_ rhs: Expression) -> ASTLike {
+    public func like(_ rhs: Expression) -> ASTLike {
         return .init(lhs: self, rhs: rhs)
     }
 }
