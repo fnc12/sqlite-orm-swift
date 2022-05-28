@@ -42,7 +42,7 @@ public class Storage: BaseStorage {
         } while resultCode != self.apiProvider.SQLITE_DONE
     }
 
-    public func enumerated<T>(_ all: T.Type, _ constraints: SelectConstraint...) -> View<T> {
+    public func enumerated<T>(_ all: T.Type, _ constraints: SelectConstraint...) -> PseudoContainer<T> {
         let anyTable = self.tables.first(where: { $0.type == T.self })!
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {
