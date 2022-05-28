@@ -62,8 +62,8 @@ public class AnyColumn: NSObject {
     /// - Parameter binder: binder object used to bind values.
     /// - Parameter object: object of type mapped to this column.
     /// - Returns: SQLite code returned by `sqlite3_bind_*` routine called within this function.
-    func bind<O>(binder: Binder, object: O) throws -> Int32 {
-        return 0
+    func bind<O>(binder: Binder, object: O) -> Result<Int32, Error> {
+        return .success(0)
     }
 
     /// Use this function to obtain value from SQLite value and assign it to a field mapped

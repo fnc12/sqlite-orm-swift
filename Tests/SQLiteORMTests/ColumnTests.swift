@@ -98,51 +98,85 @@ class ColumnTests: XCTestCase {
             self.binderMock = .init()
             var user = User()
             user.id = value
-            _ = try self.intColumn.bind(binder: self.binderMock, object: user)
-            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindInt(value: value))])
+            var bindResult = self.intColumn.bind(binder: self.binderMock, object: user)
+            switch bindResult {
+            case .success(_):
+                XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindInt(value: value))])
+            case .failure(let error):
+                throw error
+            }
 
             //  bind nullable int
             self.binderMock = .init()
             user.idMaybe = value
-            _ = try self.intOptionalColumn.bind(binder: self.binderMock, object: user)
-            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindInt(value: value))])
+            bindResult = self.intOptionalColumn.bind(binder: self.binderMock, object: user)
+            switch bindResult {
+            case .success(_):
+                XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindInt(value: value))])
+            case .failure(let error):
+                throw error
+            }
 
             //  bind null as int
             self.binderMock = .init()
             user.idMaybe = nil
-            _ = try self.intOptionalColumn.bind(binder: self.binderMock, object: user)
-            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindNull)])
+            bindResult = self.intOptionalColumn.bind(binder: self.binderMock, object: user)
+            switch bindResult {
+            case .success(_):
+                XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindNull)])
+            case .failure(let error):
+                throw error
+            }
 
         }
 
         //  bind string
         self.binderMock = .init()
         var user = User(id: 0, name: "Rachel")
-        _ = try self.stringColumn.bind(binder: self.binderMock, object: user)
-        XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindText(value: "Rachel"))])
+        var bindResult = self.stringColumn.bind(binder: self.binderMock, object: user)
+        switch bindResult {
+        case .success(_):
+            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindText(value: "Rachel"))])
+        case.failure(let error):
+            throw error
+        }
 
         //  bind nullable string
         self.binderMock = .init()
         user.nameMaybe = "One"
-        _ = try self.stringOptionalColumn.bind(binder: self.binderMock, object: user)
-        XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindText(value: "One"))])
+        bindResult = self.stringOptionalColumn.bind(binder: self.binderMock, object: user)
+        switch bindResult {
+        case .success(_):
+            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindText(value: "One"))])
+        case .failure(let error):
+            throw error
+        }
 
         //  bind null as string
         self.binderMock = .init()
         user.nameMaybe = nil
-        _ = try self.stringOptionalColumn.bind(binder: self.binderMock, object: user)
-        XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindNull)])
+        bindResult = self.stringOptionalColumn.bind(binder: self.binderMock, object: user)
+        switch bindResult {
+        case .success(_):
+            XCTAssertEqual(self.binderMock.calls, [BinderMock.Call(id: 0, callType: .bindNull)])
+        case .failure(let error):
+            throw error
+        }
     }
 
     func testBindThrowUnknownType() throws {
         let visit = Visit(id: 10)
-        do {
-            _ = try self.intColumn.bind(binder: self.binderMock, object: visit)
+        let bindResult = self.intColumn.bind(binder: self.binderMock, object: visit)
+        switch bindResult {
+        case .success(_):
             XCTAssert(false)
-        } catch SQLiteORM.Error.unknownType {
-            XCTAssert(true)
-        } catch {
-            XCTAssert(false)
+        case .failure(let error):
+            switch error {
+            case .unknownType:
+                XCTAssert(true)
+            default:
+                XCTAssert(false)
+            }
         }
     }
 }

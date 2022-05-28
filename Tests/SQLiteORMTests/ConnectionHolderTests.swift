@@ -18,13 +18,18 @@ class ConnectionHolderTests: XCTestCase {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
         self.apiProvider.sqlite3OpenDbToAssign = dbPointer
         self.apiProvider.sqlite3OpenToReturn = self.apiProvider.SQLITE_OK
-        try connectionHolder.increment()
-        XCTAssertEqual(self.apiProvider.calls.count, 1)
-        switch self.apiProvider.calls.first!.callType {
-        case .sqlite3Open:
-            XCTAssert(true)
-        default:
-            XCTAssert(false)
+        let incrementResult = connectionHolder.increment()
+        switch incrementResult {
+        case .success():
+            XCTAssertEqual(self.apiProvider.calls.count, 1)
+            switch self.apiProvider.calls.first!.callType {
+            case .sqlite3Open:
+                XCTAssert(true)
+            default:
+                XCTAssert(false)
+            }
+        case .failure(let error):
+            throw error
         }
     }
 
@@ -32,13 +37,17 @@ class ConnectionHolderTests: XCTestCase {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
         self.apiProvider.sqlite3OpenDbToAssign = dbPointer
         self.apiProvider.sqlite3OpenToReturn = 1
-        do {
-            try connectionHolder.increment()
+        let incrementResult = connectionHolder.increment()
+        switch incrementResult {
+        case .success():
             XCTAssert(false)
-        } catch SQLiteORM.Error.sqliteError(let code, _) {
-            XCTAssertEqual(code, 1)
-        } catch {
-            XCTAssert(false)
+        case .failure(let error):
+            switch error {
+            case .sqliteError(let code, _):
+                XCTAssertEqual(code, 1)
+            default:
+                XCTAssert(false)
+            }
         }
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls.first!.callType {
@@ -51,13 +60,17 @@ class ConnectionHolderTests: XCTestCase {
 
     func testIncrementWithDbNil() throws {
         let connectionHolder = ConnectionHolderImpl(filename: self.filename, apiProvider: self.apiProvider)
-        do {
-            try connectionHolder.increment()
+        let incrementResult = connectionHolder.increment()
+        switch incrementResult {
+        case .success():
             XCTAssert(false)
-        } catch SQLiteORM.Error.databaseIsNull {
-            XCTAssert(true)
-        } catch {
-            XCTAssert(false)
+        case .failure(let error):
+            switch error {
+            case .databaseIsNull:
+                XCTAssert(true)
+            default:
+                XCTAssert(false)
+            }
         }
         XCTAssertEqual(self.apiProvider.calls.count, 1)
         switch self.apiProvider.calls.first!.callType {

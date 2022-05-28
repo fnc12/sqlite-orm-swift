@@ -62,12 +62,12 @@ public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLite
     ///
     /// - Throws:
     ///     `Error.unknownType` if `O` is not equal to `Self.T`
-    override func bind<O>(binder: Binder, object: O) throws -> Int32 {
+    override func bind<O>(binder: Binder, object: O) -> Result<Int32, Error> {
         guard O.self == T.self else {
-            throw Error.unknownType
+            return .failure(Error.unknownType)
         }
         let tObject = object as! T
-        return tObject[keyPath: self.keyPath].bind(to: binder)
+        return .success(tObject[keyPath: self.keyPath].bind(to: binder))
     }
 
     /// This is overridden property of superclass. Created for internal usage only.

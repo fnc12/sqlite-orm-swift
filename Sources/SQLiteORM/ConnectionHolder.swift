@@ -6,7 +6,7 @@ protocol ConnectionHolder: AnyObject {
     var filename: String { get }
     var errorMessage: String { get }
 
-    func increment() throws
+    func increment() -> Result<Void, Error>
     func decrementUnsafe()
-    func decrement() throws
+    func decrement() -> Result<Void, Error>
 }

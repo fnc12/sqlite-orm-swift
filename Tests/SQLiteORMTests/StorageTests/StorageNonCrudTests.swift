@@ -254,7 +254,7 @@ class StorageNonCrudTests: XCTestCase {
                     ]
                 }
                 apiProvider.resetCalls()
-                var users: [User] = try storage.getAll()
+                var users = try storage.getAll(all: User.self)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
                 XCTAssertEqual(users, [])
 

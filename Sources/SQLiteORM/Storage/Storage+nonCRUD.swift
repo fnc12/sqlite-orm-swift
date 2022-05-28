@@ -91,8 +91,12 @@ extension Storage {
             throw Error.sqliteError(code: resultCode, text: errorString)
         }
     }
-
-    public func getAll<T>(_ constraints: SelectConstraint...) throws -> [T] where T: Initializable {
+    
+    public func getAll<T>(all of: T.Type, _ constraints: SelectConstraint...) throws -> [T] where T: Initializable {
+        return try self.getAllInternal(all: T.self, constraints: constraints)
+    }
+    
+    private func getAllInternal<T>(all of: T.Type, constraints: [SelectConstraint]) throws -> [T] where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
@@ -128,5 +132,9 @@ extension Storage {
             }
         } while resultCode != self.apiProvider.SQLITE_DONE
         return result
+    }
+
+    public func getAll<T>(_ constraints: SelectConstraint...) throws -> [T] where T: Initializable {
+        return try self.getAllInternal(all: T.self, constraints: constraints)
     }
 }

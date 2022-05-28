@@ -4,43 +4,7 @@ public protocol Initializable {
     init()
 }
 
-public class Storage: NSObject {
-    let tables: [AnyTable]
-    private let inMemory: Bool
-    let connection: ConnectionHolder
-    let apiProvider: SQLiteApiProvider
-
-    init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
-        self.inMemory = filename.isEmpty || filename == ":memory:"
-        self.tables = tables
-        self.connection = connection
-        self.apiProvider = apiProvider
-        super.init()
-        if self.inMemory {
-            try self.connection.increment()
-        }
-    }
-
-    convenience init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
-        try self.init(filename: filename,
-                      apiProvider: apiProvider,
-                      connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider),
-                      tables: tables)
-    }
-
-    public convenience init(filename: String, tables: AnyTable...) throws {
-        try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
-    }
-
-    deinit {
-        if self.inMemory {
-            self.connection.decrementUnsafe()
-        }
-    }
-
-    public var filename: String {
-        return self.connection.filename
-    }
+public class Storage: BaseStorage {
 
     public func forEach<T>(_ all: T.Type, _ constraints: SelectConstraint..., callback: (_ object: T) -> Void) throws where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {

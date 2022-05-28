@@ -1,28 +1,20 @@
 import Foundation
 
-class ConnectionRef: NSObject {
-    let connection: ConnectionHolder
+class ConnectionRef: BaseConnectionRef {
 
     init(connection: ConnectionHolder) throws {
-        self.connection = connection
-        super.init()
-        try self.connection.increment()
+        super.init(with: connection)
+        let incrementResult = self.connection.increment()
+        switch incrementResult {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
     }
 
     deinit {
         self.connection.decrementUnsafe()
-    }
-
-    var db: OpaquePointer? {
-        return self.connection.dbMaybe
-    }
-
-    var lastInsertRowid: Int64 {
-        return self.connection.apiProvider.sqlite3LastInsertRowid(self.db)
-    }
-
-    var errorMessage: String {
-        return self.connection.errorMessage
     }
 
     func prepare(sql: String) throws -> Statement & ColumnBinder {

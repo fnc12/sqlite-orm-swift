@@ -23,9 +23,10 @@ enum ConnectionHolderCallType: Equatable {
 
 extension ConnectionHolderMock: ConnectionHolder {
 
-    func increment() throws {
+    func increment() -> Result<Void, Error> {
         let call = self.makeCall(with: .increment)
         self.calls.append(call)
+        return .success(())
     }
 
     func decrementUnsafe() {
@@ -33,8 +34,9 @@ extension ConnectionHolderMock: ConnectionHolder {
         self.calls.append(call)
     }
 
-    func decrement() throws {
+    func decrement() -> Result<Void, Error> {
         let call = self.makeCall(with: .decrement)
         self.calls.append(call)
+        return .success(())
     }
 }

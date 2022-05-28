@@ -19,19 +19,23 @@ extension Storage {
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var bindIndex = 1
-        var resultCode = Int32(0)
         for column in anyTable.columns {
             if column.isPrimaryKey {
                 let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                resultCode = try column.bind(binder: binder, object: object)
-                guard resultCode == self.apiProvider.SQLITE_OK else {
-                    let errorString = connectionRef.errorMessage
-                    throw Error.sqliteError(code: resultCode, text: errorString)
+                let bindResult = column.bind(binder: binder, object: object)
+                switch bindResult {
+                case .success(let resultCode):
+                    guard resultCode == self.apiProvider.SQLITE_OK else {
+                        let errorString = connectionRef.errorMessage
+                        throw Error.sqliteError(code: resultCode, text: errorString)
+                    }
+                    bindIndex += 1
+                case .failure(let error):
+                    throw error
                 }
-                bindIndex += 1
             }
         }
-        resultCode = statement.step()
+        let resultCode = statement.step()
         guard self.apiProvider.SQLITE_DONE == resultCode else {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
@@ -69,30 +73,39 @@ extension Storage {
         let connectionRef = try ConnectionRef(connection: self.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var bindIndex = 1
-        var resultCode = Int32(0)
         for column in anyTable.columns {
             if !column.isPrimaryKey {
                 let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                resultCode = try column.bind(binder: binder, object: object)
-                guard resultCode == self.apiProvider.SQLITE_OK else {
-                    let errorString = connectionRef.errorMessage
-                    throw Error.sqliteError(code: resultCode, text: errorString)
+                let bindResult = column.bind(binder: binder, object: object)
+                switch bindResult {
+                case .success(let resultCode):
+                    guard resultCode == self.apiProvider.SQLITE_OK else {
+                        let errorString = connectionRef.errorMessage
+                        throw Error.sqliteError(code: resultCode, text: errorString)
+                    }
+                    bindIndex += 1
+                case .failure(let error):
+                    throw error
                 }
-                bindIndex += 1
             }
         }
         for column in anyTable.columns {
             if column.isPrimaryKey {
                 let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                resultCode = try column.bind(binder: binder, object: object)
-                bindIndex += 1
-                guard resultCode == self.apiProvider.SQLITE_OK else {
-                    let errorString = connectionRef.errorMessage
-                    throw Error.sqliteError(code: resultCode, text: errorString)
+                let bindResult = column.bind(binder: binder, object: object)
+                switch bindResult {
+                case .success(let resultCode):
+                    bindIndex += 1
+                    guard resultCode == self.apiProvider.SQLITE_OK else {
+                        let errorString = connectionRef.errorMessage
+                        throw Error.sqliteError(code: resultCode, text: errorString)
+                    }
+                case .failure(let error):
+                    throw error
                 }
             }
         }
-        resultCode = statement.step()
+        let resultCode = statement.step()
         guard apiProvider.SQLITE_DONE == resultCode else {
             let errorString = connectionRef.errorMessage
             throw Error.sqliteError(code: resultCode, text: errorString)
