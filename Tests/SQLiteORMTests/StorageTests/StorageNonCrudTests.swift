@@ -46,7 +46,7 @@ class StorageNonCrudTests: XCTestCase {
             try storage.replace(Employee(id: 6, firstname: "Michael", lastname: "Mitchell", title: "IT Manager", email: "michael@chinookcorp.com"))
             try storage.replace(Employee(id: 7, firstname: "Robert", lastname: "King", title: "IT Staff", email: "robert@chinookcorp.com"))
             try storage.replace(Employee(id: 8, firstname: "Laura", lastname: "Callahan", title: "IT Staff", email: "laura@chinookcorp.com"))
-
+            
             apiProvider.resetCalls()
             try section("one column", routine: {
                 let ids: [Int] = try storage.select(\Employee.id, from(Employee.self))
@@ -137,6 +137,68 @@ class StorageNonCrudTests: XCTestCase {
                     .init(id: 35, callType: .sqlite3ColumnCount(.ignore)),
                     .init(id: 36, callType: .sqlite3Finalize(.ignore)),
                     .init(id: 37, callType: .sqlite3Close(.ignore))
+                ])
+            })
+            try section("three columns", routine: {
+                let rows: [(Int, String, String)] = try storage.select(\Employee.id, \Employee.firstname, \Employee.lastname, from(Employee.self))
+                let expected: [(Int, String, String)] = [
+                    (1, "Andrew", "Adams"),
+                    (2, "Nancy", "Edwards"),
+                    (3, "Jane", "Peacock"),
+                    (4, "Margaret", "Park"),
+                    (5, "Steve", "Johnson"),
+                    (6, "Michael", "Mitchell"),
+                    (7, "Robert", "King"),
+                    (8, "Laura", "Callahan"),
+                ]
+                XCTAssert(compareUnordered(rows, expected, { $0.0 == $1.0 && $0.1 == $1.1 && $0.2 == $1.2 }))
+                XCTAssertEqual(apiProvider.calls, [
+                    .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
+                    .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT employees.\"id\", employees.\"firstname\", employees.\"lastname\" FROM employees", -1, .ignore, nil)),
+                    .init(id: 2, callType: .sqlite3Step(.ignore)),
+                    .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 4, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 5, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 6, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 7, callType: .sqlite3Step(.ignore)),
+                    .init(id: 8, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 9, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 10, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 11, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 12, callType: .sqlite3Step(.ignore)),
+                    .init(id: 13, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 14, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 15, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 16, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 17, callType: .sqlite3Step(.ignore)),
+                    .init(id: 18, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 19, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 20, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 21, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 22, callType: .sqlite3Step(.ignore)),
+                    .init(id: 23, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 24, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 25, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 26, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 27, callType: .sqlite3Step(.ignore)),
+                    .init(id: 28, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 29, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 30, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 31, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 32, callType: .sqlite3Step(.ignore)),
+                    .init(id: 33, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 34, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 35, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 36, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 37, callType: .sqlite3Step(.ignore)),
+                    .init(id: 38, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 39, callType: .sqlite3ColumnInt(.ignore, 0)),
+                    .init(id: 40, callType: .sqlite3ColumnText(.ignore, 1)),
+                    .init(id: 41, callType: .sqlite3ColumnText(.ignore, 2)),
+                    .init(id: 42, callType: .sqlite3Step(.ignore)),
+                    .init(id: 43, callType: .sqlite3ColumnCount(.ignore)),
+                    .init(id: 44, callType: .sqlite3Finalize(.ignore)),
+                    .init(id: 45, callType: .sqlite3Close(.ignore)),
                 ])
             })
         })
