@@ -52,7 +52,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedResult = 0
                     expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"value\") FROM total_test WHERE total_test.\"value\" < 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"value\") FROM total_test WHERE (total_test.\"value\" < 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnDouble(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
@@ -196,7 +196,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedResult = nil
                     expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"value\") FROM sum_test WHERE sum_test.\"value\" > 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"value\") FROM sum_test WHERE (sum_test.\"value\" > 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
@@ -351,7 +351,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedResult = nil
                     expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"value\") FROM min_test WHERE min_test.\"value\" <= 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"value\") FROM min_test WHERE (min_test.\"value\" <= 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
@@ -506,7 +506,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedResult = nil
                     expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"value\") FROM max_test WHERE max_test.\"value\" >= 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"value\") FROM max_test WHERE (max_test.\"value\" >= 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
@@ -658,7 +658,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedResult = [nil]
                     expectedApiCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\") FROM group_concat_test WHERE group_concat_test.\"value\" == 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\") FROM group_concat_test WHERE (group_concat_test.\"value\" == 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),
@@ -806,7 +806,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedCount = 0
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(\"value\") FROM count_test WHERE count_test.\"value\" != 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(\"value\") FROM count_test WHERE (count_test.\"value\" != 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
@@ -894,7 +894,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 try section("with constraints", routine: {
                     expectedCount = 0
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test WHERE count_test.\"value\" != 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test WHERE (count_test.\"value\" != 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnInt(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3Step(.ignore)),
@@ -983,7 +983,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 var avgValue: Double?
                 try section("with constraints", routine: {
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(\"value\") FROM avg_test WHERE avg_test.\"value\" < 10", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(\"value\") FROM avg_test WHERE (avg_test.\"value\" < 10)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnValue(.ignore, 0)),
                         .init(id: 3, callType: .sqlite3ValueType(.ignore)),

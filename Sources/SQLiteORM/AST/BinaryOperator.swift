@@ -16,7 +16,12 @@ extension BinaryOperator: Serializable {
     public func serialize(with serializationContext: SerializationContext) throws -> String {
         let leftString = try self.lhs.serialize(with: serializationContext)
         let rightString = try self.rhs.serialize(with: serializationContext)
-        return "\(leftString) \(self.operatorType) \(rightString)"
+        let middle = "\(leftString) \(self.operatorType) \(rightString)"
+        if self.operatorType != .assign {
+            return "(\(middle))"
+        } else {
+            return middle
+        }
     }
 }
 

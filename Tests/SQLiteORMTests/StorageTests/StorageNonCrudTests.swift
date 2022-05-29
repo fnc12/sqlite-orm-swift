@@ -187,7 +187,7 @@ class StorageNonCrudTests: XCTestCase {
             })
             XCTAssertEqual(apiProvider.calls, [
                 .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "UPDATE employees SET \"lastname\" = 'Smith' WHERE employees.\"id\" == 3", -1, .ignore, nil)),
+                .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "UPDATE employees SET \"lastname\" = 'Smith' WHERE (employees.\"id\" == 3)", -1, .ignore, nil)),
                 .init(id: 2, callType: .sqlite3Step(.ignore)),
                 .init(id: 3, callType: .sqlite3Finalize(.ignore)),
                 .init(id: 4, callType: .sqlite3Close(.ignore))
@@ -293,7 +293,7 @@ class StorageNonCrudTests: XCTestCase {
                 apiProvider.resetCalls()
                 if inMemory {
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.\"id\" == 5", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE (users.\"id\" == 5)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 3, callType: .sqlite3Finalize(.ignore))
@@ -301,7 +301,7 @@ class StorageNonCrudTests: XCTestCase {
                 } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.\"id\" == 5", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE (users.\"id\" == 5)", -1, .ignore, nil)),
                         .init(id: 2, callType: .sqlite3Step(.ignore)),
                         .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 4, callType: .sqlite3Finalize(.ignore)),
@@ -316,7 +316,7 @@ class StorageNonCrudTests: XCTestCase {
                 if inMemory {
                     let db = storage.connection.dbMaybe!
                     expectedCalls = [
-                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users WHERE users.\"id\" == 3", -1, .ignore, nil)),
+                        .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users WHERE (users.\"id\" == 3)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
                         .init(id: 2, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 3, callType: .sqlite3ColumnInt(.ignore, 0)),
@@ -328,7 +328,7 @@ class StorageNonCrudTests: XCTestCase {
                 } else {
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE users.\"id\" == 3", -1, .ignore, nil)),
+                        .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "SELECT * FROM users WHERE (users.\"id\" == 3)", -1, .ignore, nil)),
                         .init(id: 2, callType: .sqlite3Step(.ignore)),
                         .init(id: 3, callType: .sqlite3ColumnCount(.ignore)),
                         .init(id: 4, callType: .sqlite3ColumnInt(.ignore, 0)),
@@ -408,7 +408,7 @@ class StorageNonCrudTests: XCTestCase {
                         remove(filename)
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3Open(filename, .ignore)),
-                            .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE users.\"id\" < 10", -1, .ignore, nil)),
+                            .init(id: 1, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE (users.\"id\" < 10)", -1, .ignore, nil)),
                             .init(id: 2, callType: .sqlite3Step(.ignore)),
                             .init(id: 3, callType: .sqlite3Finalize(.ignore)),
                             .init(id: 4, callType: .sqlite3Close(.ignore))
@@ -416,7 +416,7 @@ class StorageNonCrudTests: XCTestCase {
                     })
                     try section("memory", routine: {
                         expectedCalls = [
-                            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE users.\"id\" < 10", -1, .ignore, nil)),
+                            .init(id: 0, callType: .sqlite3PrepareV2(.ignore, "DELETE FROM users WHERE (users.\"id\" < 10)", -1, .ignore, nil)),
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
                             .init(id: 2, callType: .sqlite3Finalize(.ignore))
                         ]
