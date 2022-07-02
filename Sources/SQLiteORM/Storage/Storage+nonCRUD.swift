@@ -141,7 +141,13 @@ extension Storage {
                 var object = T()
                 for (columnIndex, anyColumn) in table.columns.enumerated() {
                     let columnValuePointer = statement.columnValuePointer(with: columnIndex)
-                    try anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
+                    let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
+                    switch assignResult {
+                    case .success():
+                        continue
+                    case .failure(let error):
+                        throw error
+                    }
                 }
                 result.append(object)
             case self.apiProvider.SQLITE_DONE:

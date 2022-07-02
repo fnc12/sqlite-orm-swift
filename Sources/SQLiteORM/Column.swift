@@ -45,13 +45,14 @@ public class Column<T, V>: AnyColumn where V: Bindable & ConstructableFromSQLite
     ///
     /// - Throws:
     ///     `Error.unknownType` if `O` is not equal to `Self.T`
-    override func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
+    override func assign<O>(object: inout O, sqliteValue: SQLiteValue) -> Result<Void, Error> {
         guard O.self == T.self else {
-            throw Error.unknownType
+            return .failure(Error.unknownType)
         }
         var tObject = object as! T
         tObject[keyPath: self.keyPath] = .init(sqliteValue: sqliteValue)
         object = tObject as! O
+        return .success(())
     }
 
     /// This is overridden function of superclass. Created for internal usage only.

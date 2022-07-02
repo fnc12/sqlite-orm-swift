@@ -21,12 +21,12 @@ extension PseudoContainerIterator: IteratorProtocol {
             var object = T()
             for (columnIndex, anyColumn) in self.pseudoContainer.table.columns.enumerated() {
                 let columnValuePointer = self.pseudoContainer.statement.columnValuePointer(with: columnIndex)
-                do {
-                    try anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
-                } catch let error as Error {
+                let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
+                switch assignResult {
+                case .success():
+                    continue
+                case .failure(let error):
                     return .failure(error)
-                } catch {
-                    return .failure(Error.unknownError)
                 }
             }
             return .success(object)

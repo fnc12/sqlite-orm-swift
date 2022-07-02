@@ -71,8 +71,8 @@ public class AnyColumn: NSObject {
     ///
     /// - Parameter object: object passed by reference which will be modified after this call.
     /// - Parameter sqliteValue: object used to obtain typed data dependent of field type if this column.
-    func assign<O>(object: inout O, sqliteValue: SQLiteValue) throws {
-        // ..
+    func assign<O>(object: inout O, sqliteValue: SQLiteValue) -> Result<Void, Error> {
+        return .success(())
     }
 }
 

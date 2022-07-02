@@ -45,7 +45,13 @@ class ColumnTests: XCTestCase {
         self.sqliteValueMock = .init()
         self.sqliteValueMock.integer = 10
         user.id = 0
-        try self.intColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        var assignResult = self.intColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
+            XCTAssert(true)
+        case .failure(let error):
+            throw error
+        }
         XCTAssertEqual(user.id, 10)
 
         //  bind int optional
@@ -53,21 +59,39 @@ class ColumnTests: XCTestCase {
         self.sqliteValueMock.integer = 5
         self.sqliteValueMock.isNull = false
         user.idMaybe = nil
-        try self.intOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        assignResult = self.intOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
+            XCTAssert(true)
+        case .failure(let error):
+            throw error
+        }
         XCTAssertEqual(user.idMaybe, 5)
 
         //  bind nil as int optional
         self.sqliteValueMock = .init()
         self.sqliteValueMock.isNull = true
         user.idMaybe = 10
-        try self.intOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        assignResult = self.intOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
+            XCTAssert(true)
+        case .failure(let error):
+            throw error
+        }
         XCTAssertEqual(user.idMaybe, nil)
 
         //  bind string
         self.sqliteValueMock = .init()
         self.sqliteValueMock.text = "Keri Hilson"
         user.name = ""
-        try self.stringColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        assignResult = self.stringColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
+            XCTAssert(true)
+        case .failure(let error):
+            throw error
+        }
         XCTAssertEqual(user.name, "Keri Hilson")
 
         //  bind string optional
@@ -75,19 +99,29 @@ class ColumnTests: XCTestCase {
         self.sqliteValueMock.text = "The Offspring"
         self.sqliteValueMock.isNull = false
         user.nameMaybe = nil
-        try self.stringOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        assignResult = self.stringOptionalColumn.assign(object: &user, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
+            XCTAssert(true)
+        case .failure(let error):
+            throw error
+        }
         XCTAssertEqual(user.nameMaybe, "The Offspring")
     }
 
     func testAssignThrowUnknownType() throws {
         var visit = Visit()
-        do {
-            try self.intOptionalColumn.assign(object: &visit, sqliteValue: self.sqliteValueMock)
+        let assignResult = self.intOptionalColumn.assign(object: &visit, sqliteValue: self.sqliteValueMock)
+        switch assignResult {
+        case .success():
             XCTAssert(false)
-        } catch SQLiteORM.Error.unknownType {
-            XCTAssert(true)
-        } catch {
-            XCTAssert(false)
+        case .failure(let error):
+            switch error {
+            case .unknownType:
+                XCTAssert(true)
+            default:
+                XCTAssert(false)
+            }
         }
     }
 
