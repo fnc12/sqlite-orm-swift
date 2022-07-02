@@ -61,4 +61,13 @@ extension ConnectionHolderImpl: ConnectionHolder {
         }
         return .success(())
     }
+    
+    func createConnectionRef() -> Result<SafeConnectionRef, Error> {
+        let connectionRef = SafeConnectionRef(connection: self)
+        if let error = connectionRef.error {
+            return .failure(error)
+        } else {
+            return .success(connectionRef)
+        }
+    }
 }

@@ -9,4 +9,5 @@ protocol ConnectionHolder: AnyObject {
     func increment() -> Result<Void, Error>
     func decrementUnsafe()
     func decrement() -> Result<Void, Error>
+    func createConnectionRef() -> Result<SafeConnectionRef, Error>
 }

@@ -16,29 +16,38 @@ extension Storage {
                 sql += " AND"
             }
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        let statement = try connectionRef.prepare(sql: sql)
-        var bindIndex = 1
-        for column in anyTable.columns {
-            if column.isPrimaryKey {
-                let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                let bindResult = column.bind(binder: binder, object: object)
-                switch bindResult {
-                case .success(let resultCode):
-                    guard resultCode == self.apiProvider.SQLITE_OK else {
-                        let errorString = connectionRef.errorMessage
-                        throw Error.sqliteError(code: resultCode, text: errorString)
+        let connectionRefResult = self.connection.createConnectionRef()
+        switch connectionRefResult {
+        case .success(let connectionRef):
+            let prepareResult = connectionRef.prepare(sql: sql)
+            switch prepareResult {
+            case .success(let statement):
+                var bindIndex = 1
+                for column in anyTable.columns {
+                    guard column.isPrimaryKey else { continue }
+                    let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
+                    let bindResult = column.bind(binder: binder, object: object)
+                    switch bindResult {
+                    case .success(let resultCode):
+                        guard resultCode == self.apiProvider.SQLITE_OK else {
+                            let errorString = connectionRef.errorMessage
+                            throw Error.sqliteError(code: resultCode, text: errorString)
+                        }
+                        bindIndex += 1
+                    case .failure(let error):
+                        throw error
                     }
-                    bindIndex += 1
-                case .failure(let error):
-                    throw error
                 }
+                let resultCode = statement.step()
+                guard self.apiProvider.SQLITE_DONE == resultCode else {
+                    let errorString = connectionRef.errorMessage
+                    throw Error.sqliteError(code: resultCode, text: errorString)
+                }
+            case .failure(let error):
+                throw error
             }
-        }
-        let resultCode = statement.step()
-        guard self.apiProvider.SQLITE_DONE == resultCode else {
-            let errorString = connectionRef.errorMessage
-            throw Error.sqliteError(code: resultCode, text: errorString)
+        case .failure(let error):
+            throw error
         }
     }
 
