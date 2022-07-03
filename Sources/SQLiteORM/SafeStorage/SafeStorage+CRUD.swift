@@ -16,4 +16,8 @@ extension SafeStorage {
     public func insert<T>(_ object: T) -> Result<Int64, Error> {
         return self.insertInternal(object)
     }
+    
+    public func replace<T>(_ object: T) -> Result<Void, Error> {
+        return self.replaceInternal(object)
+    }
 }

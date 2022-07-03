@@ -252,4 +252,56 @@ extension BaseStorage {
             return .failure(error)
         }
     }
+    
+    func replaceInternal<T>(_ object: T) -> Result<Void, Error> {
+        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+            return .failure(Error.typeIsNotMapped)
+        }
+        var sql = "REPLACE INTO \(anyTable.name) ("
+        let columnsCount = anyTable.columns.count
+        for (columnIndex, column) in anyTable.columns.enumerated() {
+            sql += "\"\(column.name)\""
+            if columnIndex < columnsCount - 1 {
+                sql += ", "
+            }
+        }
+        sql += ") VALUES ("
+        for columnIndex in 0..<columnsCount {
+            sql += "?"
+            if columnIndex < columnsCount - 1 {
+                sql += ", "
+            }
+        }
+        sql += ")"
+        let connectionRefResult = self.connection.createConnectionRef()
+        switch connectionRefResult {
+        case .success(let connectionRef):
+            let prepareResult = connectionRef.prepare(sql: sql)
+            switch prepareResult {
+            case .success(let statement):
+                let table = anyTable as! Table<T>
+                let bindResult = table.bind(columnBinder: statement, object: object, apiProvider: self.apiProvider)
+                switch bindResult {
+                case .success(var resultCode):
+                    guard resultCode == apiProvider.SQLITE_OK else {
+                        let errorString = connectionRef.errorMessage
+                        return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                    }
+                    resultCode = statement.step()
+                    guard apiProvider.SQLITE_DONE == resultCode else {
+                        let errorString = connectionRef.errorMessage
+                        return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                    }
+                    return .success(())
+                case .failure(let error):
+                    return .failure(error)
+                }
+            case .failure(let error):
+                return .failure(error)
+            }
+        case .failure(let error):
+            return .failure(error)
+        }
+        
+    }
 }

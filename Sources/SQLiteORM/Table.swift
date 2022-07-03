@@ -28,7 +28,7 @@ public class Table<T>: AnyTable {
         return .success(result)
     }
 
-    func bind(columnBinder: ColumnBinder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
+    func bind(columnBinder: ColumnBinder, object: T, apiProvider: SQLiteApiProvider) -> Result<Int32, Error> {
         var result = Int32(0)
         for (columnIndex, anyColumn) in self.columns.enumerated() {
             let binder = BinderImpl(columnIndex: columnIndex + 1, columnBinder: columnBinder)
@@ -40,9 +40,9 @@ public class Table<T>: AnyTable {
                     break
                 }
             case .failure(let error):
-                throw error
+                return .failure(error)
             }
         }
-        return result
+        return .success(result)
     }
 }
