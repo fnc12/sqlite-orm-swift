@@ -6,7 +6,7 @@ public class Table<T>: AnyTable {
         return T.self
     }
 
-    func bindNonPrimaryKey(columnBinder: ColumnBinder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {
+    func bindNonPrimaryKey(columnBinder: ColumnBinder, object: T, apiProvider: SQLiteApiProvider) -> Result<Int32, Error> {
         var result = Int32(0)
         var columnIndex = 0
         for anyColumn in self.columns {
@@ -21,11 +21,11 @@ public class Table<T>: AnyTable {
                         break
                     }
                 case .failure(let error):
-                    throw error
+                    return .failure(error)
                 }
             }
         }
-        return result
+        return .success(result)
     }
 
     func bind(columnBinder: ColumnBinder, object: T, apiProvider: SQLiteApiProvider) throws -> Int32 {

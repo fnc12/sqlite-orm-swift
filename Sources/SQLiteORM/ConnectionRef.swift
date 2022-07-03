@@ -13,10 +13,6 @@ class ConnectionRef: BaseConnectionRef {
         }
     }
 
-    deinit {
-        self.connection.decrementUnsafe()
-    }
-
     func prepare(sql: String) throws -> Statement & ColumnBinder {
         guard let db = self.db else {
             throw Error.databaseIsNull

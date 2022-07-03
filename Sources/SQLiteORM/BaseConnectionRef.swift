@@ -8,6 +8,10 @@ class BaseConnectionRef: NSObject {
         super.init()
     }
     
+    deinit {
+        self.connection.decrementUnsafe()
+    }
+    
     var db: OpaquePointer? {
         return self.connection.dbMaybe
     }
