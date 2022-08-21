@@ -4,10 +4,30 @@ public protocol Initializable {
     init()
 }
 
-public class Storage: BaseStorage {
+public class Storage {
+    let storageCore: StorageCore
+    
+    public convenience init(filename: String, tables: AnyTable...) throws {
+        try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
+    }
+    
+    init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
+        storageCore = try .init(filename: filename,
+                                apiProvider: apiProvider,
+                                connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider),
+                                tables: tables)
+    }
+    
+    init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
+        storageCore = try .init(filename: filename, apiProvider: apiProvider, connection: connection, tables: tables)
+    }
+    
+    var filename: String {
+        self.storageCore.filename
+    }
 
     public func forEach<T>(_ all: T.Type, _ constraints: SelectConstraint..., callback: (_ object: T) -> Void) throws where T: Initializable {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         var sql = "SELECT * FROM \(anyTable.name)"
@@ -15,7 +35,7 @@ public class Storage: BaseStorage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         let table = anyTable as! Table<T>
         var resultCode: Int32 = 0
@@ -26,7 +46,7 @@ public class Storage: BaseStorage {
                 throw Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount), storageColumnsCount: table.columns.count)
             }
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 var object = T()
                 for (columnIndex, anyColumn) in table.columns.enumerated() {
                     let columnValuePointer = statement.columnValuePointer(with: columnIndex)
@@ -39,24 +59,24 @@ public class Storage: BaseStorage {
                     }
                 }
                 callback(object)
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        } while resultCode != self.apiProvider.SQLITE_DONE
+        } while resultCode != self.storageCore.apiProvider.SQLITE_DONE
     }
 
     public func enumerated<T>(_ all: T.Type, _ constraints: SelectConstraint...) -> PseudoContainer<T> {
-        let anyTable = self.tables.first(where: { $0.type == T.self })!
+        let anyTable = self.storageCore.tables.first(where: { $0.type == T.self })!
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {
             let constraintsString = try! constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try! ConnectionRef(connection: self.connection)
+        let connectionRef = try! ConnectionRef(connection: self.storageCore.connection)
         let statement = try! connectionRef.prepare(sql: sql)
-        return .init(connectionRef: connectionRef, statement: statement, table: anyTable as! Table<T>, apiProvider: self.apiProvider)
+        return .init(connectionRef: connectionRef, statement: statement, table: anyTable as! Table<T>, apiProvider: self.storageCore.apiProvider)
     }
 }

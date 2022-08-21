@@ -40,6 +40,11 @@ extension ConnectionHolderMock: ConnectionHolder {
     }
     
     func createConnectionRef() -> Result<SafeConnectionRef, Error> {
-        fatalError()
+        let connectionRef = SafeConnectionRef(connection: self)
+        if let error = connectionRef.error {
+            return .failure(error)
+        } else {
+            return .success(connectionRef)
+        }
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 
 extension Storage {
     public func delete<T>(_ object: T) throws {
-        let deleteResult = self.deleteInternal(object)
+        let deleteResult = self.storageCore.deleteInternal(object)
         switch deleteResult {
         case .success():
             return
@@ -12,7 +12,7 @@ extension Storage {
     }
 
     public func update<T>(_ object: T) throws {
-        let updateResult = self.updateInternal(object)
+        let updateResult = self.storageCore.updateInternal(object)
         switch updateResult {
         case .success():
             return
@@ -22,7 +22,7 @@ extension Storage {
     }
 
     public func get<T>(id: Bindable...) throws -> T? where T: Initializable {
-        let getResult: Result<T?, Error> = self.getInternal(id: id)
+        let getResult: Result<T?, Error> = self.storageCore.getInternal(id: id)
         switch getResult {
         case .success(let object):
             return object
@@ -32,7 +32,7 @@ extension Storage {
     }
 
     public func insert<T>(_ object: T) throws -> Int64 {
-        let insertResult = self.insertInternal(object)
+        let insertResult = self.storageCore.insertInternal(object)
         switch insertResult {
         case .success(let code):
             return code
@@ -42,7 +42,7 @@ extension Storage {
     }
 
     public func replace<T>(_ object: T) throws {
-        let replaceResult = self.replaceInternal(object)
+        let replaceResult = self.storageCore.replaceInternal(object)
         switch replaceResult {
         case .success():
             return

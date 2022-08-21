@@ -3,56 +3,71 @@ import Foundation
 extension Storage {
 
     public func tableExists(with name: String) throws -> Bool {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        return try self.tableExists(with: name, connectionRef: connectionRef)
+        let connectionRefResult = self.storageCore.connection.createConnectionRef()
+        switch connectionRefResult {
+        case .success(let connectionRef):
+            return try self.tableExists(with: name, connectionRef: connectionRef)
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func tableExists(with name: String, connectionRef: ConnectionRef) throws -> Bool {
+    private func tableExists(with name: String, connectionRef: SafeConnectionRef) throws -> Bool {
         var res = false
         let sql = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '\(name)'"
-        let statement = try connectionRef.prepare(sql: sql)
-        var resultCode = Int32(0)
-        repeat {
-            resultCode = statement.step()
-            switch resultCode {
-            case apiProvider.SQLITE_ROW:
-                let intValue = statement.columnInt(index: 0)
-                res = intValue == 1
-            case apiProvider.SQLITE_DONE:
-                break
-            default:
-                let errorString = connectionRef.errorMessage
-                throw Error.sqliteError(code: resultCode, text: errorString)
-            }
-        }while resultCode != apiProvider.SQLITE_DONE
-        return res
+        let prepareResult = connectionRef.prepare(sql: sql)
+        switch prepareResult {
+        case .success(let statement):
+            var resultCode = Int32(0)
+            repeat {
+                resultCode = statement.step()
+                switch resultCode {
+                case self.storageCore.apiProvider.SQLITE_ROW:
+                    let intValue = statement.columnInt(index: 0)
+                    res = intValue == 1
+                case self.storageCore.apiProvider.SQLITE_DONE:
+                    break
+                default:
+                    let errorString = connectionRef.errorMessage
+                    throw Error.sqliteError(code: resultCode, text: errorString)
+                }
+            }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
+            return res
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func tableInfo(forTableWith name: String, connectionRef: ConnectionRef) throws -> [TableInfo] {
+    private func tableInfo(forTableWith name: String, connectionRef: SafeConnectionRef) throws -> [TableInfo] {
         let sql = "PRAGMA table_info('\(name)')"
-        let statement = try connectionRef.prepare(sql: sql)
-        var res = [TableInfo]()
-        var resultCode = Int32(0)
-        repeat {
-            resultCode = statement.step()
-            switch resultCode {
-            case apiProvider.SQLITE_ROW:
-                var tableInfo = TableInfo()
-                tableInfo.cid = statement.columnInt(index: 0)
-                tableInfo.name = statement.columnText(index: 1)
-                tableInfo.type = statement.columnText(index: 2)
-                tableInfo.notNull = statement.columnInt(index: 3) == 1
-                tableInfo.dfltValue = statement.columnText(index: 4)
-                tableInfo.pk = statement.columnInt(index: 5)
-                res.append(tableInfo)
-            case apiProvider.SQLITE_DONE:
-                break
-            default:
-                let errorString = connectionRef.errorMessage
-                throw Error.sqliteError(code: resultCode, text: errorString)
-            }
-        }while resultCode != apiProvider.SQLITE_DONE
-        return res
+        let prepareResult = connectionRef.prepare(sql: sql)
+        switch prepareResult {
+        case .success(let statement):
+            var res = [TableInfo]()
+            var resultCode = Int32(0)
+            repeat {
+                resultCode = statement.step()
+                switch resultCode {
+                case self.storageCore.apiProvider.SQLITE_ROW:
+                    var tableInfo = TableInfo()
+                    tableInfo.cid = statement.columnInt(index: 0)
+                    tableInfo.name = statement.columnText(index: 1)
+                    tableInfo.type = statement.columnText(index: 2)
+                    tableInfo.notNull = statement.columnInt(index: 3) == 1
+                    tableInfo.dfltValue = statement.columnText(index: 4)
+                    tableInfo.pk = statement.columnInt(index: 5)
+                    res.append(tableInfo)
+                case self.storageCore.apiProvider.SQLITE_DONE:
+                    break
+                default:
+                    let errorString = connectionRef.errorMessage
+                    throw Error.sqliteError(code: resultCode, text: errorString)
+                }
+            }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
+            return res
+        case .failure(let error):
+            throw error
+        }
     }
 
     static private func calculateRemoveAddColumns(columnsToAdd: inout [TableInfo],
@@ -91,7 +106,7 @@ extension Storage {
         return notEqual
     }
 
-    private func schemaStatus(for table: AnyTable, connectionRef: ConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
+    private func schemaStatus(for table: AnyTable, connectionRef: SafeConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
         var res = SyncSchemaResult.alredyInSync
         var gottaCreateTable = try !self.tableExists(with: table.name, connectionRef: connectionRef)
         if !gottaCreateTable {
@@ -144,7 +159,7 @@ extension Storage {
         return res
     }
 
-    private func create(tableWith name: String, columns: [AnyColumn], connectionRef: ConnectionRef) throws {
+    private func create(tableWith name: String, columns: [AnyColumn], connectionRef: SafeConnectionRef) throws {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
         for (columnIndex, column) in columns.enumerated() {
@@ -155,10 +170,16 @@ extension Storage {
             }
         }
         sql += ")"
-        try connectionRef.exec(sql: sql)
+        let execResult = connectionRef.exec(sql: sql)
+        switch execResult {
+        case .success():
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func copy(table: AnyTable, name: String, connectionRef: ConnectionRef, columnsToIgnore: [TableInfo]) throws {
+    private func copy(table: AnyTable, name: String, connectionRef: SafeConnectionRef, columnsToIgnore: [TableInfo]) throws {
         var columnNames = [String]()
         for column in table.columns {   //  TODO: refactor to map and filter
             let columnName = column.name
@@ -182,20 +203,38 @@ extension Storage {
             }
         }
         sql += " FROM '\(table.name)'"
-        try connectionRef.exec(sql: sql)
+        let execResult = connectionRef.exec(sql: sql)
+        switch execResult {
+        case .success():
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func dropTableInternal(tableName: String, connectionRef: ConnectionRef) throws {
+    private func dropTableInternal(tableName: String, connectionRef: SafeConnectionRef) throws {
         let sql = "DROP TABLE '\(tableName)'"
-        try connectionRef.exec(sql: sql)
+        let execResult = connectionRef.exec(sql: sql)
+        switch execResult {
+        case .success():
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func renameTable(connectionRef: ConnectionRef, oldName: String, newName: String) throws {
+    private func renameTable(connectionRef: SafeConnectionRef, oldName: String, newName: String) throws {
         let sql = "ALTER TABLE \(oldName) RENAME TO \(newName)"
-        try connectionRef.exec(sql: sql)
+        let execResult = connectionRef.exec(sql: sql)
+        switch execResult {
+        case .success():
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func backup(_ table: AnyTable, connectionRef: ConnectionRef, columnsToIgnore: [TableInfo]) throws {
+    private func backup(_ table: AnyTable, connectionRef: SafeConnectionRef, columnsToIgnore: [TableInfo]) throws {
 
         //  here we copy source table to another with a name with '_backup' suffix, but in case table with such
         //  a name already exists we append suffix 1, then 2, etc until we find a free name..
@@ -217,7 +256,7 @@ extension Storage {
         try self.renameTable(connectionRef: connectionRef, oldName: backupTableName, newName: table.name)
     }
 
-    private func add(column tableInfo: TableInfo, table: AnyTable, connectionRef: ConnectionRef) throws {
+    private func add(column tableInfo: TableInfo, table: AnyTable, connectionRef: SafeConnectionRef) throws {
         var sql = "ALTER TABLE \(table.name) ADD COLUMN \(tableInfo.name) \(tableInfo.type)"
         if tableInfo.pk == 1 {
             sql += " PRIMARY KEY"
@@ -228,10 +267,16 @@ extension Storage {
         if !tableInfo.dfltValue.isEmpty {
             sql += " DEFAULT \(tableInfo.dfltValue)"
         }
-        try connectionRef.exec(sql: sql)
+        let execResult = connectionRef.exec(sql: sql)
+        switch execResult {
+        case .success():
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 
-    private func sync(_ table: AnyTable, connectionRef: ConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
+    private func sync(_ table: AnyTable, connectionRef: SafeConnectionRef, preserve: Bool) throws -> SyncSchemaResult {
         var res = SyncSchemaResult.alredyInSync
         let schemaStatus = try self.schemaStatus(for: table, connectionRef: connectionRef, preserve: preserve)
         if schemaStatus != .alredyInSync {
@@ -284,15 +329,18 @@ extension Storage {
 
     @discardableResult
     public func syncSchema(preserve: Bool) throws -> [String: SyncSchemaResult] {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-
-        var res = [String: SyncSchemaResult]()
-        res.reserveCapacity(self.tables.count)
-        for table in self.tables {
-            let tableSyncResult = try self.sync(table, connectionRef: connectionRef, preserve: preserve)
-            res[table.name] = tableSyncResult
+        let connectionRefResult = self.storageCore.connection.createConnectionRef()
+        switch connectionRefResult {
+        case .success(let connectionRef):
+            var res = [String: SyncSchemaResult]()
+            res.reserveCapacity(self.storageCore.tables.count)
+            for table in self.storageCore.tables {
+                let tableSyncResult = try self.sync(table, connectionRef: connectionRef, preserve: preserve)
+                res[table.name] = tableSyncResult
+            }
+            return res
+        case .failure(let error):
+            throw error
         }
-
-        return res
     }
 }

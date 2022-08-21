@@ -30,4 +30,20 @@ class SafeConnectionRef: BaseConnectionRef {
         }
         return .success(StatementImpl(stmt: stmt, apiProvider: self.connection.apiProvider))
     }
+    
+    func exec(sql: String) -> Result<Void, Error> {
+        guard let db = self.db else {
+            return .failure(Error.databaseIsNull)
+        }
+        guard let cString = sql.cString(using: .utf8) else {
+            return .failure(Error.failedCastingSwiftStringToCString)
+        }
+        let apiProvider = self.connection.apiProvider
+        let resultCode = apiProvider.sqlite3Exec(db, cString, nil, nil, nil)
+        guard apiProvider.SQLITE_OK == resultCode else {
+            let errorString = self.errorMessage
+            return .failure(Error.sqliteError(code: resultCode, text: errorString))
+        }
+        return .success(())
+    }
 }

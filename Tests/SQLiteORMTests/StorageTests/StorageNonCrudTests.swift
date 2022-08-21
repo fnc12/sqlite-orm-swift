@@ -298,7 +298,7 @@ class StorageNonCrudTests: XCTestCase {
                 let storage = try createStorage(filename)
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 if inMemory {
-                    let db = storage.connection.dbMaybe!
+                    let db = storage.storageCore.connection.dbMaybe!
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
@@ -322,7 +322,7 @@ class StorageNonCrudTests: XCTestCase {
 
                 try storage.replace(User(id: 3, name: "Ted"))
                 if inMemory {
-                    let db = storage.connection.dbMaybe!
+                    let db = storage.storageCore.connection.dbMaybe!
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),
@@ -376,7 +376,7 @@ class StorageNonCrudTests: XCTestCase {
 
                 apiProvider.resetCalls()
                 if inMemory {
-                    let db = storage.connection.dbMaybe!
+                    let db = storage.storageCore.connection.dbMaybe!
                     expectedCalls = [
                         .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT * FROM users WHERE (users.\"id\" == 3)", -1, .ignore, nil)),
                         .init(id: 1, callType: .sqlite3Step(.ignore)),

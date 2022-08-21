@@ -3,35 +3,30 @@ import Foundation
 extension Storage {
 
     public func beginTransaction() throws {
-        let incrementResult = self.connection.increment()
-        switch incrementResult {
-        case .success():
-            let connectionRef = try ConnectionRef(connection: self.connection)
-            try connectionRef.exec(sql: "BEGIN TRANSACTION")
+        let transactionResult = self.storageCore.beginTransaction()
+        switch transactionResult {
+        case .success(()):
+            return
         case .failure(let error):
             throw error
         }
     }
 
     public func commit() throws {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        try connectionRef.exec(sql: "COMMIT")
-        let decrementResult = self.connection.decrement()
-        switch decrementResult {
+        let commitResult = self.storageCore.commit()
+        switch commitResult {
         case .success():
-            break
+            return
         case .failure(let error):
             throw error
         }
     }
 
     public func rollback() throws {
-        let connectionRef = try ConnectionRef(connection: self.connection)
-        try connectionRef.exec(sql: "ROLLBACK")
-        let decrementResult = self.connection.decrement()
-        switch decrementResult {
+        let rollbackResult = self.storageCore.rollback()
+        switch rollbackResult {
         case .success():
-            break
+            return
         case .failure(let error):
             throw error
         }

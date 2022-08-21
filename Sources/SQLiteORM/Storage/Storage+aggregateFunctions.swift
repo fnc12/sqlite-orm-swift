@@ -2,7 +2,7 @@ import Foundation
 
 extension Storage {
     public func total<T, R>(_ columnKeyPath: KeyPath<T, R>, _ constraints: SelectConstraint...) throws -> Double {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -14,27 +14,27 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: Double = 0
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 res = statement.columnDouble(index: 0)
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
     public func sum<T, R>(_ columnKeyPath: KeyPath<T, R>, _ constraints: SelectConstraint...) throws -> Double? {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -46,30 +46,30 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: Double?
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
                     res = Double(sqliteValue: columnValue)
                 }
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
     func minInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>, constraints: [SelectConstraint]) throws -> R? where R: ConstructableFromSQLiteValue {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -81,25 +81,25 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: R?
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
                     res = R(sqliteValue: columnValue)
                 }
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
@@ -112,7 +112,7 @@ extension Storage {
     }
 
     func maxInternal<T, R>(_ columnKeyPath: PartialKeyPath<T>, constraints: [SelectConstraint]) throws -> R? where R: ConstructableFromSQLiteValue {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -124,25 +124,25 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: R?
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
                     res = R(sqliteValue: columnValue)
                 }
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
@@ -155,7 +155,7 @@ extension Storage {
     }
 
     func groupConcatInternal<T, F>(_ columnKeyPath: KeyPath<T, F>, separator: String?, constraints: [SelectConstraint]) throws -> String? {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -172,25 +172,25 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: String?
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
                     res = columnValue.text
                 }
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
@@ -203,7 +203,7 @@ extension Storage {
     }
 
     public func count<T, F>(_ columnKeyPath: KeyPath<T, F>, _ constraints: SelectConstraint...) throws -> Int {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -215,27 +215,27 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res = 0
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 res = statement.columnInt(index: 0)
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
     public func count<T>(all of: T.Type, _ constraints: SelectConstraint...) throws -> Int {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -244,27 +244,27 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res = 0
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 res = statement.columnInt(index: 0)
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 
     public func avg<T, F>(_ columnKeyPath: KeyPath<T, F>, _ constraints: SelectConstraint...) throws -> Double? {
-        guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
+        guard let anyTable = self.storageCore.tables.first(where: { $0.type == T.self }) else {
             throw Error.typeIsNotMapped
         }
         let table = anyTable as! Table<T>
@@ -276,25 +276,25 @@ extension Storage {
             let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
             sql += " \(constraintsString)"
         }
-        let connectionRef = try ConnectionRef(connection: self.connection)
+        let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
         var resultCode = Int32(0)
         var res: Double?
         repeat {
             resultCode = statement.step()
             switch resultCode {
-            case self.apiProvider.SQLITE_ROW:
+            case self.storageCore.apiProvider.SQLITE_ROW:
                 let columnValue = statement.columnValue(columnIndex: 0)
                 if !columnValue.isNull {
                     res = columnValue.double
                 }
-            case self.apiProvider.SQLITE_DONE:
+            case self.storageCore.apiProvider.SQLITE_DONE:
                 break
             default:
                 let errorString = connectionRef.errorMessage
                 throw Error.sqliteError(code: resultCode, text: errorString)
             }
-        }while resultCode != self.apiProvider.SQLITE_DONE
+        }while resultCode != self.storageCore.apiProvider.SQLITE_DONE
         return res
     }
 }

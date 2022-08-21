@@ -1,6 +1,6 @@
 import Foundation
 
-public class BaseStorage: NSObject {
+public class StorageCore: NSObject {
     let tables: [AnyTable]
     private let inMemory: Bool
     let connection: ConnectionHolder

@@ -1,5 +1,5 @@
 import Foundation
 
-public class SafeStorage: BaseStorage {
+public class SafeStorage: StorageCore {
     
 }

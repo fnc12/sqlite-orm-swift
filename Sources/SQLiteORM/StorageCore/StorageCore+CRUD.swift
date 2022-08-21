@@ -1,6 +1,6 @@
 import Foundation
 
-extension BaseStorage {
+extension StorageCore {
     func deleteInternal<T>(_ object: T) -> Result<Void, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
