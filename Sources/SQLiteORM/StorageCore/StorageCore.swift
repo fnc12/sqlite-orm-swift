@@ -1,6 +1,6 @@
 import Foundation
 
-public class StorageCore: NSObject {
+public class StorageCore {
     let tables: [AnyTable]
     private let inMemory: Bool
     let connection: ConnectionHolder
@@ -11,7 +11,6 @@ public class StorageCore: NSObject {
         self.tables = tables
         self.connection = connection
         self.apiProvider = apiProvider
-        super.init()
         if self.inMemory {
             let incrementResult = self.connection.increment()
             switch incrementResult {

@@ -27,7 +27,12 @@ public class SafeStorage {
                       tables: tables)
     }
     
-    init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
-        storageCore = try .init(filename: filename, apiProvider: apiProvider, connection: connection, tables: tables)
+    convenience init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
+        let storageCore = try StorageCore(filename: filename, apiProvider: apiProvider, connection: connection, tables: tables)
+        self.init(storageCore: storageCore)
+    }
+    
+    init(storageCore: StorageCore) {
+        self.storageCore = storageCore
     }
 }
