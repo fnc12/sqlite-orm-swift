@@ -77,14 +77,18 @@ public class AnyColumn: NSObject {
 }
 
 extension AnyColumn: Serializable {
-    public func serialize(with serializationContext: SerializationContext) -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         let typeString = self.sqliteTypeName
         var res = "\"\(self.name)\" \(typeString)"
         for constraint in self.constraints {
-            let constraintString = constraint.serialize(with: serializationContext)
-            res += " "
-            res += constraintString
+            switch constraint.serialize(with: serializationContext) {
+            case .success(let constraintString):
+                res += " "
+                res += constraintString
+            case .failure(let error):
+                return .failure(error)
+            }
         }
-        return res
+        return .success(res)
     }
 }

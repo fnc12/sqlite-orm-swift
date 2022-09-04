@@ -6,10 +6,10 @@ public enum Order {
 }
 
 extension Order: Serializable {
-    public func serialize(with serializationContext: SerializationContext) -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         switch self {
-        case .asc: return "ASC"
-        case .desc: return "DESC"
+        case .asc: return .success("ASC")
+        case .desc: return .success("DESC")
         }
     }
 }

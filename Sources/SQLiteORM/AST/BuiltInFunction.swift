@@ -208,17 +208,22 @@ public enum BuiltInFunction {
 }
 
 extension BuiltInFunction: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         let arguments = self.arguments
         var result = "\(self.name)("
         for (i, argument) in arguments.enumerated() {
-            result += try argument.serialize(with: serializationContext)
-            if i < arguments.count - 1 {
-                result += ", "
+            switch argument.serialize(with: serializationContext) {
+            case .success(let stringValue):
+                result += stringValue
+                if i < arguments.count - 1 {
+                    result += ", "
+                }
+            case .failure(let error):
+                return .failure(error)
             }
         }
         result += ")"
-        return result
+        return .success(result)
     }
 }
 

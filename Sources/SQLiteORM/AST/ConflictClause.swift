@@ -9,7 +9,7 @@ public enum ConflictClause {
 }
 
 extension ConflictClause: Serializable {
-    public func serialize(with serializationContext: SerializationContext) -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         var res = "ON CONFLICT "
         switch self {
         case .rollback: res += "ROLLBACK"
@@ -18,6 +18,6 @@ extension ConflictClause: Serializable {
         case .ignore: res += "IGNORE"
         case .replace: res += "REPLACE"
         }
-        return res
+        return .success(res)
     }
 }

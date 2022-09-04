@@ -9,9 +9,13 @@ public class ASTWhere: SelectConstraint {
 }
 
 extension ASTWhere: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        let expressionString = try self.expression.serialize(with: serializationContext)
-        return "WHERE \(expressionString)"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.expression.serialize(with: serializationContext) {
+        case .success(let expressionString):
+            return .success("WHERE \(expressionString)")
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }
 

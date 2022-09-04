@@ -41,25 +41,34 @@ public class ASTOrderBy: SelectConstraint {
 }
 
 extension ASTOrderBy: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        let expressionString = try self.expression.serialize(with: serializationContext)
-        var result = "ORDER BY \(expressionString)"
-        if let collateName = self.collateName {
-            result += " COLLATE " + collateName
-        }
-        if let order = self.order {
-            result += " " + order.serialize(with: serializationContext)
-        }
-        if let nullsStatus = self.nullsStatus {
-            result += " NULLS "
-            switch nullsStatus {
-            case .first:
-                result += "FIRST"
-            case .last:
-                result += "LAST"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.expression.serialize(with: serializationContext) {
+        case .success(let expressionString):
+            var result = "ORDER BY \(expressionString)"
+            if let collateName = self.collateName {
+                result += " COLLATE " + collateName
             }
+            if let order = self.order {
+                switch order.serialize(with: serializationContext) {
+                case .success(let orderString):
+                    result += " " + orderString
+                case .failure(let error):
+                    return .failure(error)
+                }
+            }
+            if let nullsStatus = self.nullsStatus {
+                result += " NULLS "
+                switch nullsStatus {
+                case .first:
+                    result += "FIRST"
+                case .last:
+                    result += "LAST"
+                }
+            }
+            return .success(result)
+        case .failure(let error):
+            return .failure(error)
         }
-        return result
     }
 }
 

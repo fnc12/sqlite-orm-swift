@@ -11,8 +11,13 @@ public class UnaryOperator: Expression {
 }
 
 extension UnaryOperator: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return try "\(self.operatorType.description) \(self.expression.serialize(with: serializationContext))"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.expression.serialize(with: serializationContext) {
+        case .success(let expressionString):
+            return .success("\(self.operatorType.description) \(expressionString)")
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }
 

@@ -13,14 +13,22 @@ public class BinaryOperator: Expression {
 }
 
 extension BinaryOperator: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        let leftString = try self.lhs.serialize(with: serializationContext)
-        let rightString = try self.rhs.serialize(with: serializationContext)
-        let middle = "\(leftString) \(self.operatorType) \(rightString)"
-        if self.operatorType != .assign {
-            return "(\(middle))"
-        } else {
-            return middle
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.lhs.serialize(with: serializationContext) {
+        case .success(let leftString):
+            switch self.rhs.serialize(with: serializationContext) {
+            case .success(let rightString):
+                let middle = "\(leftString) \(self.operatorType) \(rightString)"
+                if self.operatorType != .assign {
+                    return .success("(\(middle))")
+                } else {
+                    return .success(middle)
+                }
+            case .failure(let error):
+                return .failure(error)
+            }
+        case .failure(let error):
+            return .failure(error)
         }
     }
 }

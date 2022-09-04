@@ -7,40 +7,56 @@ public enum ColumnConstraint {
 }
 
 extension ColumnConstraint: Serializable {
-    public func serialize(with serializationContext: SerializationContext) -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         switch self {
         case .primaryKey(let orderMaybe, let conflictClauseMaybe, let autoincrement):
             var res = "PRIMARY KEY"
             if let order = orderMaybe {
-                let orderString = order.serialize(with: serializationContext)
-                res += " "
-                res += orderString
+                switch order.serialize(with: serializationContext) {
+                case .success(let orderString):
+                    res += " "
+                    res += orderString
+                case .failure(let error):
+                    return .failure(error)
+                }
             }
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize(with: serializationContext)
-                res += " "
-                res += conflictClauseString
+                switch conflictClause.serialize(with: serializationContext) {
+                case .success(let conflictClauseString):
+                    res += " "
+                    res += conflictClauseString
+                case .failure(let error):
+                    return .failure(error)
+                }
             }
             if autoincrement {
                 res += " AUTOINCREMENT"
             }
-            return res
+            return .success(res)
         case .notNull(let conflictClauseMaybe):
             var res = "NOT NULL"
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize(with: serializationContext)
-                res += " "
-                res += conflictClauseString
+                switch conflictClause.serialize(with: serializationContext) {
+                case .success(let conflictClauseString):
+                    res += " "
+                    res += conflictClauseString
+                case .failure(let error):
+                    return .failure(error)
+                }
             }
-            return res
+            return .success(res)
         case .unique(let conflictClauseMaybe):
             var res = "UNIQUE"
             if let conflictClause = conflictClauseMaybe {
-                let conflictClauseString = conflictClause.serialize(with: serializationContext)
-                res += " "
-                res += conflictClauseString
+                switch conflictClause.serialize(with: serializationContext) {
+                case .success(let conflictClauseString):
+                    res += " "
+                    res += conflictClauseString
+                case .failure(let error):
+                    return .failure(error)
+                }
             }
-            return res
+            return .success(res)
         }
     }
 }

@@ -30,7 +30,7 @@ public class StorageCore: NSObject {
                       tables: tables)
     }
 
-    public convenience init(filename: String, tables: AnyTable...) throws {
+    convenience init(filename: String, tables: AnyTable...) throws {
         try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
     }
 
@@ -40,7 +40,7 @@ public class StorageCore: NSObject {
         }
     }
 
-    public var filename: String {
+    var filename: String {
         return self.connection.filename
     }
 }

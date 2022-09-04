@@ -11,10 +11,18 @@ public class ASTLike {
 }
 
 extension ASTLike: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        let leftString = try self.lhs.serialize(with: serializationContext)
-        let rightString = try self.rhs.serialize(with: serializationContext)
-        return "\(leftString) LIKE \(rightString)"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.lhs.serialize(with: serializationContext) {
+        case .success(let leftString):
+            switch self.rhs.serialize(with: serializationContext) {
+            case .success(let rightString):
+                return .success("\(leftString) LIKE \(rightString)")
+            case .failure(let error):
+                return .failure(error)
+            }
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }
 

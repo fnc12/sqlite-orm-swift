@@ -1,73 +1,79 @@
 import Foundation
 
 public protocol Serializable {
-    func serialize(with serializationContext: SerializationContext) throws -> String
+    func serialize(with serializationContext: SerializationContext) -> Result<String, Error>
 }
 
 extension Int: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension UInt: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension Int64: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension UInt64: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension Bool: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self ? "1" : "0"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self ? "1" : "0")
     }
 }
 
 extension String: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return "'\(self)'"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success("'\(self)'")
     }
 }
 
 extension KeyPath: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         if serializationContext.skipTableName {
-            return "\"\(try serializationContext.schemaProvider.columnName(keyPath: self))\""
+            switch serializationContext.schemaProvider.columnName(keyPath: self) {
+            case .success(let columnName):
+                return .success("\"\(columnName)\"")
+            case .failure(let error):
+                return .failure(error)
+            }
         } else {
-            return try serializationContext.schemaProvider.columnNameWithTable(keyPath: self)
+            return serializationContext.schemaProvider.columnNameWithTable(keyPath: self)
         }
     }
 }
 
 extension Float: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension Double: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        return self.description
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        return .success(self.description)
     }
 }
 
 extension Optional: Serializable where Wrapped : Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
         switch self {
-        case .none: return "NULL"
+        case .none:
+            return .success("NULL")
         case .some(let value):
-            return try value.serialize(with: serializationContext)
+            return value.serialize(with: serializationContext)
         }
     }
 }

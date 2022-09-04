@@ -1,24 +1,24 @@
 import XCTest
 @testable import SQLiteORM
 
-class SchemaProviderStub: SchemaProvider {
+/*class SchemaProviderStub: SchemaProvider {
 
     enum Error: Swift.Error {
         case error
     }
 
-    func columnName<T, F>(keyPath: KeyPath<T, F>) throws -> String {
-        throw Self.Error.error
+    func columnName<T, F>(keyPath: KeyPath<T, F>) -> Result<String, Error> {
+        return .failure(Self.Error.error)
     }
 
-    func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) throws -> String {
-        throw Self.Error.error
+    func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) -> Result<String, Error> {
+        return .failure(Self.Error.error)
     }
 
-    func tableName<T>(type: T.Type) throws -> String {
-        throw Self.Error.error
+    func tableName<T>(type: T.Type) -> Result<String, Error> {
+        return .failure(Self.Error.error)
     }
-}
+}*/
 
 class SerializeTests: XCTestCase {
 
@@ -36,7 +36,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            var serializationContext = SerializationContext(schemaProvider: storage)
+            var serializationContext = SerializationContext(schemaProvider: storage.storageCore)
             var string = ""
             var expected = ""
             try section("id", routine: {
@@ -49,7 +49,12 @@ class SerializeTests: XCTestCase {
                     serializationContext = serializationContext.bySkippingTableName()
                     expected = "\"id\""
                 })
-                string = try keyPath.serialize(with: serializationContext)
+                switch keyPath.serialize(with: serializationContext) {
+                case .success(let value):
+                    string = value
+                case .failure(let error):
+                    throw error
+                }
             })
             try section("name", routine: {
                 let keyPath = \User.name
@@ -61,7 +66,12 @@ class SerializeTests: XCTestCase {
                     serializationContext = serializationContext.bySkippingTableName()
                     expected = "\"name\""
                 })
-                string = try keyPath.serialize(with: serializationContext)
+                switch keyPath.serialize(with: serializationContext) {
+                case .success(let value):
+                    string = value
+                case .failure(let error):
+                    throw error
+                }
             })
             try section("rating", routine: {
                 let keyPath = \User.rating
@@ -73,7 +83,12 @@ class SerializeTests: XCTestCase {
                     serializationContext = serializationContext.bySkippingTableName()
                     expected = "\"rating\""
                 })
-                string = try keyPath.serialize(with: serializationContext)
+                switch keyPath.serialize(with: serializationContext) {
+                case .success(let value):
+                    string = value
+                case .failure(let error):
+                    throw error
+                }
             })
 
             XCTAssertEqual(string, expected)
@@ -103,8 +118,12 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             try storage.syncSchema(preserve: false)
-            let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
-            XCTAssertEqual(string, testCase.expected)
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let string):
+                XCTAssertEqual(string, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
@@ -119,9 +138,19 @@ class SerializeTests: XCTestCase {
             .init(value: limit(3, offset: 10), expected: "LIMIT 3 OFFSET 10")
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let value = try testCase.value.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(value, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let value):
+                XCTAssertEqual(value, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
@@ -226,8 +255,12 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             try storage.syncSchema(preserve: false)
-            let string = try testCase.value.serialize(with: .init(schemaProvider: storage))
-            XCTAssertEqual(string, testCase.expected)
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let string):
+                XCTAssertEqual(string, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
@@ -283,8 +316,12 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            let string = try testCase.expression.serialize(with: .init(schemaProvider: storage))
-            XCTAssertEqual(string, testCase.expected)
+            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let string):
+                XCTAssertEqual(string, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
@@ -304,8 +341,12 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            let string = try testCase.expression.serialize(with: .init(schemaProvider: storage))
-            XCTAssertEqual(string, testCase.expected)
+            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let string):
+                XCTAssertEqual(string, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
@@ -336,7 +377,7 @@ class SerializeTests: XCTestCase {
         }
     }
 
-    func testAnyColumn() {
+    func testAnyColumn() throws {
         struct TestCase {
             let anyColumn: AnyColumn
             let expected: String
@@ -362,13 +403,23 @@ class SerializeTests: XCTestCase {
                      expected: "\"rating\" REAL")
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.anyColumn.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(value, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.anyColumn.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let value):
+                XCTAssertEqual(value, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
-    func testOrder() {
+    func testOrder() throws {
         struct TestCase {
             let order: Order
             let expected: String
@@ -378,13 +429,23 @@ class SerializeTests: XCTestCase {
             TestCase(order: .desc, expected: "DESC")
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.order.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(value, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.order.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let value):
+                XCTAssertEqual(value, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
-    func testConflictClause() {
+    func testConflictClause() throws {
         struct TestCase {
             let conflictClause: ConflictClause
             let expected: String
@@ -397,9 +458,19 @@ class SerializeTests: XCTestCase {
             TestCase(conflictClause: .replace, expected: "ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let value = testCase.conflictClause.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(value, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.conflictClause.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let value):
+                XCTAssertEqual(value, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
     
@@ -462,13 +533,23 @@ class SerializeTests: XCTestCase {
             TestCase(builtInFunction: zeroblob(10), expected: "ZEROBLOB(10)"),
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let result = try testCase.builtInFunction.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(result, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.builtInFunction.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let result):
+                XCTAssertEqual(result, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
 
-    func testColumnConstraint() {
+    func testColumnConstraint() throws {
         struct TestCase {
             let columnConstraint: ColumnConstraint
             let expected: String
@@ -497,9 +578,19 @@ class SerializeTests: XCTestCase {
                      expected: "NOT NULL ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
-            let schemaProviderStub = SchemaProviderStub()
-            let result = testCase.columnConstraint.serialize(with: .init(schemaProvider: schemaProviderStub))
-            XCTAssertEqual(result, testCase.expected)
+//            let schemaProviderStub = SchemaProviderStub()
+            let storage = try Storage(filename: "",
+                                      tables: Table<User>(name: "users",
+                                                          columns:
+                                                            Column(name: "id", keyPath: \User.id),
+                                                            Column(name: "name", keyPath: \User.name),
+                                                            Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.columnConstraint.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            case .success(let result):
+                XCTAssertEqual(result, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
         }
     }
     
@@ -514,8 +605,12 @@ class SerializeTests: XCTestCase {
                                                         Column(name: "id", keyPath: \User.id),
                                                         Column(name: "name", keyPath: \User.name)))
         let expression = (\User.name).like("a%")
-        let string = try expression.serialize(with: .init(schemaProvider: storage))
-        XCTAssertEqual(string, "users.\"name\" LIKE 'a%'")
+        switch expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+        case .success(let string):
+            XCTAssertEqual(string, "users.\"name\" LIKE 'a%'")
+        case .failure(let error):
+            throw error
+        }
     }
 
 }

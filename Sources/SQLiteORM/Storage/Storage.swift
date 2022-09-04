@@ -32,8 +32,12 @@ public class Storage {
         }
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -72,8 +76,12 @@ public class Storage {
         let anyTable = self.storageCore.tables.first(where: { $0.type == T.self })!
         var sql = "SELECT * FROM \(anyTable.name)"
         for constraint in constraints {
-            let constraintsString = try! constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                fatalError(error.localizedDescription)  //  TODO
+            }
         }
         let connectionRef = try! ConnectionRef(connection: self.storageCore.connection)
         let statement = try! connectionRef.prepare(sql: sql)

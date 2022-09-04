@@ -13,15 +13,25 @@ public class ASTLimit: SelectConstraint {
 }
 
 extension ASTLimit: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        if let offsetExpression = self.offsetExpression {
-            if self.hasOffsetLabel {
-                return "LIMIT \(try self.exression.serialize(with: serializationContext)) OFFSET \(try offsetExpression.serialize(with: serializationContext))"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch self.exression.serialize(with: serializationContext) {
+        case .success(let exressionString):
+            if let offsetExpression = self.offsetExpression {
+                switch offsetExpression.serialize(with: serializationContext) {
+                case .success(let offsetExpressionString):
+                    if self.hasOffsetLabel {
+                        return .success("LIMIT \(exressionString) OFFSET \(offsetExpressionString)")
+                    } else {
+                        return .success("LIMIT \(exressionString), \(offsetExpressionString)")
+                    }
+                case .failure(let error):
+                    return .failure(error)
+                }
             } else {
-                return "LIMIT \(try self.exression.serialize(with: serializationContext)), \(try offsetExpression.serialize(with: serializationContext))"
+                return .success("LIMIT \(exressionString)")
             }
-        } else {
-            return "LIMIT \(try self.exression.serialize(with: serializationContext))"
+        case .failure(let error):
+            return .failure(error)
         }
     }
 }

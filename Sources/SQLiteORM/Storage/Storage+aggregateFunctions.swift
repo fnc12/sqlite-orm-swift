@@ -11,8 +11,12 @@ extension Storage {
         }
         var sql = "SELECT TOTAL(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -43,8 +47,12 @@ extension Storage {
         }
         var sql = "SELECT SUM(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -78,8 +86,12 @@ extension Storage {
         }
         var sql = "SELECT MIN(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -121,8 +133,12 @@ extension Storage {
         }
         var sql = "SELECT MAX(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -169,8 +185,12 @@ extension Storage {
             sql = "SELECT GROUP_CONCAT(\"\(column.name)\", '\(separator!)') FROM \(table.name)"
         }
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -212,8 +232,12 @@ extension Storage {
         }
         var sql = "SELECT COUNT(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -241,8 +265,12 @@ extension Storage {
         let table = anyTable as! Table<T>
         var sql = "SELECT COUNT(*) FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)
@@ -273,8 +301,12 @@ extension Storage {
         }
         var sql = "SELECT AVG(\"\(column.name)\") FROM \(table.name)"
         for constraint in constraints {
-            let constraintsString = try constraint.serialize(with: .init(schemaProvider: self))
-            sql += " \(constraintsString)"
+            switch constraint.serialize(with: .init(schemaProvider: self.storageCore)) {
+            case .success(let constraintsString):
+                sql += " \(constraintsString)"
+            case .failure(let error):
+                throw error
+            }
         }
         let connectionRef = try ConnectionRef(connection: self.storageCore.connection)
         let statement = try connectionRef.prepare(sql: sql)

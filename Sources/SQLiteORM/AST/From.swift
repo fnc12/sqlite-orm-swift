@@ -13,9 +13,13 @@ public func from<T>(_ type: T.Type) -> ASTFrom<T> {
 }
 
 extension ASTFrom: Serializable {
-    public func serialize(with serializationContext: SerializationContext) throws -> String {
-        let tableName = try serializationContext.schemaProvider.tableName(type: self.type)
-        return "FROM \(tableName)"
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        switch serializationContext.schemaProvider.tableName(type: self.type) {
+        case .success(let tableName):
+            return .success("FROM \(tableName)")
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }
 
