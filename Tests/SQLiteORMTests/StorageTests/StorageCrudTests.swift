@@ -54,7 +54,7 @@ class StorageCrudTests: XCTestCase {
                     .init(id: 6, callType: .sqlite3Close(.ignore))
                 ]
             } else {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 expectedCalls = [
                     .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 1, callType: .sqlite3BindText(.ignore, 1, "Bebe Rexha", -1, apiProvider.SQLITE_TRANSIENT)),
@@ -83,7 +83,7 @@ class StorageCrudTests: XCTestCase {
                     .init(id: 6, callType: .sqlite3Close(.ignore))
                 ]
             } else {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 expectedCalls = [
                     .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "INSERT INTO users (\"name\") VALUES (?)", -1, .ignore, nil)),
                     .init(id: 1, callType: .sqlite3BindText(.ignore, 1, "Ariana Grande", -1, apiProvider.SQLITE_TRANSIENT)),

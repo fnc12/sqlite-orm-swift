@@ -36,7 +36,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            var serializationContext = SerializationContext(schemaProvider: storage.storageCore)
+            var serializationContext = SerializationContext(schemaProvider: storage.storageCore as! StorageCoreImpl)
             var string = ""
             var expected = ""
             try section("id", routine: {
@@ -118,7 +118,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             try storage.syncSchema(preserve: false)
-            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
             case .failure(let error):
@@ -145,7 +145,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
             case .failure(let error):
@@ -255,7 +255,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             try storage.syncSchema(preserve: false)
-            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
             case .failure(let error):
@@ -316,7 +316,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
             case .failure(let error):
@@ -341,7 +341,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
             case .failure(let error):
@@ -410,7 +410,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.anyColumn.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.anyColumn.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
             case .failure(let error):
@@ -436,7 +436,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.order.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.order.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
             case .failure(let error):
@@ -465,7 +465,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.conflictClause.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.conflictClause.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
             case .failure(let error):
@@ -540,7 +540,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.builtInFunction.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.builtInFunction.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
             case .failure(let error):
@@ -585,7 +585,7 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
-            switch testCase.columnConstraint.serialize(with: .init(schemaProvider: storage.storageCore)) {
+            switch testCase.columnConstraint.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
             case .failure(let error):
@@ -605,7 +605,7 @@ class SerializeTests: XCTestCase {
                                                         Column(name: "id", keyPath: \User.id),
                                                         Column(name: "name", keyPath: \User.name)))
         let expression = (\User.name).like("a%")
-        switch expression.serialize(with: .init(schemaProvider: storage.storageCore)) {
+        switch expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
         case .success(let string):
             XCTAssertEqual(string, "users.\"name\" LIKE 'a%'")
         case .failure(let error):

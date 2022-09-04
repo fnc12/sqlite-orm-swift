@@ -28,7 +28,7 @@ public class SafeStorage {
     }
     
     convenience init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
-        let storageCore = try StorageCore(filename: filename, apiProvider: apiProvider, connection: connection, tables: tables)
+        let storageCore = try StorageCoreImpl(filename: filename, apiProvider: apiProvider, connection: connection, tables: tables)
         self.init(storageCore: storageCore)
     }
     

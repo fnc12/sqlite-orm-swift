@@ -49,7 +49,7 @@ class StorageTests: XCTestCase {
             try storage.replace(user1)
             try storage.replace(user2)
 
-            try section("enumerated", routine: {
+            /*try section("enumerated", routine: {
                 for userResult in storage.enumerated(User.self) {
                     switch userResult {
                     case .success(let user):
@@ -58,7 +58,7 @@ class StorageTests: XCTestCase {
                         throw error
                     }
                 }
-            })
+            })*/
             try section("forEach", routine: {
                 try storage.forEach(User.self) {
                     users.append($0)

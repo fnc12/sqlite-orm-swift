@@ -1,6 +1,6 @@
 import Foundation
 
-extension StorageCore: SchemaProvider {
+extension StorageCoreImpl: SchemaProvider {
 
     public func columnName<T, F>(keyPath: KeyPath<T, F>) -> Result<String, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {

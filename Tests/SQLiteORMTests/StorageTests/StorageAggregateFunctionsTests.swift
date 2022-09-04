@@ -45,7 +45,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedResult: Double = 0
                 var result: Double = -1
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -189,7 +189,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedResult: Double?
                 var result: Double?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -344,7 +344,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -499,7 +499,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -651,7 +651,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedResult = [String?]()
                 var result: String?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -799,7 +799,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 })
             })
             try section("no error", routine: {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 var count = 0
@@ -889,7 +889,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
             try section("no error", routine: {
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var count = 0
                 try section("with constraints", routine: {
                     expectedCount = 0
@@ -977,7 +977,7 @@ class StorageAggregateFunctionsTests: XCTestCase {
                 }
             }
             try section("no error") {
-                let db = storage.storageCore.connection.dbMaybe!
+                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 var expectedResult: Double?
                 var avgValue: Double?

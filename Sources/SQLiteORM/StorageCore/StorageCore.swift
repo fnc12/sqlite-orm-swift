@@ -1,45 +1,58 @@
 import Foundation
 
-public class StorageCore {
-    let tables: [AnyTable]
-    private let inMemory: Bool
-    let connection: ConnectionHolder
-    let apiProvider: SQLiteApiProvider
-
-    init(filename: String, apiProvider: SQLiteApiProvider, connection: ConnectionHolder, tables: [AnyTable]) throws {
-        self.inMemory = filename.isEmpty || filename == ":memory:"
-        self.tables = tables
-        self.connection = connection
-        self.apiProvider = apiProvider
-        if self.inMemory {
-            let incrementResult = self.connection.increment()
-            switch incrementResult {
-            case .success():
-                break
-            case .failure(let error):
-                throw error
-            }
-        }
-    }
-
-    convenience init(filename: String, apiProvider: SQLiteApiProvider, tables: [AnyTable]) throws {
-        try self.init(filename: filename,
-                      apiProvider: apiProvider,
-                      connection: ConnectionHolderImpl(filename: filename, apiProvider: apiProvider),
-                      tables: tables)
-    }
-
-    convenience init(filename: String, tables: AnyTable...) throws {
-        try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
-    }
-
-    deinit {
-        if self.inMemory {
-            self.connection.decrementUnsafe()
-        }
-    }
-
-    var filename: String {
-        return self.connection.filename
-    }
+protocol StorageCore: AnyObject {
+    var filename: String { get }
+    
+    //  aggregate functions
+    func total<T, R>(_ columnKeyPath: KeyPath<T, R>, _ constraints: [SelectConstraint]) -> Result<Double, Error>
+    func sum<T, R>(_ columnKeyPath: KeyPath<T, R>, _ constraints: [SelectConstraint]) -> Result<Double?, Error>
+    func min<T, F>(_ columnKeyPath: KeyPath<T, F?>,
+                   _ constraints: [SelectConstraint]) -> Result<F?, Error> where F: ConstructableFromSQLiteValue
+    func min<T, F>(_ columnKeyPath: KeyPath<T, F>,
+                   _ constraints: [SelectConstraint]) -> Result<F?, Error> where F: ConstructableFromSQLiteValue
+    func max<T, F>(_ columnKeyPath: KeyPath<T, F?>,
+                   _ constraints: [SelectConstraint]) -> Result<F?, Error> where F: ConstructableFromSQLiteValue
+    func max<T, F>(_ columnKeyPath: KeyPath<T, F>,
+                   _ constraints: [SelectConstraint]) -> Result<F?, Error> where F: ConstructableFromSQLiteValue
+    func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>,
+                           separator: String,
+                           _ constraints: [SelectConstraint]) -> Result<String?, Error>
+    func groupConcat<T, F>(_ columnKeyPath: KeyPath<T, F>,
+                           _ constraints: [SelectConstraint]) -> Result<String?, Error>
+    func count<T, F>(_ columnKeyPath: KeyPath<T, F>, _ constraints: [SelectConstraint]) -> Result<Int, Error>
+    func count<T>(all of: T.Type, _ constraints: [SelectConstraint]) -> Result<Int, Error>
+    func avg<T, F>(_ columnKeyPath: KeyPath<T, F>, _ constraints: [SelectConstraint]) -> Result<Double?, Error>
+    
+    //  CRUD
+    func deleteInternal<T>(_ object: T) -> Result<Void, Error>
+    func updateInternal<T>(_ object: T) -> Result<Void, Error>
+    func getInternal<T>(id: [Bindable]) -> Result<T?, Error> where T: Initializable
+    func insertInternal<T>(_ object: T) -> Result<Int64, Error>
+    func replaceInternal<T>(_ object: T) -> Result<Void, Error>
+    
+    //  non-CRUD
+    func select<R1, R2, R3>(_ expression1: Expression,
+                            _ expression2: Expression,
+                            _ expression3: Expression,
+                            _ constraints: [SelectConstraint]) -> Result<[(R1, R2, R3)], Error> where R1: ConstructableFromSQLiteValue, R2: ConstructableFromSQLiteValue, R3: ConstructableFromSQLiteValue
+    func select<R1, R2>(_ expression1: Expression,
+                        _ expression2: Expression,
+                        _ constraints: [SelectConstraint]) -> Result<[(R1, R2)], Error> where R1: ConstructableFromSQLiteValue, R2: ConstructableFromSQLiteValue
+    func select<R>(_ expression: Expression,
+                   _ constraints: [SelectConstraint]) -> Result<[R], Error> where R: ConstructableFromSQLiteValue
+    func update<T>(all of: T.Type, _ set: AssignList, _ constraints: [SelectConstraint]) -> Result<Void, Error>
+    func delete<T>(all of: T.Type, _ constraints: [SelectConstraint]) -> Result<Void, Error>
+    func getAll<T>(_ constraints: [SelectConstraint]) -> Result<[T], Error> where T: Initializable
+    func getAll<T>(all of: T.Type, _ constraints: [SelectConstraint]) -> Result<[T], Error> where T: Initializable
+    func forEach<T>(_ all: T.Type, _ constraints: [SelectConstraint],
+                    callback: (_ object: T) -> Void) -> Result<Void, Error> where T: Initializable
+    
+    //  schema
+    func syncSchema(preserve: Bool) -> Result<[String: SyncSchemaResult], Error>
+    func tableExists(with name: String) -> Result<Bool, Error>
+    
+    //  transactions
+    func beginTransaction() -> Result<Void, Error>
+    func commit() -> Result<Void, Error>
+    func rollback() -> Result<Void, Error>
 }
