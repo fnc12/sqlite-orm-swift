@@ -1,7 +1,7 @@
 import XCTest
 @testable import SQLiteORM
 
-class StorageAggregateFunctionsTests: XCTestCase {
+class StorageCoreAggregateFunctionsTests: XCTestCase {
     struct Unknown {
         var value = Double(0)
     }
@@ -15,37 +15,48 @@ class StorageAggregateFunctionsTests: XCTestCase {
             }
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<TotalTest>(name: "total_test",
-                                                                columns:
-                                                                    Column(name: "value", keyPath: \TotalTest.value),
-                                                                    Column(name: "null_value", keyPath: \TotalTest.nullableValue))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<TotalTest>(name: "total_test",
+                                                                            columns:
+                                                                                Column(name: "value", keyPath: \TotalTest.value),
+                                                                            Column(name: "null_value", keyPath: \TotalTest.nullableValue))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("error notMappedType", routine: {
-                    do {
-                        _ = try storage.total(\Unknown.value)
+                    switch storageCore.total(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("error columnNotFound", routine: {
-                    do {
-                        _ = try storage.total(\TotalTest.unknown)
+                    switch storageCore.total(\TotalTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedResult: Double = 0
                 var result: Double = -1
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -60,10 +71,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        result = try storage.total(\TotalTest.value, where_(lesserThan(lhs: \TotalTest.value, rhs: 10)))
+                        switch storageCore.total(\TotalTest.value, [where_(lesserThan(lhs: \TotalTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        result = try storage.total(\TotalTest.value, where_(\TotalTest.value < 10))
+                        switch storageCore.total(\TotalTest.value, [where_(\TotalTest.value < 10)]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
@@ -80,7 +101,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(TotalTest(value: 1))
+                        switch storageCore.replaceInternal(TotalTest(value: 1)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 1
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"value\") FROM total_test", -1, .ignore, nil)),
@@ -91,8 +117,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(TotalTest(value: 2))
-                        try storage.replace(TotalTest(value: 3))
+                        switch storageCore.replaceInternal(TotalTest(value: 2)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(TotalTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 5
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"value\") FROM total_test", -1, .ignore, nil)),
@@ -103,7 +139,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.total(\TotalTest.value)
+                    switch storageCore.total(\TotalTest.value, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -119,7 +160,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(TotalTest(value: 0, nullableValue: 3))
+                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 3
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"null_value\") FROM total_test", -1, .ignore, nil)),
@@ -130,8 +176,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(TotalTest(value: 0, nullableValue: 4))
-                        try storage.replace(TotalTest(value: 0, nullableValue: 6))
+                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT TOTAL(\"null_value\") FROM total_test", -1, .ignore, nil)),
@@ -142,7 +198,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.total(\TotalTest.nullableValue)
+                    switch storageCore.total(\TotalTest.nullableValue, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -159,37 +220,48 @@ class StorageAggregateFunctionsTests: XCTestCase {
             }
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<SumTest>(name: "sum_test",
-                                                              columns:
-                                                                Column(name: "value", keyPath: \SumTest.value),
-                                                                Column(name: "null_value", keyPath: \SumTest.nullableValue))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<SumTest>(name: "sum_test",
+                                                                          columns:
+                                                                            Column(name: "value", keyPath: \SumTest.value),
+                                                                          Column(name: "null_value", keyPath: \SumTest.nullableValue))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("error notMappedType", routine: {
-                    do {
-                        _ = try storage.sum(\Unknown.value)
+                    switch storageCore.sum(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("error columnNotFound", routine: {
-                    do {
-                        _ = try storage.sum(\SumTest.unknown)
+                    switch storageCore.sum(\SumTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedResult: Double?
                 var result: Double?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -205,10 +277,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        result = try storage.sum(\SumTest.value, where_(greaterThan(lhs: \SumTest.value, rhs: 10)))
+                        switch storageCore.sum(\SumTest.value, [where_(greaterThan(lhs: \SumTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        result = try storage.sum(\SumTest.value, where_(\SumTest.value > 10))
+                        switch storageCore.sum(\SumTest.value, [where_(\SumTest.value > 10)]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
@@ -226,7 +308,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(SumTest(value: 1))
+                        switch storageCore.replaceInternal(SumTest(value: 1)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 1
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"value\") FROM sum_test", -1, .ignore, nil)),
@@ -239,8 +326,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(SumTest(value: 2))
-                        try storage.replace(SumTest(value: 3))
+                        switch storageCore.replaceInternal(SumTest(value: 2)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(SumTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 5
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"value\") FROM sum_test", -1, .ignore, nil)),
@@ -253,7 +350,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.sum(\SumTest.value)
+                    switch storageCore.sum(\SumTest.value, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -270,7 +372,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(SumTest(value: 0, nullableValue: 3))
+                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 3
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"null_value\") FROM sum_test", -1, .ignore, nil)),
@@ -283,8 +390,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(SumTest(value: 0, nullableValue: 4))
-                        try storage.replace(SumTest(value: 0, nullableValue: 6))
+                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT SUM(\"null_value\") FROM sum_test", -1, .ignore, nil)),
@@ -297,7 +414,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.sum(\SumTest.nullableValue)
+                    switch storageCore.sum(\SumTest.nullableValue, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -314,37 +436,48 @@ class StorageAggregateFunctionsTests: XCTestCase {
             }
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<MinTest>(name: "min_test",
-                                                              columns:
-                                                                Column(name: "value", keyPath: \MinTest.value),
-                                                                Column(name: "null_value", keyPath: \MinTest.nullableValue))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<MinTest>(name: "min_test",
+                                                                          columns:
+                                                                            Column(name: "value", keyPath: \MinTest.value),
+                                                                          Column(name: "null_value", keyPath: \MinTest.nullableValue))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("error notMappedType", routine: {
-                    do {
-                        _ = try storage.min(\Unknown.value)
+                    switch storageCore.min(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("error columnNotFound", routine: {
-                    do {
-                        _ = try storage.min(\MinTest.unknown)
+                    switch storageCore.min(\MinTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -360,10 +493,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        result = try storage.min(\MinTest.value, where_(lesserOrEqual(lhs: \MinTest.value, rhs: 10)))
+                        switch storageCore.min(\MinTest.value, [where_(lesserOrEqual(lhs: \MinTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        result = try storage.min(\MinTest.value, where_(\MinTest.value <= 10))
+                        switch storageCore.min(\MinTest.value, [where_(\MinTest.value <= 10)]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
@@ -381,7 +524,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(MinTest(value: 10))
+                        switch storageCore.replaceInternal(MinTest(value: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"value\") FROM min_test", -1, .ignore, nil)),
@@ -394,8 +542,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(MinTest(value: 4))
-                        try storage.replace(MinTest(value: 6))
+                        switch storageCore.replaceInternal(MinTest(value: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(MinTest(value: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 4
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"value\") FROM min_test", -1, .ignore, nil)),
@@ -408,7 +566,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.min(\MinTest.value)
+                    switch storageCore.min(\MinTest.value, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -425,7 +588,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(MinTest(value: 0, nullableValue: 10))
+                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"null_value\") FROM min_test", -1, .ignore, nil)),
@@ -438,8 +606,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(MinTest(value: 0, nullableValue: 4))
-                        try storage.replace(MinTest(value: 0, nullableValue: 6))
+                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 4
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MIN(\"null_value\") FROM min_test", -1, .ignore, nil)),
@@ -452,7 +630,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.min(\MinTest.nullableValue)
+                    switch storageCore.min(\MinTest.nullableValue, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -469,37 +652,48 @@ class StorageAggregateFunctionsTests: XCTestCase {
             }
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<MaxTest>(name: "max_test",
-                                                              columns:
-                                                                Column(name: "value", keyPath: \MaxTest.value),
-                                                                Column(name: "null_value", keyPath: \MaxTest.nullableValue))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<MaxTest>(name: "max_test",
+                                                                          columns:
+                                                                            Column(name: "value", keyPath: \MaxTest.value),
+                                                                          Column(name: "null_value", keyPath: \MaxTest.nullableValue))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("error notMappedType", routine: {
-                    do {
-                        _ = try storage.max(\Unknown.value)
+                    switch storageCore.max(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("error columnNotFound", routine: {
-                    do {
-                        _ = try storage.max(\MaxTest.unknown)
+                    switch storageCore.max(\MaxTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedResult: Int?
                 var result: Int?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -515,10 +709,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        result = try storage.max(\MaxTest.value, where_(greaterOrEqual(lhs: \MaxTest.value, rhs: 10)))
+                        switch storageCore.max(\MaxTest.value, [where_(greaterOrEqual(lhs: \MaxTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        result = try storage.max(\MaxTest.value, where_(\MaxTest.value >= 10))
+                        switch storageCore.max(\MaxTest.value, [where_(\MaxTest.value >= 10)]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
@@ -536,7 +740,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(MaxTest(value: 10))
+                        switch storageCore.replaceInternal(MaxTest(value: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"value\") FROM max_test", -1, .ignore, nil)),
@@ -549,8 +758,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(MaxTest(value: 4))
-                        try storage.replace(MaxTest(value: 6))
+                        switch storageCore.replaceInternal(MaxTest(value: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(MaxTest(value: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 6
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"value\") FROM max_test", -1, .ignore, nil)),
@@ -563,7 +782,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.max(\MaxTest.value)
+                    switch storageCore.max(\MaxTest.value, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -580,7 +804,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        try storage.replace(MaxTest(value: 0, nullableValue: 10))
+                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 10
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"null_value\") FROM max_test", -1, .ignore, nil)),
@@ -593,8 +822,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        try storage.replace(MaxTest(value: 0, nullableValue: 4))
-                        try storage.replace(MaxTest(value: 0, nullableValue: 6))
+                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 6)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = 6
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT MAX(\"null_value\") FROM max_test", -1, .ignore, nil)),
@@ -607,7 +846,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.max(\MaxTest.nullableValue)
+                    switch storageCore.max(\MaxTest.nullableValue, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                     XCTAssertEqual(result, expectedResult)
                     XCTAssertEqual(apiProvider.calls, expectedApiCalls)
                 })
@@ -623,35 +867,46 @@ class StorageAggregateFunctionsTests: XCTestCase {
             }
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<GroupConcatTest>(name: "group_concat_test",
-                                                                      columns: Column(name: "value", keyPath: \GroupConcatTest.value, constraints: primaryKey()))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<GroupConcatTest>(name: "group_concat_test",
+                                                                                  columns: Column(name: "value", keyPath: \GroupConcatTest.value, constraints: primaryKey()))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("error notMappedType", routine: {
-                    do {
-                        _ = try storage.count(\Unknown.value)
+                    switch storageCore.count(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("error columnNotFound", routine: {
-                    do {
-                        _ = try storage.count(\GroupConcatTest.unknown)
+                    switch storageCore.count(\GroupConcatTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedResult = [String?]()
                 var result: String?
                 var expectedApiCalls = [SQLiteApiProviderMock.Call]()
@@ -667,10 +922,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        result = try storage.groupConcat(\GroupConcatTest.value, where_(equal(lhs: \GroupConcatTest.value, rhs: 10)))
+                        switch storageCore.groupConcat(\GroupConcatTest.value, [where_(equal(lhs: \GroupConcatTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        result = try storage.groupConcat(\GroupConcatTest.value, where_(\GroupConcatTest.value == 10))
+                        switch storageCore.groupConcat(\GroupConcatTest.value, [where_(\GroupConcatTest.value == 10)]) {
+                        case .success(let value):
+                            result = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                 })
                 try section("1 argument", routine: {
@@ -686,7 +951,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        try storage.replace(GroupConcatTest(value: 1))
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 1)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = ["1"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\") FROM group_concat_test", -1, .ignore, nil)),
@@ -699,8 +969,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        try storage.replace(GroupConcatTest(value: 3))
-                        try storage.replace(GroupConcatTest(value: 5))
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 5)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = ["3,5", "5,3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\") FROM group_concat_test", -1, .ignore, nil)),
@@ -713,7 +993,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.groupConcat(\GroupConcatTest.value)
+                    switch storageCore.groupConcat(\GroupConcatTest.value, []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                 })
                 try section("2 arguments", routine: {
                     try section("no rows", routine: {
@@ -728,7 +1013,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        try storage.replace(GroupConcatTest(value: 3))
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = ["3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\", '-') FROM group_concat_test", -1, .ignore, nil)),
@@ -741,8 +1031,18 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        try storage.replace(GroupConcatTest(value: 3))
-                        try storage.replace(GroupConcatTest(value: 5))
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(GroupConcatTest(value: 5)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedResult = ["3-5", "5-3"]
                         expectedApiCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT GROUP_CONCAT(\"value\", '-') FROM group_concat_test", -1, .ignore, nil)),
@@ -755,7 +1055,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    result = try storage.groupConcat(\GroupConcatTest.value, separator: "-")
+                    switch storageCore.groupConcat(\GroupConcatTest.value, separator: "-", []) {
+                    case .success(let value):
+                        result = value
+                    case .failure(let error):
+                        throw error
+                    }
                 })
                 XCTAssert(expectedResult.contains(result))
                 XCTAssertEqual(apiProvider.calls, expectedApiCalls)
@@ -771,35 +1076,46 @@ class StorageAggregateFunctionsTests: XCTestCase {
         try testCase(#function, routine: {
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<CountTest>(name: "count_test",
-                                                                columns: Column(name: "value", keyPath: \CountTest.value))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<CountTest>(name: "count_test",
+                                                                            columns: Column(name: "value", keyPath: \CountTest.value))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error", routine: {
                 try section("notMappedType", routine: {
-                    do {
-                        _ = try storage.count(\Unknown.value)
+                    switch storageCore.count(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
                 try section("columnNotFound", routine: {
-                    do {
-                        _ = try storage.count(\CountTest.unknown)
+                    switch storageCore.count(\CountTest.unknown, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 })
             })
             try section("no error", routine: {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 var count = 0
@@ -814,10 +1130,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        count = try storage.count(\CountTest.value, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                        switch storageCore.count(\CountTest.value, [where_(notEqual(lhs: \CountTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            count = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        count = try storage.count(\CountTest.value, where_(\CountTest.value != 10))
+                        switch storageCore.count(\CountTest.value, [where_(\CountTest.value != 10)]) {
+                        case .success(let value):
+                            count = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                 })
                 try section("without constraints", routine: {
@@ -832,7 +1158,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row with null", routine: {
-                        try storage.replace(CountTest(value: nil))
+                        switch storageCore.replaceInternal(CountTest(value: nil)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedCount = 0
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(\"value\") FROM count_test", -1, .ignore, nil)),
@@ -843,9 +1174,24 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("three rows without null", routine: {
-                        try storage.replace(CountTest(value: 10))
-                        try storage.replace(CountTest(value: 20))
-                        try storage.replace(CountTest(value: 30))
+                        switch storageCore.replaceInternal(CountTest(value: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(CountTest(value: 20)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(CountTest(value: 30)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedCount = 3
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(\"value\") FROM count_test", -1, .ignore, nil)),
@@ -856,7 +1202,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    count = try storage.count(\CountTest.value)
+                    switch storageCore.count(\CountTest.value, []) {
+                    case .success(let value):
+                        count = value
+                    case .failure(let error):
+                        throw error
+                    }
                 })
                 XCTAssertEqual(count, expectedCount)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
@@ -871,25 +1222,33 @@ class StorageAggregateFunctionsTests: XCTestCase {
         try testCase(#function, routine: {
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<CountTest>(name: "count_test",
-                                                                columns: Column(name: "value", keyPath: \CountTest.value))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<CountTest>(name: "count_test",
+                                                                            columns: Column(name: "value", keyPath: \CountTest.value))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error notMapedType", routine: {
-                do {
-                    _ = try storage.count(all: Unknown.self)
+                switch storageCore.count(all: Unknown.self, []) {
+                case .success(_):
                     XCTAssert(false)
-                } catch SQLiteORM.Error.typeIsNotMapped {
-                    XCTAssert(true)
-                } catch {
-                    XCTAssert(false)
+                case .failure(let error):
+                    switch error {
+                    case SQLiteORM.Error.typeIsNotMapped:
+                        XCTAssert(true)
+                    default:
+                        XCTAssert(false)
+                    }
                 }
             })
             try section("no error", routine: {
                 var expectedCount = 0
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var count = 0
                 try section("with constraints", routine: {
                     expectedCount = 0
@@ -902,10 +1261,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     ]
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        count = try storage.count(all: CountTest.self, where_(notEqual(lhs: \CountTest.value, rhs: 10)))
+                        switch storageCore.count(all: CountTest.self, [where_(notEqual(lhs: \CountTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            count = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        count = try storage.count(all: CountTest.self, where_(\CountTest.value != 10))
+                        switch storageCore.count(all: CountTest.self, [where_(\CountTest.value != 10)]) {
+                        case .success(let value):
+                            count = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                 })
                 try section("without constraints", routine: {
@@ -920,9 +1289,24 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("3 rows", routine: {
-                        try storage.replace(CountTest(value: 1))
-                        try storage.replace(CountTest(value: 2))
-                        try storage.replace(CountTest(value: 3))
+                        switch storageCore.replaceInternal(CountTest(value: 1)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(CountTest(value: 2)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(CountTest(value: 3)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedCount = 3
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT COUNT(*) FROM count_test", -1, .ignore, nil)),
@@ -933,7 +1317,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     apiProvider.resetCalls()
-                    count = try storage.count(all: CountTest.self)
+                    switch storageCore.count(all: CountTest.self, []) {
+                    case .success(let value):
+                        count = value
+                    case .failure(let error):
+                        throw error
+                    }
                 })
                 XCTAssertEqual(count, expectedCount)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
@@ -949,35 +1338,46 @@ class StorageAggregateFunctionsTests: XCTestCase {
         try testCase(#function) {
             let apiProvider = SQLiteApiProviderMock()
             apiProvider.forwardsCalls = true
-            let storage = try Storage(filename: "",
-                                      apiProvider: apiProvider,
-                                      tables: [Table<AvgTest>(name: "avg_test",
-                                                              columns: Column(name: "value", keyPath: \AvgTest.value))])
-            try storage.syncSchema(preserve: false)
+            let storageCore = try StorageCoreImpl(filename: "",
+                                                  apiProvider: apiProvider,
+                                                  tables: [Table<AvgTest>(name: "avg_test",
+                                                                          columns: Column(name: "value", keyPath: \AvgTest.value))])
+            switch storageCore.syncSchema(preserve: false) {
+            case .success(_):
+                break
+            case .failure(let error):
+                throw error
+            }
             try section("error") {
                 try section("columnNotFound") {
-                    do {
-                        _ = try storage.avg(\AvgTest.unused)
+                    switch storageCore.avg(\AvgTest.unused, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.columnNotFound {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.columnNotFound:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 }
                 try section("notMapedType") {
-                    do {
-                        _ = try storage.avg(\Unknown.value)
+                    switch storageCore.avg(\Unknown.value, []) {
+                    case .success(_):
                         XCTAssert(false)
-                    } catch SQLiteORM.Error.typeIsNotMapped {
-                        XCTAssert(true)
-                    } catch {
-                        XCTAssert(false)
+                    case .failure(let error):
+                        switch error {
+                        case SQLiteORM.Error.typeIsNotMapped:
+                            XCTAssert(true)
+                        default:
+                            XCTAssert(false)
+                        }
                     }
                 }
             }
             try section("no error") {
-                let db = (storage.storageCore as! StorageCoreImpl).connection.dbMaybe!
+                let db = storageCore.connection.dbMaybe!
                 var expectedCalls = [SQLiteApiProviderMock.Call]()
                 var expectedResult: Double?
                 var avgValue: Double?
@@ -993,10 +1393,20 @@ class StorageAggregateFunctionsTests: XCTestCase {
                     expectedResult = nil
                     apiProvider.resetCalls()
                     try section("function", routine: {
-                        avgValue = try storage.avg(\AvgTest.value, where_(lesserThan(lhs: \AvgTest.value, rhs: 10)))
+                        switch storageCore.avg(\AvgTest.value, [where_(lesserThan(lhs: \AvgTest.value, rhs: 10))]) {
+                        case .success(let value):
+                            avgValue = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                     try section("operator", routine: {
-                        avgValue = try storage.avg(\AvgTest.value, where_(\AvgTest.value < 10))
+                        switch storageCore.avg(\AvgTest.value, [where_(\AvgTest.value < 10)]) {
+                        case .success(let value):
+                            avgValue = value
+                        case .failure(let error):
+                            throw error
+                        }
                     })
                 })
                 try section("without constraints", routine: {
@@ -1012,9 +1422,24 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         expectedResult = nil
                     }
                     try section("insert something", routine: {
-                        try storage.replace(AvgTest(value: 1))
-                        try storage.replace(AvgTest(value: 4))
-                        try storage.replace(AvgTest(value: 10))
+                        switch storageCore.replaceInternal(AvgTest(value: 1)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(AvgTest(value: 4)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
+                        switch storageCore.replaceInternal(AvgTest(value: 10)) {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            throw error
+                        }
                         expectedCalls = [
                             .init(id: 0, callType: .sqlite3PrepareV2(.value(db), "SELECT AVG(\"value\") FROM avg_test", -1, .ignore, nil)),
                             .init(id: 1, callType: .sqlite3Step(.ignore)),
@@ -1027,7 +1452,12 @@ class StorageAggregateFunctionsTests: XCTestCase {
                         expectedResult = Double(1 + 4 + 10) / 3
                     })
                     apiProvider.resetCalls()
-                    avgValue = try storage.avg(\AvgTest.value)
+                    switch storageCore.avg(\AvgTest.value, []) {
+                    case .success(let value):
+                        avgValue = value
+                    case .failure(let error):
+                        throw error
+                    }
                 })
                 XCTAssertEqual(avgValue, expectedResult)
                 XCTAssertEqual(apiProvider.calls, expectedCalls)
