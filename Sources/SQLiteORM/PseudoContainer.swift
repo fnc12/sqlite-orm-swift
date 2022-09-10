@@ -1,7 +1,7 @@
 import Foundation
 
 public struct PseudoContainer<T: Initializable> {
-    let connectionRef: ConnectionRef
+    let connectionRef: SafeConnectionRef
     let statement: Statement & ColumnBinder
     let table: Table<T>
     let apiProvider: SQLiteApiProvider

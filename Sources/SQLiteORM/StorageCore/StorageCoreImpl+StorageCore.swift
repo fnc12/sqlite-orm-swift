@@ -531,7 +531,7 @@ extension StorageCoreImpl: StorageCore {
                     }
                 }
                 let resultCode = statement.step()
-                guard apiProvider.SQLITE_DONE == resultCode else {
+                guard self.apiProvider.SQLITE_DONE == resultCode else {
                     let errorString = connectionRef.errorMessage
                     return .failure(Error.sqliteError(code: resultCode, text: errorString))
                 }
@@ -645,12 +645,12 @@ extension StorageCoreImpl: StorageCore {
                 let bindResult = table.bindNonPrimaryKey(columnBinder: statement, object: object, apiProvider: self.apiProvider)
                 switch bindResult {
                 case .success(var resultCode):
-                    guard resultCode == apiProvider.SQLITE_OK else {
+                    guard resultCode == self.apiProvider.SQLITE_OK else {
                         let errorString = connectionRef.errorMessage
                         return .failure(Error.sqliteError(code: resultCode, text: errorString))
                     }
                     resultCode = statement.step()
-                    guard apiProvider.SQLITE_DONE == resultCode else {
+                    guard self.apiProvider.SQLITE_DONE == resultCode else {
                         let errorString = connectionRef.errorMessage
                         return .failure(Error.sqliteError(code: resultCode, text: errorString))
                     }
