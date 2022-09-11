@@ -126,6 +126,56 @@ class StorageCoreCrudTests: XCTestCase {
         })
     }
     
+    func testDelete() throws {
+        let storageCore = try StorageCoreImpl(filename: "",
+                                              tables: Table<User>(name: "users",
+                                                                  columns:
+                                                                    Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+        switch storageCore.syncSchema(preserve: true) {
+        case .success(_):
+            break
+        case .failure(let error):
+            throw error
+        }
+
+        let bebeRexha = User(id: 1, name: "Bebe Rexha")
+        let arianaGrande = User(id: 2, name: "Ariana Grande")
+        switch storageCore.replace(bebeRexha) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        switch storageCore.replace(arianaGrande) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        var getAllResult: Result<[User], Error> = storageCore.getAll([])
+        switch getAllResult {
+        case .success(let allUsers):
+            XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
+        case .failure(let error):
+            throw error
+        }
+
+        switch storageCore.delete(bebeRexha) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        getAllResult = storageCore.getAll([])
+        switch getAllResult {
+        case .success(let allUsers):
+            XCTAssert(allUsers == [arianaGrande])
+        case .failure(let error):
+            throw error
+        }
+    }
+    
     func testReplace() throws {
         let storageCore = try StorageCoreImpl(filename: "",
                                               tables: Table<User>(name: "users",

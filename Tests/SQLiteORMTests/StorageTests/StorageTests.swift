@@ -136,21 +136,6 @@ class StorageTests: XCTestCase {
         })
     }
 
-    func testDelete() throws {
-        try self.storage.syncSchema(preserve: true)
-
-        let bebeRexha = User(id: 1, name: "Bebe Rexha")
-        let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try self.storage.replace(bebeRexha)
-        try self.storage.replace(arianaGrande)
-        var allUsers: [User] = try self.storage.getAll()
-        XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
-
-        try self.storage.delete(bebeRexha)
-        allUsers = try self.storage.getAll()
-        XCTAssert(allUsers == [arianaGrande])
-    }
-
     func testTableExists() throws {
         let apiProvider = SQLiteApiProviderMock()
         apiProvider.forwardsCalls = true
