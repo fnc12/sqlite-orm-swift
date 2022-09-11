@@ -125,4 +125,54 @@ class StorageCoreCrudTests: XCTestCase {
             }
         })
     }
+    
+    func testGet() throws {
+        let storageCore = try StorageCoreImpl(filename: "",
+                                              tables: Table<User>(name: "users",
+                                                                  columns:
+                                                                    Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+        var getResult: Result<User?, Error> = storageCore.get(id: [1])
+        switch getResult {
+        case .success(_):
+            XCTAssert(false)
+        case .failure(let error):
+            switch error {
+            case SQLiteORM.Error.sqliteError(_, _):
+                XCTAssert(true)
+            default:
+                XCTAssert(false)
+            }
+        }
+        switch storageCore.syncSchema(preserve: true) {
+        case .success(_):
+            break
+        case .failure(let error):
+            throw error
+        }
+
+        switch storageCore.replace(User(id: 1, name: "Bebe Rexha")) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        getResult = storageCore.get(id: [1])
+        switch getResult {
+        case .success(let bebeRexhaMaybe):
+            XCTAssertEqual(bebeRexhaMaybe, User(id: 1, name: "Bebe Rexha"))
+        case .failure(let error):
+            throw error
+        }
+        
+        for id in 2..<10 {
+            getResult = storageCore.get(id: [id])
+            switch getResult {
+            case .success(let user):
+                XCTAssert(user == nil)
+            case .failure(let error):
+                throw error
+            }
+        }
+    }
 }

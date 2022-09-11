@@ -136,27 +136,6 @@ class StorageTests: XCTestCase {
         })
     }
 
-    func testGet() throws {
-        do {
-            let _: User? = try self.storage.get(id: 1)
-            XCTAssert(false)
-        } catch SQLiteORM.Error.sqliteError(_, _) {
-            XCTAssert(true)
-        } catch {
-            XCTAssert(false)
-        }
-        try self.storage.syncSchema(preserve: true)
-
-        try self.storage.replace(User(id: 1, name: "Bebe Rexha"))
-        let bebeRexhaMaybe: User? = try storage.get(id: 1)
-        XCTAssertEqual(bebeRexhaMaybe, User(id: 1, name: "Bebe Rexha"))
-
-        for id in 2..<10 {
-            let user: User? = try self.storage.get(id: id)
-            XCTAssert(user == nil)
-        }
-    }
-
     func testUpdate() throws {
         try self.storage.syncSchema(preserve: true)
         var bebeRexha = User(id: 1, name: "Bebe Rexha")
