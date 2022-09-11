@@ -136,19 +136,6 @@ class StorageTests: XCTestCase {
         })
     }
 
-    func testUpdate() throws {
-        try self.storage.syncSchema(preserve: true)
-        var bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try self.storage.replace(bebeRexha)
-        var allUsers: [User] = try storage.getAll()
-        XCTAssertEqual(allUsers, [bebeRexha])
-
-        bebeRexha.name = "Ariana Grande"
-        try self.storage.update(bebeRexha)
-        allUsers = try self.storage.getAll()
-        XCTAssertEqual(allUsers, [bebeRexha])
-    }
-
     func testDelete() throws {
         try self.storage.syncSchema(preserve: true)
 

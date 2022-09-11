@@ -126,6 +126,49 @@ class StorageCoreCrudTests: XCTestCase {
         })
     }
     
+    func testUpdate() throws {
+        let storageCore = try StorageCoreImpl(filename: "",
+                                              tables: Table<User>(name: "users",
+                                                                  columns:
+                                                                    Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+        switch storageCore.syncSchema(preserve: true) {
+        case .success(_):
+            break
+        case .failure(let error):
+            throw error
+        }
+        var bebeRexha = User(id: 1, name: "Bebe Rexha")
+        switch storageCore.replace(bebeRexha) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        var getAllResult: Result<[User], Error> = storageCore.getAll([])
+        switch getAllResult {
+        case .success(let allUsers):
+            XCTAssertEqual(allUsers, [bebeRexha])
+        case .failure(let error):
+            throw error
+        }
+
+        bebeRexha.name = "Ariana Grande"
+        switch storageCore.update(bebeRexha) {
+        case .success():
+            break
+        case .failure(let error):
+            throw error
+        }
+        getAllResult = storageCore.getAll([])
+        switch getAllResult {
+        case .success(let allUsers):
+            XCTAssertEqual(allUsers, [bebeRexha])
+        case .failure(let error):
+            throw error
+        }
+    }
+    
     func testGet() throws {
         let storageCore = try StorageCoreImpl(filename: "",
                                               tables: Table<User>(name: "users",
