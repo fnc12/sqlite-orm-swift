@@ -202,23 +202,4 @@ class StorageTests: XCTestCase {
             .init(id: 4, callType: .sqlite3Finalize(.ignore))
         ])
     }
-
-    func testReplace() throws {
-        try self.storage.syncSchema(preserve: true)
-
-        var allUsers: [User] = try self.storage.getAll()
-        XCTAssertTrue(allUsers.isEmpty)
-
-        let bebeRexha = User(id: 1, name: "Bebe Rexha")
-        try self.storage.replace(bebeRexha)
-
-        allUsers = try self.storage.getAll()
-        XCTAssertEqual(allUsers, [bebeRexha])
-
-        let arianaGrande = User(id: 2, name: "Ariana Grande")
-        try self.storage.replace(arianaGrande)
-
-        allUsers = try self.storage.getAll()
-        XCTAssert(compareUnordered(allUsers, [bebeRexha, arianaGrande]))
-    }
 }
