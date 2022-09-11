@@ -101,7 +101,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(TotalTest(value: 1)) {
+                        switch storageCore.replace(TotalTest(value: 1)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -117,13 +117,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(TotalTest(value: 2)) {
+                        switch storageCore.replace(TotalTest(value: 2)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(TotalTest(value: 3)) {
+                        switch storageCore.replace(TotalTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -160,7 +160,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 3)) {
+                        switch storageCore.replace(TotalTest(value: 0, nullableValue: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -176,13 +176,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 4)) {
+                        switch storageCore.replace(TotalTest(value: 0, nullableValue: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(TotalTest(value: 0, nullableValue: 6)) {
+                        switch storageCore.replace(TotalTest(value: 0, nullableValue: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -308,7 +308,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(SumTest(value: 1)) {
+                        switch storageCore.replace(SumTest(value: 1)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -326,13 +326,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(SumTest(value: 2)) {
+                        switch storageCore.replace(SumTest(value: 2)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(SumTest(value: 3)) {
+                        switch storageCore.replace(SumTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -372,7 +372,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 3)) {
+                        switch storageCore.replace(SumTest(value: 0, nullableValue: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -390,13 +390,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 4)) {
+                        switch storageCore.replace(SumTest(value: 0, nullableValue: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(SumTest(value: 0, nullableValue: 6)) {
+                        switch storageCore.replace(SumTest(value: 0, nullableValue: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -524,7 +524,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(MinTest(value: 10)) {
+                        switch storageCore.replace(MinTest(value: 10)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -542,13 +542,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(MinTest(value: 4)) {
+                        switch storageCore.replace(MinTest(value: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(MinTest(value: 6)) {
+                        switch storageCore.replace(MinTest(value: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -588,7 +588,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 10)) {
+                        switch storageCore.replace(MinTest(value: 0, nullableValue: 10)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -606,13 +606,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 4)) {
+                        switch storageCore.replace(MinTest(value: 0, nullableValue: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(MinTest(value: 0, nullableValue: 6)) {
+                        switch storageCore.replace(MinTest(value: 0, nullableValue: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -740,7 +740,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(MaxTest(value: 10)) {
+                        switch storageCore.replace(MaxTest(value: 10)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -758,13 +758,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(MaxTest(value: 4)) {
+                        switch storageCore.replace(MaxTest(value: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(MaxTest(value: 6)) {
+                        switch storageCore.replace(MaxTest(value: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -804,7 +804,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("1 row", routine: {
-                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 10)) {
+                        switch storageCore.replace(MaxTest(value: 0, nullableValue: 10)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -822,13 +822,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("2 rows", routine: {
-                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 4)) {
+                        switch storageCore.replace(MaxTest(value: 0, nullableValue: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(MaxTest(value: 0, nullableValue: 6)) {
+                        switch storageCore.replace(MaxTest(value: 0, nullableValue: 6)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -951,7 +951,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 1)) {
+                        switch storageCore.replace(GroupConcatTest(value: 1)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -969,13 +969,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        switch storageCore.replace(GroupConcatTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 5)) {
+                        switch storageCore.replace(GroupConcatTest(value: 5)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1013,7 +1013,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row", routine: {
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        switch storageCore.replace(GroupConcatTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1031,13 +1031,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("two rows", routine: {
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 3)) {
+                        switch storageCore.replace(GroupConcatTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(GroupConcatTest(value: 5)) {
+                        switch storageCore.replace(GroupConcatTest(value: 5)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1158,7 +1158,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("one row with null", routine: {
-                        switch storageCore.replaceInternal(CountTest(value: nil)) {
+                        switch storageCore.replace(CountTest(value: nil)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1174,19 +1174,19 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("three rows without null", routine: {
-                        switch storageCore.replaceInternal(CountTest(value: 10)) {
+                        switch storageCore.replace(CountTest(value: 10)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(CountTest(value: 20)) {
+                        switch storageCore.replace(CountTest(value: 20)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(CountTest(value: 30)) {
+                        switch storageCore.replace(CountTest(value: 30)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1289,19 +1289,19 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         ]
                     })
                     try section("3 rows", routine: {
-                        switch storageCore.replaceInternal(CountTest(value: 1)) {
+                        switch storageCore.replace(CountTest(value: 1)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(CountTest(value: 2)) {
+                        switch storageCore.replace(CountTest(value: 2)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(CountTest(value: 3)) {
+                        switch storageCore.replace(CountTest(value: 3)) {
                         case .success():
                             break
                         case .failure(let error):
@@ -1422,19 +1422,19 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                         expectedResult = nil
                     }
                     try section("insert something", routine: {
-                        switch storageCore.replaceInternal(AvgTest(value: 1)) {
+                        switch storageCore.replace(AvgTest(value: 1)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(AvgTest(value: 4)) {
+                        switch storageCore.replace(AvgTest(value: 4)) {
                         case .success():
                             break
                         case .failure(let error):
                             throw error
                         }
-                        switch storageCore.replaceInternal(AvgTest(value: 10)) {
+                        switch storageCore.replace(AvgTest(value: 10)) {
                         case .success():
                             break
                         case .failure(let error):

@@ -43,7 +43,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 1,
+            switch storageCore.replace(Employee(id: 1,
                                                         firstname: "Andrew",
                                                         lastname: "Adams",
                                                         title: "General Manager",
@@ -53,7 +53,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 2,
+            switch storageCore.replace(Employee(id: 2,
                                                         firstname: "Nancy",
                                                         lastname: "Edwards",
                                                         title: "Sales Manager",
@@ -63,7 +63,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 3,
+            switch storageCore.replace(Employee(id: 3,
                                                         firstname: "Jane",
                                                         lastname: "Peacock",
                                                         title: "Sales Support Agent",
@@ -73,7 +73,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 4,
+            switch storageCore.replace(Employee(id: 4,
                                                         firstname: "Margaret",
                                                         lastname: "Park",
                                                         title: "Sales Support Agent",
@@ -83,7 +83,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 5,
+            switch storageCore.replace(Employee(id: 5,
                                                         firstname: "Steve",
                                                         lastname: "Johnson",
                                                         title: "Sales Support Agent",
@@ -93,7 +93,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 6,
+            switch storageCore.replace(Employee(id: 6,
                                                         firstname: "Michael",
                                                         lastname: "Mitchell",
                                                         title: "IT Manager",
@@ -103,7 +103,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 7,
+            switch storageCore.replace(Employee(id: 7,
                                                         firstname: "Robert",
                                                         lastname: "King",
                                                         title: "IT Staff",
@@ -113,7 +113,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 8,
+            switch storageCore.replace(Employee(id: 8,
                                                         firstname: "Laura",
                                                         lastname: "Callahan",
                                                         title: "IT Staff",
@@ -328,7 +328,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 1,
+            switch storageCore.replace(Employee(id: 1,
                                                         firstname: "Andrew",
                                                         lastname: "Adams",
                                                         title: "General Manager",
@@ -338,7 +338,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 2,
+            switch storageCore.replace(Employee(id: 2,
                                                         firstname: "Nancy",
                                                         lastname: "Edwards",
                                                         title: "Sales Manager",
@@ -348,7 +348,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 3,
+            switch storageCore.replace(Employee(id: 3,
                                                         firstname: "Jane",
                                                         lastname: "Peacock",
                                                         title: "Sales Support Agent",
@@ -358,7 +358,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 4,
+            switch storageCore.replace(Employee(id: 4,
                                                         firstname: "Margaret",
                                                         lastname: "Park",
                                                         title: "Sales Support Agent",
@@ -368,7 +368,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 5,
+            switch storageCore.replace(Employee(id: 5,
                                                         firstname: "Steve",
                                                         lastname: "Johnson",
                                                         title: "Sales Support Agent",
@@ -378,7 +378,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 6,
+            switch storageCore.replace(Employee(id: 6,
                                                         firstname: "Michael",
                                                         lastname: "Mitchell",
                                                         title: "IT Manager",
@@ -388,7 +388,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 7,
+            switch storageCore.replace(Employee(id: 7,
                                                         firstname: "Robert",
                                                         lastname: "King",
                                                         title: "IT Staff",
@@ -398,7 +398,7 @@ class StorageCoreNonCrudTests: XCTestCase {
             case .failure(let error):
                 throw error
             }
-            switch storageCore.replaceInternal(Employee(id: 8,
+            switch storageCore.replace(Employee(id: 8,
                                                         firstname: "Laura",
                                                         lastname: "Callahan",
                                                         title: "IT Staff",
@@ -516,7 +516,7 @@ class StorageCoreNonCrudTests: XCTestCase {
                     throw error
                 }
 
-                switch storageCore.replaceInternal(User(id: 3, name: "Ted")) {
+                switch storageCore.replace(User(id: 3, name: "Ted")) {
                 case .success():
                     break
                 case .failure(let error):

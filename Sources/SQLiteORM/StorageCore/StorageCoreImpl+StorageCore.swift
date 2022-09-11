@@ -414,7 +414,7 @@ extension StorageCoreImpl: StorageCore {
     
     //  MARK: - CRUD
     
-    func deleteInternal<T>(_ object: T) -> Result<Void, Error> {
+    func delete<T>(_ object: T) -> Result<Void, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }
@@ -465,7 +465,7 @@ extension StorageCoreImpl: StorageCore {
         }
     }
     
-    func updateInternal<T>(_ object: T) -> Result<Void, Error> {
+    func update<T>(_ object: T) -> Result<Void, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }
@@ -544,7 +544,7 @@ extension StorageCoreImpl: StorageCore {
         }
     }
     
-    func getInternal<T>(id: [Bindable]) -> Result<T?, Error> where T: Initializable {
+    func get<T>(id: [Bindable]) -> Result<T?, Error> where T: Initializable {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }
@@ -615,7 +615,7 @@ extension StorageCoreImpl: StorageCore {
         }
     }
     
-    func insertInternal<T>(_ object: T) -> Result<Int64, Error> {
+    func insert<T>(_ object: T) -> Result<Int64, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }
@@ -666,7 +666,7 @@ extension StorageCoreImpl: StorageCore {
         }
     }
     
-    func replaceInternal<T>(_ object: T) -> Result<Void, Error> {
+    func replace<T>(_ object: T) -> Result<Void, Error> {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }

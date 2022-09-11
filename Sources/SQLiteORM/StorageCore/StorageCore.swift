@@ -24,11 +24,11 @@ protocol StorageCore: AnyObject {
     func avg<T, F>(_ columnKeyPath: KeyPath<T, F>, _ constraints: [SelectConstraint]) -> Result<Double?, Error>
     
     //  CRUD
-    func deleteInternal<T>(_ object: T) -> Result<Void, Error>
-    func updateInternal<T>(_ object: T) -> Result<Void, Error>
-    func getInternal<T>(id: [Bindable]) -> Result<T?, Error> where T: Initializable
-    func insertInternal<T>(_ object: T) -> Result<Int64, Error>
-    func replaceInternal<T>(_ object: T) -> Result<Void, Error>
+    func delete<T>(_ object: T) -> Result<Void, Error>
+    func update<T>(_ object: T) -> Result<Void, Error>
+    func get<T>(id: [Bindable]) -> Result<T?, Error> where T: Initializable
+    func insert<T>(_ object: T) -> Result<Int64, Error>
+    func replace<T>(_ object: T) -> Result<Void, Error>
     
     //  non-CRUD
     func select<R1, R2, R3>(_ expression1: Expression,
