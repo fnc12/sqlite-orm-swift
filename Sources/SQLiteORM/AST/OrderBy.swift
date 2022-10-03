@@ -14,27 +14,27 @@ public class ASTOrderBy: SelectConstraint {
         self.expression = expression
     }
 
-    func collate(_ name: String) -> ASTOrderBy {
+    public func collate(_ name: String) -> ASTOrderBy {
         self.collateName = name
-        return self
+        return self 
     }
 
-    func asc() -> ASTOrderBy {
+    public func asc() -> ASTOrderBy {
         self.order = .asc
         return self
     }
 
-    func desc() -> ASTOrderBy {
+    public func desc() -> ASTOrderBy {
         self.order = .desc
         return self
     }
 
-    func nullsFirst() -> ASTOrderBy {
+    public func nullsFirst() -> ASTOrderBy {
         self.nullsStatus = .first
         return self
     }
 
-    func nullsLast() -> ASTOrderBy {
+    public func nullsLast() -> ASTOrderBy {
         self.nullsStatus = .last
         return self
     }
