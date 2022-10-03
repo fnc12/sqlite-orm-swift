@@ -14,4 +14,5 @@ public enum Error: Swift.Error {
     case unableToGetObjectWithoutPrimaryKeys
     case unableToDeleteObjectWithoutPrimaryKeys
     case unknownError
+    case arrayIsEmpty
 }

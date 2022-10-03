@@ -16,6 +16,7 @@ enum BinaryOperatorType {
     case conc
     case and
     case or
+    case `in`
 }
 
 extension BinaryOperatorType: CustomStringConvertible {
@@ -36,6 +37,7 @@ extension BinaryOperatorType: CustomStringConvertible {
         case .conc: return "||"
         case .and: return "AND"
         case .or: return "OR"
+        case .in: return "IN"
         }
     }
 }

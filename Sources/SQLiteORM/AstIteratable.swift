@@ -68,3 +68,11 @@ extension Optional: AstIteratable where Wrapped : AstIteratable {
         }
     }
 }
+
+extension Array: AstIteratable where Element: Expression {
+    public func iterateAst(routine: (Expression) -> Void) {
+        for element in self {
+            routine(element)
+        }
+    }
+}

@@ -77,3 +77,27 @@ extension Optional: Serializable where Wrapped : Serializable {
         }
     }
 }
+
+extension Array: Serializable where Element: Serializable {
+    public func serialize(with serializationContext: SerializationContext) -> Result<String, Error> {
+        guard !isEmpty else {
+            return .failure(.arrayIsEmpty)
+        }
+        var result = "("
+        for (elementIndex, element) in self.enumerated() {
+            let elementResult = element.serialize(with: serializationContext)
+            switch elementResult {
+            case .success(let elementString):
+                if elementIndex > 0 {
+                    result += ", \(elementString)"
+                } else {
+                    result += elementString
+                }
+            case .failure(let error):
+                return .failure(error)
+            }
+        }
+        result += ")"
+        return .success(result)
+    }
+}

@@ -1,25 +1,6 @@
 import XCTest
 @testable import SQLiteORM
 
-/*class SchemaProviderStub: SchemaProvider {
-
-    enum Error: Swift.Error {
-        case error
-    }
-
-    func columnName<T, F>(keyPath: KeyPath<T, F>) -> Result<String, Error> {
-        return .failure(Self.Error.error)
-    }
-
-    func columnNameWithTable<T, F>(keyPath: KeyPath<T, F>) -> Result<String, Error> {
-        return .failure(Self.Error.error)
-    }
-
-    func tableName<T>(type: T.Type) -> Result<String, Error> {
-        return .failure(Self.Error.error)
-    }
-}*/
-
 class SerializeTests: XCTestCase {
 
     struct User {
@@ -138,7 +119,6 @@ class SerializeTests: XCTestCase {
             .init(value: limit(3, offset: 10), expected: "LIMIT 3 OFFSET 10")
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
@@ -184,6 +164,7 @@ class SerializeTests: XCTestCase {
             TestCase(value: 2 < \User.id, expected: "(2 < users.\"id\")"),
             TestCase(value: lesserOrEqual(lhs: 4, rhs: \User.id), expected: "(4 <= users.\"id\")"),
             TestCase(value: 4 <= \User.id, expected: "(4 <= users.\"id\")"),
+//            TestCase(value: (\User.id).in([1, 2, 3]), expected: "users.\"id\" IN (1, 2, 3)"),
 
             TestCase(value: conc(\User.id, "Skillet"), expected: "(users.\"id\" || 'Skillet')"),
             TestCase(value: SQLiteORM.add(\User.id, 5), expected: "(users.\"id\" + 5)"),
@@ -369,7 +350,8 @@ class SerializeTests: XCTestCase {
             TestCase(binaryOperatorType: .greaterOrEqual, expected: ">="),
             TestCase(binaryOperatorType: .conc, expected: "||"),
             TestCase(binaryOperatorType: .and, expected: "AND"),
-            TestCase(binaryOperatorType: .or, expected: "OR")
+            TestCase(binaryOperatorType: .or, expected: "OR"),
+            TestCase(binaryOperatorType: .in, expected: "IN"),
         ]
         for testCase in testCases {
             let description = testCase.binaryOperatorType.description
@@ -403,7 +385,6 @@ class SerializeTests: XCTestCase {
                      expected: "\"rating\" REAL")
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
@@ -429,7 +410,6 @@ class SerializeTests: XCTestCase {
             TestCase(order: .desc, expected: "DESC")
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
@@ -458,7 +438,6 @@ class SerializeTests: XCTestCase {
             TestCase(conflictClause: .replace, expected: "ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
@@ -533,7 +512,6 @@ class SerializeTests: XCTestCase {
             TestCase(builtInFunction: zeroblob(10), expected: "ZEROBLOB(10)"),
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
@@ -541,6 +519,31 @@ class SerializeTests: XCTestCase {
                                                             Column(name: "name", keyPath: \User.name),
                                                             Column(name: "rating", keyPath: \User.rating)))
             switch testCase.builtInFunction.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
+            case .success(let result):
+                XCTAssertEqual(result, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
+        }
+    }
+    
+    func testArray() throws {
+        struct TestCase {
+            let expression: Expression
+            let expected: String
+        }
+        let testCases = [
+            TestCase(expression: [1, 2, 3], expected: "(1, 2, 3)"),
+            TestCase(expression: ["1", "2", "3"], expected: "('1', '2', '3')"),
+        ]
+        for testCase in testCases {
+            let storageCoreImpl = try StorageCoreImpl(filename: "",
+                                                      tables: Table<User>(name: "users",
+                                                                          columns:
+                                                                            Column(name: "id", keyPath: \User.id),
+                                                                          Column(name: "name", keyPath: \User.name),
+                                                                          Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
             case .failure(let error):
@@ -578,7 +581,6 @@ class SerializeTests: XCTestCase {
                      expected: "NOT NULL ON CONFLICT REPLACE")
         ]
         for testCase in testCases {
-//            let schemaProviderStub = SchemaProviderStub()
             let storage = try Storage(filename: "",
                                       tables: Table<User>(name: "users",
                                                           columns:
