@@ -12,10 +12,6 @@ extension Expression {
     public func or(_ rhs: Expression) -> BinaryOperator {
         return SQLiteORM.or(self, rhs)
     }
-    
-    public func `in`(_ rhs: Expression) -> BinaryOperator {
-        return .init(lhs: self, rhs: rhs, operatorType: .in)
-    }
 }
 
 extension Expression {

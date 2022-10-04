@@ -351,7 +351,6 @@ class SerializeTests: XCTestCase {
             TestCase(binaryOperatorType: .conc, expected: "||"),
             TestCase(binaryOperatorType: .and, expected: "AND"),
             TestCase(binaryOperatorType: .or, expected: "OR"),
-            TestCase(binaryOperatorType: .in, expected: "IN"),
         ]
         for testCase in testCases {
             let description = testCase.binaryOperatorType.description
@@ -394,6 +393,34 @@ class SerializeTests: XCTestCase {
             switch testCase.anyColumn.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
+        }
+    }
+    
+    func testIn() throws {
+        struct TestCase {
+            let expression: ASTIn
+            let expected: String
+        }
+        let testCases = [
+            TestCase(expression: (\User.id).in([1, 2, 3]), expected: "users.\"id\" IN (1, 2, 3)"),
+            TestCase(expression: (\User.id).in(select(\User.id,
+                                                       from(User.self),
+                                                       where_(length(\User.name) > 5))), expected: "users.\"id\" IN (SELECT users.\"id\" FROM users WHERE (LENGTH(users.\"name\") > 5))"),
+            TestCase(expression: (\User.id).in(\User.id), expected: "users.\"id\" IN users.\"id\""),
+        ]
+        for testCase in testCases {
+            let storageCoreImpl = try StorageCoreImpl(filename: "",
+                                                      tables: Table<User>(name: "users",
+                                                                          columns:
+                                                                            Column(name: "id", keyPath: \User.id),
+                                                                          Column(name: "name", keyPath: \User.name),
+                                                                          Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
+            case .success(let result):
+                XCTAssertEqual(result, testCase.expected)
             case .failure(let error):
                 throw error
             }
@@ -527,14 +554,40 @@ class SerializeTests: XCTestCase {
         }
     }
     
+    func testSelect() throws {
+        struct TestCase {
+            let expression: ASTSelect
+            let expected: String
+        }
+        let testCases = [
+            TestCase(expression: select(1), expected: "SELECT 1"),
+            TestCase(expression: select(\User.name, from(User.self), where_(\User.id == 5)),
+                     expected: "SELECT users.\"name\" FROM users WHERE (users.\"id\" == 5)"),
+        ]
+        for testCase in testCases {
+            let storageCoreImpl = try StorageCoreImpl(filename: "",
+                                                      tables: Table<User>(name: "users",
+                                                                          columns:
+                                                                            Column(name: "id", keyPath: \User.id),
+                                                                          Column(name: "name", keyPath: \User.name),
+                                                                          Column(name: "rating", keyPath: \User.rating)))
+            switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
+            case .success(let result):
+                XCTAssertEqual(result, testCase.expected)
+            case .failure(let error):
+                throw error
+            }
+        }
+    }
+    
     func testArray() throws {
         struct TestCase {
             let expression: Expression
             let expected: String
         }
         let testCases = [
-            TestCase(expression: [1, 2, 3], expected: "(1, 2, 3)"),
-            TestCase(expression: ["1", "2", "3"], expected: "('1', '2', '3')"),
+            TestCase(expression: [1, 2, 3], expected: "1, 2, 3"),
+            TestCase(expression: ["1", "2", "3"], expected: "'1', '2', '3'"),
         ]
         for testCase in testCases {
             let storageCoreImpl = try StorageCoreImpl(filename: "",
