@@ -7,7 +7,7 @@ public protocol Initializable {
 public class Storage {
     let storageCore: StorageCore
     
-    public convenience init(filename: String, tables: AnyTable...) throws {
+    public convenience init(filename: String, tables: [AnyTable]) throws {
         try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
     }
     

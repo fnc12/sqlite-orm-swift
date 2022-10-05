@@ -33,9 +33,9 @@ class StorageCoreCrudTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: filename,
                                                   apiProvider: apiProvider,
                                                   tables: [Table<User>(name: "users",
-                                                                       columns:
+                                                                       columns: [
                                                                         Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                       Column(name: "name", keyPath: \User.name, constraints: notNull()))])
+                                                                       Column(name: "name", keyPath: \User.name, constraints: notNull())])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -128,10 +128,10 @@ class StorageCoreCrudTests: XCTestCase {
     
     func testDelete() throws {
         let storageCore = try StorageCoreImpl(filename: "",
-                                              tables: Table<User>(name: "users",
-                                                                  columns:
+                                              tables: [Table<User>(name: "users",
+                                                                  columns: [
                                                                     Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())])])
         switch storageCore.syncSchema(preserve: true) {
         case .success(_):
             break
@@ -178,10 +178,10 @@ class StorageCoreCrudTests: XCTestCase {
     
     func testReplace() throws {
         let storageCore = try StorageCoreImpl(filename: "",
-                                              tables: Table<User>(name: "users",
-                                                                  columns:
+                                              tables: [Table<User>(name: "users",
+                                                                  columns: [
                                                                     Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())])])
         switch storageCore.syncSchema(preserve: true) {
         case .success(_):
             break
@@ -232,10 +232,10 @@ class StorageCoreCrudTests: XCTestCase {
     
     func testUpdate() throws {
         let storageCore = try StorageCoreImpl(filename: "",
-                                              tables: Table<User>(name: "users",
-                                                                  columns:
+                                              tables: [Table<User>(name: "users",
+                                                                  columns: [
                                                                     Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())])])
         switch storageCore.syncSchema(preserve: true) {
         case .success(_):
             break
@@ -275,10 +275,10 @@ class StorageCoreCrudTests: XCTestCase {
     
     func testGet() throws {
         let storageCore = try StorageCoreImpl(filename: "",
-                                              tables: Table<User>(name: "users",
-                                                                  columns:
+                                              tables: [Table<User>(name: "users",
+                                                                  columns: [
                                                                     Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())))
+                                                                  Column(name: "name", keyPath: \User.name, constraints: notNull())])])
         var getResult: Result<User?, Error> = storageCore.get(id: [1])
         switch getResult {
         case .success(_):

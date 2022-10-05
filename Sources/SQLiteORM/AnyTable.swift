@@ -7,7 +7,7 @@ public class AnyTable: NSObject {
     let columns: [AnyColumn]
 
     /// Constructor that must be called from subclass constructor.
-    public init(name: String, columns: AnyColumn...) {
+    public init(name: String, columns: [AnyColumn]) {
         self.name = name
         self.columns = columns
         super.init()

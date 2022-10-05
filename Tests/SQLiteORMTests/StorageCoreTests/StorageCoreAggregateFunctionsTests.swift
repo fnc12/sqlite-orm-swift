@@ -17,10 +17,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             apiProvider.forwardsCalls = true
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
-                                                  tables: [Table<TotalTest>(name: "total_test",
-                                                                            columns:
-                                                                                Column(name: "value", keyPath: \TotalTest.value),
-                                                                            Column(name: "null_value", keyPath: \TotalTest.nullableValue))])
+                                                  tables: [
+                                                    Table<TotalTest>(name: "total_test",
+                                                                     columns:[
+                                                                        Column(name: "value", keyPath: \TotalTest.value),
+                                                                        Column(name: "null_value", keyPath: \TotalTest.nullableValue)
+                                                                     ])
+                                                  ])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -222,10 +225,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             apiProvider.forwardsCalls = true
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
-                                                  tables: [Table<SumTest>(name: "sum_test",
-                                                                          columns:
-                                                                            Column(name: "value", keyPath: \SumTest.value),
-                                                                          Column(name: "null_value", keyPath: \SumTest.nullableValue))])
+                                                  tables: [
+                                                    Table<SumTest>(name: "sum_test",
+                                                                   columns:[
+                                                                    Column(name: "value", keyPath: \SumTest.value),
+                                                                    Column(name: "null_value", keyPath: \SumTest.nullableValue)
+                                                                   ])
+                                                  ])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -438,10 +444,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             apiProvider.forwardsCalls = true
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
-                                                  tables: [Table<MinTest>(name: "min_test",
-                                                                          columns:
-                                                                            Column(name: "value", keyPath: \MinTest.value),
-                                                                          Column(name: "null_value", keyPath: \MinTest.nullableValue))])
+                                                  tables: [
+                                                    Table<MinTest>(name: "min_test",
+                                                                   columns:[
+                                                                    Column(name: "value", keyPath: \MinTest.value),
+                                                                    Column(name: "null_value", keyPath: \MinTest.nullableValue)
+                                                                   ])
+                                                  ])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -654,10 +663,13 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             apiProvider.forwardsCalls = true
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
-                                                  tables: [Table<MaxTest>(name: "max_test",
-                                                                          columns:
-                                                                            Column(name: "value", keyPath: \MaxTest.value),
-                                                                          Column(name: "null_value", keyPath: \MaxTest.nullableValue))])
+                                                  tables: [
+                                                    Table<MaxTest>(name: "max_test",
+                                                                   columns:[
+                                                                    Column(name: "value", keyPath: \MaxTest.value),
+                                                                    Column(name: "null_value", keyPath: \MaxTest.nullableValue)
+                                                                   ])
+                                                  ])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -869,8 +881,12 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             apiProvider.forwardsCalls = true
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
-                                                  tables: [Table<GroupConcatTest>(name: "group_concat_test",
-                                                                                  columns: Column(name: "value", keyPath: \GroupConcatTest.value, constraints: primaryKey()))])
+                                                  tables: [
+                                                    Table<GroupConcatTest>(name: "group_concat_test",
+                                                                           columns: [
+                                                                            Column(name: "value", keyPath: \GroupConcatTest.value, constraints: primaryKey())
+                                                                           ])
+                                                  ])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -1079,7 +1095,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<CountTest>(name: "count_test",
-                                                                            columns: Column(name: "value", keyPath: \CountTest.value))])
+                                                                            columns: [Column(name: "value", keyPath: \CountTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -1225,7 +1241,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<CountTest>(name: "count_test",
-                                                                            columns: Column(name: "value", keyPath: \CountTest.value))])
+                                                                            columns: [Column(name: "value", keyPath: \CountTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -1341,7 +1357,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<AvgTest>(name: "avg_test",
-                                                                          columns: Column(name: "value", keyPath: \AvgTest.value))])
+                                                                          columns: [Column(name: "value", keyPath: \AvgTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break

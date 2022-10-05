@@ -12,11 +12,14 @@ class SerializeTests: XCTestCase {
     func testKeyPath() throws {
         try testCase(#function, routine: {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
-                                                            Column(name: "id", keyPath: \User.id),
-                                                            Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                      tables: [
+                                        Table<User>(name: "users",
+                                                    columns:[
+                                                        Column(name: "id", keyPath: \User.id),
+                                                        Column(name: "name", keyPath: \User.name),
+                                                        Column(name: "rating", keyPath: \User.rating)
+                                                    ])
+                                      ])
             var serializationContext = SerializationContext(schemaProvider: storage.storageCore as! StorageCoreImpl)
             var string = ""
             var expected = ""
@@ -93,11 +96,14 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
-                                                            Column(name: "id", keyPath: \User.id),
-                                                            Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                      tables: [
+                                        Table<User>(name: "users",
+                                                    columns: [
+                                                        Column(name: "id", keyPath: \User.id),
+                                                        Column(name: "name", keyPath: \User.name),
+                                                        Column(name: "rating", keyPath: \User.rating)
+                                                    ])
+                                      ])
             try storage.syncSchema(preserve: false)
             switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
@@ -120,11 +126,14 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
-                                                            Column(name: "id", keyPath: \User.id),
-                                                            Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                      tables: [
+                                        Table<User>(name: "users",
+                                                    columns: [
+                                                        Column(name: "id", keyPath: \User.id),
+                                                        Column(name: "name", keyPath: \User.name),
+                                                        Column(name: "rating", keyPath: \User.rating)
+                                                    ])
+                                      ])
             switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
@@ -230,11 +239,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])
+                                      ])
             try storage.syncSchema(preserve: false)
             switch testCase.value.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
@@ -292,11 +303,12 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])])
             switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
@@ -317,11 +329,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])
+                                      ])
             switch testCase.expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let string):
                 XCTAssertEqual(string, testCase.expected)
@@ -385,11 +399,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])
+                                      ])
             switch testCase.anyColumn.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
@@ -413,11 +429,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storageCoreImpl = try StorageCoreImpl(filename: "",
-                                                      tables: Table<User>(name: "users",
-                                                                          columns:
+                                                      tables: [Table<User>(name: "users",
+                                                                          columns: [
                                                                             Column(name: "id", keyPath: \User.id),
                                                                           Column(name: "name", keyPath: \User.name),
-                                                                          Column(name: "rating", keyPath: \User.rating)))
+                                                                          Column(name: "rating", keyPath: \User.rating)
+                                                                          ])
+                                                      ])
             switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
@@ -438,11 +456,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])
+                                      ])
             switch testCase.order.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
@@ -466,11 +486,13 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)
+                                                          ])
+                                      ])
             switch testCase.conflictClause.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let value):
                 XCTAssertEqual(value, testCase.expected)
@@ -540,11 +562,11 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)])])
             switch testCase.builtInFunction.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
@@ -566,11 +588,11 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storageCoreImpl = try StorageCoreImpl(filename: "",
-                                                      tables: Table<User>(name: "users",
-                                                                          columns:
+                                                      tables: [Table<User>(name: "users",
+                                                                          columns: [
                                                                             Column(name: "id", keyPath: \User.id),
                                                                           Column(name: "name", keyPath: \User.name),
-                                                                          Column(name: "rating", keyPath: \User.rating)))
+                                                                          Column(name: "rating", keyPath: \User.rating)])])
             switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
@@ -591,11 +613,11 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storageCoreImpl = try StorageCoreImpl(filename: "",
-                                                      tables: Table<User>(name: "users",
-                                                                          columns:
+                                                      tables: [Table<User>(name: "users",
+                                                                          columns: [
                                                                             Column(name: "id", keyPath: \User.id),
                                                                           Column(name: "name", keyPath: \User.name),
-                                                                          Column(name: "rating", keyPath: \User.rating)))
+                                                                          Column(name: "rating", keyPath: \User.rating)])])
             switch testCase.expression.serialize(with: .init(schemaProvider: storageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
@@ -635,11 +657,11 @@ class SerializeTests: XCTestCase {
         ]
         for testCase in testCases {
             let storage = try Storage(filename: "",
-                                      tables: Table<User>(name: "users",
-                                                          columns:
+                                      tables: [Table<User>(name: "users",
+                                                          columns: [
                                                             Column(name: "id", keyPath: \User.id),
                                                             Column(name: "name", keyPath: \User.name),
-                                                            Column(name: "rating", keyPath: \User.rating)))
+                                                            Column(name: "rating", keyPath: \User.rating)])])
             switch testCase.columnConstraint.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
             case .success(let result):
                 XCTAssertEqual(result, testCase.expected)
@@ -655,10 +677,10 @@ class SerializeTests: XCTestCase {
             var name = ""
         }
         let storage = try Storage(filename: "",
-                                  tables: Table<User>(name: "users",
-                                                      columns:
+                                  tables: [Table<User>(name: "users",
+                                                      columns: [
                                                         Column(name: "id", keyPath: \User.id),
-                                                        Column(name: "name", keyPath: \User.name)))
+                                                        Column(name: "name", keyPath: \User.name)])])
         let expression = (\User.name).like("a%")
         switch expression.serialize(with: .init(schemaProvider: storage.storageCore as! StorageCoreImpl)) {
         case .success(let string):

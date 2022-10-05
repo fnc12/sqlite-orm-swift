@@ -29,7 +29,7 @@ public class StorageCoreImpl {
                       tables: tables)
     }
 
-    convenience init(filename: String, tables: AnyTable...) throws {
+    convenience init(filename: String, tables: [AnyTable]) throws {
         try self.init(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
     }
 

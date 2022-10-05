@@ -16,10 +16,13 @@ class StorageCoreSchemaTests: XCTestCase {
         apiProvider.forwardsCalls = true
         let storageCore = try StorageCoreImpl(filename: "",
                                               apiProvider: apiProvider,
-                                              tables: [Table<User>(name: "users",
-                                                                   columns:
-                                                                    Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                   Column(name: "name", keyPath: \User.name, constraints: notNull()))])
+                                              tables: [
+                                                Table<User>(name: "users",
+                                                            columns:[
+                                                                Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                                Column(name: "name", keyPath: \User.name, constraints: notNull())
+                                                            ])
+                                              ])
         apiProvider.resetCalls()
         switch storageCore.tableExists(with: "users") {
         case .success(let value):

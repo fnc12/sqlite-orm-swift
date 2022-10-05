@@ -12,7 +12,7 @@ public class SafeStorage {
         }
     }
     
-    public static func create(filename: String, tables: AnyTable...) -> Result<SafeStorage, Swift.Error> {
+    public static func create(filename: String, tables: [AnyTable]) -> Result<SafeStorage, Swift.Error> {
         return self.create(filename: filename, apiProvider: SQLiteApiProviderImpl.shared, tables: tables)
     }
     
