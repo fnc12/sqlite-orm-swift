@@ -34,6 +34,12 @@ extension Double: ConstructableFromSQLiteValue {
     }
 }
 
+extension Float: ConstructableFromSQLiteValue {
+    public init(sqliteValue: SQLiteValue) {
+        self = Float(sqliteValue.double)
+    }
+}
+
 extension String: ConstructableFromSQLiteValue {
     public init(sqliteValue: SQLiteValue) {
         self = sqliteValue.text
