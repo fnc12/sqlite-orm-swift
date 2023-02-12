@@ -21,9 +21,9 @@ class StorageCoreTransactionTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   connection: connectionHolderMock,
                                                   tables: [Table<User>(name: "users",
-                                                                       columns: [
+                                                                       elements: [
                                                                         Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                       Column(name: "name", keyPath: \User.name, constraints: notNull())
+                                                                        Column(name: "name", keyPath: \User.name, constraints: notNull())
                                                                        ])])
             connectionHolderMock.resetCalls()
             var expectedConnectionHolderCalls = [ConnectionHolderMock.Call]()

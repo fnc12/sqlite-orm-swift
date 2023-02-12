@@ -64,8 +64,8 @@ class StorageCoreTests: XCTestCase {
             var order = 0
         }
         let storageCore = try StorageCoreImpl(filename: "",
-                                              tables:[ Table<Object>(name: "objects",
-                                                                    columns:[
+                                              tables:[Table<Object>(name: "objects",
+                                                                    elements:[
                                                                         Column(name: "id", keyPath: \Object.id),
                                                                         Column(name: "order", keyPath: \Object.order)
                                                                     ])])

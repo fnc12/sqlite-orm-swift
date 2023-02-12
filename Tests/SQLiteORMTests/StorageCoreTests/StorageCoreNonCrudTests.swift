@@ -32,7 +32,7 @@ class StorageCoreNonCrudTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<Employee>(name: "employees",
-                                                                    columns:[
+                                                                    elements: [
                                                                         Column(name: "id", keyPath: \Employee.id, constraints: primaryKey()),
                                                                         Column(name: "firstname", keyPath: \Employee.firstname),
                                                                         Column(name: "lastname", keyPath: \Employee.lastname),
@@ -319,12 +319,12 @@ class StorageCoreNonCrudTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: filename,
                                                   apiProvider: apiProvider,
                                                   tables: [Table<Employee>(name: "employees",
-                                                                           columns: [
+                                                                           elements: [
                                                                             Column(name: "id", keyPath: \Employee.id, constraints:  primaryKey()),
-                                                                           Column(name: "firstname", keyPath: \Employee.firstname),
-                                                                           Column(name: "lastname", keyPath: \Employee.lastname),
-                                                                           Column(name: "title", keyPath: \Employee.title),
-                                                                           Column(name: "email", keyPath: \Employee.email)])])
+                                                                            Column(name: "firstname", keyPath: \Employee.firstname),
+                                                                            Column(name: "lastname", keyPath: \Employee.lastname),
+                                                                            Column(name: "title", keyPath: \Employee.title),
+                                                                            Column(name: "email", keyPath: \Employee.email)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -451,9 +451,9 @@ class StorageCoreNonCrudTests: XCTestCase {
                 let storageCore = try StorageCoreImpl(filename: filename,
                                                       apiProvider: apiProvider,
                                                       tables: [Table<User>(name: "users",
-                                                                           columns: [
+                                                                           elements: [
                                                                             Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                           Column(name: "name", keyPath: \User.name, constraints: notNull())])])
+                                                                            Column(name: "name", keyPath: \User.name, constraints: notNull())])])
                 switch storageCore.syncSchema(preserve: false) {
                 case .success(_):
                     break
@@ -636,9 +636,9 @@ class StorageCoreNonCrudTests: XCTestCase {
                 let storageCore = try StorageCoreImpl(filename: filename,
                                                       apiProvider: apiProvider,
                                                       tables: [Table<User>(name: "users",
-                                                                           columns: [
+                                                                           elements: [
                                                                             Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                                           Column(name: "name", keyPath: \User.name, constraints: notNull())])])
+                                                                            Column(name: "name", keyPath: \User.name, constraints: notNull())])])
                 switch storageCore.syncSchema(preserve: false) {
                 case .success(_):
                     break

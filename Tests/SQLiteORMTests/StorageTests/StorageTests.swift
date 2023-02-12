@@ -22,10 +22,10 @@ class StorageTests: XCTestCase {
             let storage = try Storage(filename: "",
                                       tables: [
                                         Table<User>(name: "users",
-                                                          columns:[
-                                                            Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
-                                                            Column(name: "name", keyPath: \User.name, constraints: notNull())
-                                                          ])
+                                                    elements: [
+                                                        Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
+                                                        Column(name: "name", keyPath: \User.name, constraints: notNull())
+                                                    ])
                                         ])
             try storage.syncSchema(preserve: false)
 

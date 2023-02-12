@@ -13,7 +13,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT TOTAL(\"\(column.name)\") FROM \(table.name)"
@@ -57,7 +57,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT SUM(\"\(column.name)\") FROM \(table.name)"
@@ -105,7 +105,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT MIN(\"\(column.name)\") FROM \(table.name)"
@@ -163,7 +163,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT MAX(\"\(column.name)\") FROM \(table.name)"
@@ -222,7 +222,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = ""
@@ -285,7 +285,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT COUNT(\"\(column.name)\") FROM \(table.name)"
@@ -370,7 +370,7 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         let table = anyTable as! Table<T>
-        guard let column = table.columns.first(where: { $0.keyPath == columnKeyPath }) else {
+        guard let column = table.columnBy(keyPath: columnKeyPath) else {
             return .failure(Error.columnNotFound)
         }
         var sql = "SELECT AVG(\"\(column.name)\") FROM \(table.name)"
@@ -436,19 +436,22 @@ extension StorageCoreImpl: StorageCore {
             switch statementResult {
             case .success(let statement):
                 var bindIndex = 1
-                for column in anyTable.columns {
-                    guard column.isPrimaryKey else { continue }
-                    let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                    let resultCodeResult = column.bind(binder: binder, object: object)
-                    switch resultCodeResult {
-                    case .success(let resultCode):
-                        guard resultCode == self.apiProvider.SQLITE_OK else {
-                            let errorString = connectionRef.errorMessage
-                            return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                for element in anyTable.elements {
+                    switch element {
+                    case .column(let column):
+                        guard column.isPrimaryKey else { continue }
+                        let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
+                        let resultCodeResult = column.bind(binder: binder, object: object)
+                        switch resultCodeResult {
+                        case .success(let resultCode):
+                            guard resultCode == self.apiProvider.SQLITE_OK else {
+                                let errorString = connectionRef.errorMessage
+                                return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                            }
+                            bindIndex += 1
+                        case .failure(let error):
+                            return .failure(error)
                         }
-                        bindIndex += 1
-                    case .failure(let error):
-                        return .failure(error)
                     }
                 }
                 let resultCode = statement.step()
@@ -475,9 +478,12 @@ extension StorageCoreImpl: StorageCore {
         }
         var sql = "UPDATE '\(anyTable.name)' SET"
         var setColumnNames = [String]()
-        for column in anyTable.columns {
-            if !column.isPrimaryKey {
-                setColumnNames.append(column.name)
+        for element in anyTable.elements {
+            switch element {
+            case .column(let column):
+                if !column.isPrimaryKey {
+                    setColumnNames.append(column.name)
+                }
             }
         }
         for (columnIndex, columnName) in setColumnNames.enumerated() {
@@ -500,34 +506,40 @@ extension StorageCoreImpl: StorageCore {
             switch prepareResult {
             case .success(let statement):
                 var bindIndex = 1
-                for column in anyTable.columns {
-                    guard !column.isPrimaryKey else { continue }
-                    let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                    let bindResult = column.bind(binder: binder, object: object)
-                    switch bindResult {
-                    case .success(let resultCode):
-                        guard resultCode == self.apiProvider.SQLITE_OK else {
-                            let errorString = connectionRef.errorMessage
-                            return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                for element in anyTable.elements {
+                    switch element {
+                    case .column(let column):
+                        guard !column.isPrimaryKey else { continue }
+                        let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
+                        let bindResult = column.bind(binder: binder, object: object)
+                        switch bindResult {
+                        case .success(let resultCode):
+                            guard resultCode == self.apiProvider.SQLITE_OK else {
+                                let errorString = connectionRef.errorMessage
+                                return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                            }
+                            bindIndex += 1
+                        case .failure(let error):
+                            return .failure(error)
                         }
-                        bindIndex += 1
-                    case .failure(let error):
-                        return .failure(error)
                     }
                 }
-                for column in anyTable.columns {
-                    guard column.isPrimaryKey else { continue }
-                    let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
-                    let bindResult = column.bind(binder: binder, object: object)
-                    switch bindResult {
-                    case .success(let resultCode):
-                        bindIndex += 1
-                        guard resultCode == self.apiProvider.SQLITE_OK else {
-                            let errorString = connectionRef.errorMessage
-                            return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                for element in anyTable.elements {
+                    switch element {
+                    case .column(let column):
+                        guard column.isPrimaryKey else { continue }
+                        let binder = BinderImpl(columnIndex: bindIndex, columnBinder: statement)
+                        let bindResult = column.bind(binder: binder, object: object)
+                        switch bindResult {
+                        case .success(let resultCode):
+                            bindIndex += 1
+                            guard resultCode == self.apiProvider.SQLITE_OK else {
+                                let errorString = connectionRef.errorMessage
+                                return .failure(Error.sqliteError(code: resultCode, text: errorString))
+                            }
+                        case .failure(let error):
+                            return .failure(error)
                         }
-                    case .failure(let error):
-                        return .failure(error)
                     }
                 }
                 let resultCode = statement.step()
@@ -553,8 +565,8 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.unableToGetObjectWithoutPrimaryKeys)
         }
         var sql = "SELECT "
-        let columnsCount = anyTable.columns.count
-        for (columnIndex, column) in anyTable.columns.enumerated() {
+        let columnsCount = anyTable.enumeratedColumns().count
+        for (columnIndex, column) in anyTable.enumeratedColumns() {
             sql += "\"\(column.name)\""
             if columnIndex < columnsCount - 1 {
                 sql += ", "
@@ -570,8 +582,7 @@ extension StorageCoreImpl: StorageCore {
         let connectionRefResult = self.connection.createConnectionRef()
         switch connectionRefResult {
         case .success(let connectionRef):
-            let prepareResult = connectionRef.prepare(sql: sql)
-            switch prepareResult {
+            switch connectionRef.prepare(sql: sql) {
             case .success(let statement):
                 var resultCode: Int32 = 0
                 for (idIndex, idValue) in id.enumerated() {
@@ -587,7 +598,7 @@ extension StorageCoreImpl: StorageCore {
                 case self.apiProvider.SQLITE_ROW:
                     let table = anyTable as! Table<T>
                     var object = T()
-                    for (columnIndex, anyColumn) in table.columns.enumerated() {
+                    for (columnIndex, anyColumn) in table.enumeratedColumns() {
                         let sqliteValue = statement.columnValue(columnIndex: columnIndex)
                         guard sqliteValue.isValid else {
                             return .failure(Error.valueIsNull)
@@ -671,8 +682,8 @@ extension StorageCoreImpl: StorageCore {
             return .failure(Error.typeIsNotMapped)
         }
         var sql = "REPLACE INTO \(anyTable.name) ("
-        let columnsCount = anyTable.columns.count
-        for (columnIndex, column) in anyTable.columns.enumerated() {
+        let columnsCount = anyTable.enumeratedColumns().count
+        for (columnIndex, column) in anyTable.enumeratedColumns() {
             sql += "\"\(column.name)\""
             if columnIndex < columnsCount - 1 {
                 sql += ", "
@@ -964,19 +975,20 @@ extension StorageCoreImpl: StorageCore {
             switch connectionRef.prepare(sql: sql) {
             case .success(let statement):
                 let table = anyTable as! Table<T>
+                let tableColumnsCount = table.enumeratedColumns().count
                 var result = [T]()
                 var resultCode: Int32 = 0
                 repeat {
                     resultCode = statement.step()
                     let columnsCount = statement.columnCount()
-                    guard columnsCount == table.columns.count else {
+                    guard columnsCount == tableColumnsCount else {
                         return .failure(Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount),
-                                                                   storageColumnsCount: table.columns.count))
+                                                                   storageColumnsCount: tableColumnsCount))
                     }
                     switch resultCode {
                     case self.apiProvider.SQLITE_ROW:
                         var object = T()
-                        for (columnIndex, anyColumn) in table.columns.enumerated() {
+                        for (columnIndex, anyColumn) in table.enumeratedColumns() {
                             let columnValuePointer = statement.columnValuePointer(with: columnIndex)
                             let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
                             switch assignResult {
@@ -1022,18 +1034,19 @@ extension StorageCoreImpl: StorageCore {
             switch connectionRef.prepare(sql: sql) {
             case .success(let statement):
                 let table = anyTable as! Table<T>
+                let tableColumnsCount = table.enumeratedColumns().count
                 var resultCode: Int32 = 0
                 repeat {
                     resultCode = statement.step()
                     let columnsCount = statement.columnCount()
-                    guard columnsCount == table.columns.count else {
+                    guard columnsCount == tableColumnsCount else {
                         return .failure(Error.columnsCountMismatch(statementColumnsCount: Int(columnsCount),
-                                                                   storageColumnsCount: table.columns.count))
+                                                                   storageColumnsCount: tableColumnsCount))
                     }
                     switch resultCode {
                     case self.apiProvider.SQLITE_ROW:
                         var object = T()
-                        for (columnIndex, anyColumn) in table.columns.enumerated() {
+                        for (columnIndex, anyColumn) in table.enumeratedColumns() {
                             let columnValuePointer = statement.columnValuePointer(with: columnIndex)
                             let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
                             switch assignResult {
@@ -1251,10 +1264,10 @@ extension StorageCoreImpl: StorageCore {
         }
     }
     
-    private func create(tableWith name: String, columns: [AnyColumn], connectionRef: SafeConnectionRef) -> Result<Void, Error> {
+    private func create(tableWith name: String, columns: ColumnEnumerator, connectionRef: SafeConnectionRef) -> Result<Void, Error> {
         var sql = "CREATE TABLE '\(name)' ("
         let columnsCount = columns.count
-        for (columnIndex, column) in columns.enumerated() {
+        for (columnIndex, column) in columns {
             switch column.serialize(with: .init(schemaProvider: self)) {
             case .success(let columnString):
                 sql += "\(columnString)"
@@ -1282,7 +1295,7 @@ extension StorageCoreImpl: StorageCore {
         case .success(let schemaStatus):
             if schemaStatus != .alredyInSync {
                 if schemaStatus == .newTableCreated {
-                    let createResult = self.create(tableWith: table.name, columns: table.columns, connectionRef: connectionRef)
+                    let createResult = self.create(tableWith: table.name, columns: table.enumeratedColumns(), connectionRef: connectionRef)
                     switch createResult {
                     case .success():
                         res = .newTableCreated
@@ -1348,7 +1361,7 @@ extension StorageCoreImpl: StorageCore {
                         switch dropTableResult {
                         case .success():
                             let createResult = self.create(tableWith: table.name,
-                                                           columns: table.columns,
+                                                           columns: table.enumeratedColumns(),
                                                            connectionRef: connectionRef)
                             switch createResult {
                             case .success():
@@ -1391,7 +1404,7 @@ extension StorageCoreImpl: StorageCore {
                       connectionRef: SafeConnectionRef,
                       columnsToIgnore: [TableInfo]) -> Result<Void, Error> {
         var columnNames = [String]()
-        for column in table.columns {   //  TODO: refactor to map and filter
+        for (_, column) in table.enumeratedColumns() {   //  TODO: refactor to map and filter
             let columnName = column.name
             if !columnsToIgnore.contains(where: { $0.name == columnName }) {
                 columnNames.append(columnName)
@@ -1444,7 +1457,7 @@ extension StorageCoreImpl: StorageCore {
                     }
                 } while true
             }
-            switch self.create(tableWith: backupTableName, columns: table.columns, connectionRef: connectionRef) {
+            switch self.create(tableWith: backupTableName, columns: table.enumeratedColumns(), connectionRef: connectionRef) {
             case .success():
                 switch self.copy(table: table, name: backupTableName,
                                  connectionRef: connectionRef,

@@ -92,3 +92,9 @@ extension AnyColumn: Serializable {
         return .success(res)
     }
 }
+
+extension AnyColumn: TableElementProtocol {
+    public var tableElement: TableElement {
+        .column(column: self)
+    }
+}

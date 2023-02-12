@@ -18,7 +18,7 @@ class StorageCoreSchemaTests: XCTestCase {
                                               apiProvider: apiProvider,
                                               tables: [
                                                 Table<User>(name: "users",
-                                                            columns:[
+                                                            elements: [
                                                                 Column(name: "id", keyPath: \User.id, constraints: primaryKey(), notNull()),
                                                                 Column(name: "name", keyPath: \User.name, constraints: notNull())
                                                             ])

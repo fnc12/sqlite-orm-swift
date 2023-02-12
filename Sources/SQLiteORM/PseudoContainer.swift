@@ -19,14 +19,19 @@ extension PseudoContainerIterator: IteratorProtocol {
         switch resultCode {
         case self.pseudoContainer.apiProvider.SQLITE_ROW:
             var object = T()
-            for (columnIndex, anyColumn) in self.pseudoContainer.table.columns.enumerated() {
-                let columnValuePointer = self.pseudoContainer.statement.columnValuePointer(with: columnIndex)
-                let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
-                switch assignResult {
-                case .success():
-                    continue
-                case .failure(let error):
-                    return .failure(error)
+            var columnIndex = 0
+            for element in self.pseudoContainer.table.elements {
+                switch element {
+                case .column(let anyColumn):
+                    let columnValuePointer = self.pseudoContainer.statement.columnValuePointer(with: columnIndex)
+                    let assignResult = anyColumn.assign(object: &object, sqliteValue: columnValuePointer)
+                    switch assignResult {
+                    case .success():
+                        columnIndex += 1
+                        continue
+                    case .failure(let error):
+                        return .failure(error)
+                    }
                 }
             }
             return .success(object)

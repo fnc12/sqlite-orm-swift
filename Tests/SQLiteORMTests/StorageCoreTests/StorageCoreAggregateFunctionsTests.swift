@@ -19,7 +19,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<TotalTest>(name: "total_test",
-                                                                     columns:[
+                                                                     elements: [
                                                                         Column(name: "value", keyPath: \TotalTest.value),
                                                                         Column(name: "null_value", keyPath: \TotalTest.nullableValue)
                                                                      ])
@@ -227,7 +227,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<SumTest>(name: "sum_test",
-                                                                   columns:[
+                                                                   elements: [
                                                                     Column(name: "value", keyPath: \SumTest.value),
                                                                     Column(name: "null_value", keyPath: \SumTest.nullableValue)
                                                                    ])
@@ -446,7 +446,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<MinTest>(name: "min_test",
-                                                                   columns:[
+                                                                   elements: [
                                                                     Column(name: "value", keyPath: \MinTest.value),
                                                                     Column(name: "null_value", keyPath: \MinTest.nullableValue)
                                                                    ])
@@ -665,7 +665,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<MaxTest>(name: "max_test",
-                                                                   columns:[
+                                                                   elements: [
                                                                     Column(name: "value", keyPath: \MaxTest.value),
                                                                     Column(name: "null_value", keyPath: \MaxTest.nullableValue)
                                                                    ])
@@ -883,7 +883,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
                                                   apiProvider: apiProvider,
                                                   tables: [
                                                     Table<GroupConcatTest>(name: "group_concat_test",
-                                                                           columns: [
+                                                                           elements: [
                                                                             Column(name: "value", keyPath: \GroupConcatTest.value, constraints: primaryKey())
                                                                            ])
                                                   ])
@@ -1095,7 +1095,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<CountTest>(name: "count_test",
-                                                                            columns: [Column(name: "value", keyPath: \CountTest.value)])])
+                                                                            elements: [Column(name: "value", keyPath: \CountTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -1241,7 +1241,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<CountTest>(name: "count_test",
-                                                                            columns: [Column(name: "value", keyPath: \CountTest.value)])])
+                                                                            elements: [Column(name: "value", keyPath: \CountTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
@@ -1357,7 +1357,7 @@ class StorageCoreAggregateFunctionsTests: XCTestCase {
             let storageCore = try StorageCoreImpl(filename: "",
                                                   apiProvider: apiProvider,
                                                   tables: [Table<AvgTest>(name: "avg_test",
-                                                                          columns: [Column(name: "value", keyPath: \AvgTest.value)])])
+                                                                          elements: [Column(name: "value", keyPath: \AvgTest.value)])])
             switch storageCore.syncSchema(preserve: false) {
             case .success(_):
                 break
