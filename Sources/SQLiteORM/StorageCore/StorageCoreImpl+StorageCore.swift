@@ -630,22 +630,31 @@ extension StorageCoreImpl: StorageCore {
         guard let anyTable = self.tables.first(where: { $0.type == T.self }) else {
             return .failure(Error.typeIsNotMapped)
         }
-        var sql = "INSERT INTO \(anyTable.name) ("
+        var sql = "INSERT INTO \(anyTable.name)"
         let nonPrimaryKeyColumnNamesCount = anyTable.nonPrimaryKeyColumnNamesCount
-        anyTable.forEachNonPrimaryKeyColumn { column, columnIndex in
-            sql += "\"\(column.name)\""
-            if columnIndex < nonPrimaryKeyColumnNamesCount - 1 {
-                sql += ", "
+        if nonPrimaryKeyColumnNamesCount > 0 {
+            sql += " ("
+            anyTable.forEachNonPrimaryKeyColumn { column, columnIndex in
+                sql += "\"\(column.name)\""
+                if columnIndex < nonPrimaryKeyColumnNamesCount - 1 {
+                    sql += ", "
+                }
             }
+            sql += ")"
+        } else {
+            sql += " DEFAULT"
         }
-        sql += ") VALUES ("
-        for columnIndex in 0..<nonPrimaryKeyColumnNamesCount {
-            sql += "?"
-            if columnIndex < nonPrimaryKeyColumnNamesCount - 1 {
-                sql += ", "
+        sql += " VALUES"
+        if nonPrimaryKeyColumnNamesCount > 0 {
+            sql += " ("
+            for columnIndex in 0..<nonPrimaryKeyColumnNamesCount {
+                sql += "?"
+                if columnIndex < nonPrimaryKeyColumnNamesCount - 1 {
+                    sql += ", "
+                }
             }
+            sql += ")"
         }
-        sql += ")"
         let connectionRefResult = self.connection.createConnectionRef()
         switch connectionRefResult {
         case .success(let connectionRef):
